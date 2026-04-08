@@ -33,3 +33,4 @@ build/
 
 ### Project specific ###
 /.env
+application-test.yaml
