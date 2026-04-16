@@ -295,4 +295,5 @@ dist
 
 # user-defined ignore patterns
 sonarlint.xml
+**/resources/**/main.css
 

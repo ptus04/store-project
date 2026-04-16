@@ -1,0 +1,38 @@
+/* DO NOT SERVE THIS FILE TO CLIENT */
+@import "tailwindcss";
+
+@source "../resources/templates/**/*.html";
+
+@keyframes fadeIn {
+    from {
+        visibility: visible;
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        visibility: visible;
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@theme {
+    --animate-fade-in: fadeIn 0.2s ease-in-out;
+    --animate-fade-out: fadeOut 0.2s ease-in-out;
+}
+
+::-webkit-scrollbar,
+::-webkit-scrollbar-track {
+    display: none;
+}
+
+a.active {
+    color: var(--color-red-500);
+}

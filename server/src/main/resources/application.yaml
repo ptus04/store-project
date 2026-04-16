@@ -1,12 +1,6 @@
 spring:
   application:
     name: server
-  main:
-    lazy-initialization: true
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
 
 twilio:
   account-sid: ${TWILIO_ACCOUNT_SID}

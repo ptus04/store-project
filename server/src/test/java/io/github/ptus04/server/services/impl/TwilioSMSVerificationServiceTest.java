@@ -19,13 +19,13 @@ class TwilioSMSVerificationServiceTest {
 
     @Test
     void sendVerificationCode() {
-        String sid = smsVerificationService.sendVerificationCode("+84868635209");
+        String sid = smsVerificationService.sendVerificationCode("<PHONE_NUMBER>");
         Assertions.assertNotNull(sid);
     }
 
     @Test
     void verifyCode() {
-        boolean status = smsVerificationService.verifyCode("+84868635209", "147193");
+        boolean status = smsVerificationService.verifyCode("<PHONE_NUMBER>", "<VERIFICATION_CODE>");
         Assertions.assertTrue(status);
     }
 }
