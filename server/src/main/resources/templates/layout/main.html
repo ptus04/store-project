@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" th:fragment="mainLayout(title, children, categories)" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" th:fragment="mainLayout(title, children)" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <link href="/favicon.png" rel="icon" type="image/png"/>
@@ -14,7 +14,7 @@
 </head>
 <body>
 <th:block th:replace="~{layout/fragments/header::header}"></th:block>
-<th:block th:replace="~{layout/fragments/nav::navBar(${categories})}"></th:block>
+<th:block th:replace="~{layout/fragments/nav::navBar}"></th:block>
 <th:block th:replace="${children}"></th:block>
 <th:block th:replace="~{layout/fragments/footer::footer}"></th:block>
 <script>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi"
-      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main}, ${categories})}"
+      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
       xmlns:th="https://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -15,10 +15,15 @@
                th:data-active="${i.index == 0}"
                th:each="item,i : ${carouselItems}"
                th:href="@{${item.link()}}">
-                <img class="h-full w-full object-cover"
-                     loading="lazy"
-                     th:alt="${item.title()}"
-                     th:src="@{${STORAGE_ENDPOINT} + '/images/carousel/' + ${item.image()}}"/>
+                <picture>
+                    <source media="(orientation: portrait)"
+                            th:srcset="@{${storageUrl} + '/images/carousel/' + ${item.portraitImage()}}"/>
+                    <img class="h-full w-full object-cover"
+                         loading="lazy"
+                         th:alt="${item.title()}"
+                         th:src="@{${storageUrl} + '/images/carousel/' + ${item.landscapeImage()}}"/>
+                </picture>
+
                 <div class="absolute right-0 bottom-0 left-0 bg-linear-to-t from-black to-75% pt-9 pr-4 pb-6 pl-4 text-white"
                      th:if="${item.title() != null}">
                     <h3 class="text-2xl font-bold" th:text="${item.title()}">Tiêu đề</h3>
@@ -31,9 +36,9 @@
         <div class="absolute bottom-4 left-4 flex gap-1">
             <button class="h-1 w-8 cursor-pointer rounded-full data-[active=true]:bg-white bg-gray-500"
                     data-carousel-indicator
-                    th:onClick="|handleIndicatorClick(${i.index})|"
                     th:data-active="${i.index == 0}"
                     th:each="item,i : ${carouselItems}"
+                    th:onClick="|handleIndicatorClick(${i.index})|"
                     th:title="${item.title()}"
                     type="button">
             </button>
@@ -69,7 +74,7 @@
                         <img class="w-full"
                              loading="lazy"
                              th:alt="${product.name()}"
-                             th:src="@{${STORAGE_ENDPOINT} + '/images/' + ${product.productImages().get(0).file()}}"/>
+                             th:src="@{${storageUrl} + '/images/' + ${product.productImages().get(0).file()}}"/>
                         <p class="absolute top-1/2 w-full bg-white/75 px-6 py-2 text-2xl font-bold text-red-600"
                            th:if="${product.inStock() == 0}">
                             HẾT HÀNG
