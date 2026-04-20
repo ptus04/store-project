@@ -19,6 +19,6 @@ public class HomeController {
     public String getHomePage(Model model) {
         model.addAttribute("carouselItems", carouselService.getAllCarousels());
         model.addAttribute("newProducts", productService.getProducts(true));
-        return "index";
+        return "home/index";
     }
 }

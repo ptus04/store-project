@@ -36,7 +36,7 @@
         <ul class="flex flex-col gap-2">
             <th:block th:each="category : ${categories}">
                 <th:block
-                        th:replace="~{layout/fragments/category-item::categoryItem(${category.key}, ${category.value})}"></th:block>
+                        th:replace="~{fragments/category-item::categoryItem(${category.key}, ${category.value})}"></th:block>
             </th:block>
         </ul>
 
@@ -66,7 +66,7 @@
             </div>
             <p class="text-center">
                 <span th:text="'Copyright ' + ${#dates.year(#dates.createNow())} + '&copy;'"></span>
-                <a class="hover:text-red-500" href="/">SLY</a>
+                <a class="hover:text-red-500" href="/static">SLY</a>
             </p>
         </div>
     </div>
