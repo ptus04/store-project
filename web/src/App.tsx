@@ -1,17 +1,13 @@
-import {Route, Routes} from "react-router-dom";
-import Layout from "@layout/Layout";
-import StoreProvider from "@store/StoreProvider";
+import { Route, Routes } from "react-router-dom";
 
 const App = () => {
-    return (
-        <StoreProvider>
-            <Routes>
-                <Route path="/" element={<></>}>
-                    <Route index element={<h1>BLANK</h1>}/>
-                </Route>
-            </Routes>
-        </StoreProvider>
-    );
+  return (
+    <Routes>
+      <Route path="/" element={<></>}>
+        <Route index element={<h1>BLANK</h1>} />
+      </Route>
+    </Routes>
+  );
 };
 
 export default App;
