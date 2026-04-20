@@ -1,14 +1,15 @@
 spring:
   application:
     name: server
-  main:
-    lazy-initialization: true
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+  config:
+    import: optional:file:.env[.properties]
 
 twilio:
   account-sid: ${TWILIO_ACCOUNT_SID}
   auth-token: ${TWILIO_AUTH_TOKEN}
   verify-service-sid: ${TWILIO_VERIFY_SERVICE_SID}
+
+storage:
+  url: ${STORAGE_URL}
+
+

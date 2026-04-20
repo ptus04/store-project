@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<ul>
+    <li th:fragment="categoryItem(name, subCategories)">
+        <details>
+            <summary class="flex cursor-pointer items-center gap-2">
+                <span class="font-bold" th:text="${name}"></span>
+                <i class="fa fa-caret-right"></i>
+            </summary>
+            <ul class="ms-2 flex gap-4">
+                <li class="text-sm" th:each="subCategory : ${subCategories}">
+                    <a class="duration-200 hover:text-red-500"
+                       th:href="@{./products(category=${#strings.toLowerCase(subCategory)})}"
+                       th:text="${#strings.toUpperCase(subCategory)}">
+                    </a>
+                </li>
+            </ul>
+        </details>
+    </li>
+</ul>
+</body>
+</html>

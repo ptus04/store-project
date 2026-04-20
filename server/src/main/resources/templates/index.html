@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi"
+      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
+      xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Trang chủ | SLY</title>
+</head>
+<body>
+<th:block th:fragment="main">
+    <section class="relative h-dvh">
+        <div class="h-dvh">
+            <a class="absolute h-full w-full cursor-pointer data-[active=false]:animate-fade-out invisible data-[active=true]:animate-fade-in data-[active=true]:visible"
+               data-carousel-item
+               th:data-active="${i.index == 0}"
+               th:each="item,i : ${carouselItems}"
+               th:href="@{${item.link()}}">
+                <picture>
+                    <source media="(orientation: portrait)"
+                            th:srcset="@{${storageUrl} + '/images/carousel/' + ${item.portraitImage()}}"/>
+                    <img class="h-full w-full object-cover"
+                         loading="lazy"
+                         th:alt="${item.title()}"
+                         th:src="@{${storageUrl} + '/images/carousel/' + ${item.landscapeImage()}}"/>
+                </picture>
+
+                <div class="absolute right-0 bottom-0 left-0 bg-linear-to-t from-black to-75% pt-9 pr-4 pb-6 pl-4 text-white"
+                     th:if="${item.title() != null}">
+                    <h3 class="text-2xl font-bold" th:text="${item.title()}">Tiêu đề</h3>
+                    <p th:text="${item.content()}"></p>
+                </div>
+            </a>
+        </div>
+
+        <!--        Indicators-->
+        <div class="absolute bottom-4 left-4 flex gap-1">
+            <button class="h-1 w-8 cursor-pointer rounded-full data-[active=true]:bg-white bg-gray-500"
+                    data-carousel-indicator
+                    th:data-active="${i.index == 0}"
+                    th:each="item,i : ${carouselItems}"
+                    th:onClick="|handleIndicatorClick(${i.index})|"
+                    th:title="${item.title()}"
+                    type="button">
+            </button>
+        </div>
+
+        <!--        Next/Prev buttons-->
+        <div class="absolute right-4 bottom-4 flex">
+            <button class="cursor-pointer items-center rounded-tl-2xl rounded-bl-2xl bg-black/50 px-4 py-2"
+                    onClick="handleClick(-1)"
+                    title="Quay lại"
+                    type="button">
+                <span class="fa fa-chevron-left text-white"></span>
+            </button>
+            <button class="cursor-pointer items-center rounded-tr-2xl rounded-br-2xl bg-black/50 px-4 py-2"
+                    onClick="handleClick(1)"
+                    title="Kế tiếp"
+                    type="button">
+                <span class="fa fa-chevron-right text-white"></span>
+            </button>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-3 pt-5">
+        <h1 class="text-2xl">Sản phẩm mới</h1>
+        <div class="flex flex-wrap">
+            <div class="w-full p-2 text-center md:w-1/4 lg:w-1/5" th:each="product:${newProducts}">
+                <a class="relative" th:href="@{/products/{id}(id=${product.id()})}">
+                    <div class="relative">
+                        <p class="absolute top-1/10 left-1/10 rounded-full bg-red-500 px-3 py-1 text-white"
+                           th:if="${product.discount() != 0}"
+                           th:text="${#numbers.formatDecimal(product.discount() * 100, 0, 0)} + '%'">
+                        </p>
+                        <img class="w-full"
+                             loading="lazy"
+                             th:alt="${product.name()}"
+                             th:src="@{${storageUrl} + '/images/' + ${product.productImages().get(0).file()}}"/>
+                        <p class="absolute top-1/2 w-full bg-white/75 px-6 py-2 text-2xl font-bold text-red-600"
+                           th:if="${product.inStock() == 0}">
+                            HẾT HÀNG
+                        </p>
+                    </div>
+                    <p class="overflow-hidden text-nowrap text-ellipsis whitespace-nowrap"
+                       th:text="${product.name()}">
+                    </p>
+                </a>
+
+                <div th:unless="${product.discount() == 0}">
+                    <p class="m-0 text-sm text-gray-500 line-through"
+                       th:text="${#numbers.formatDecimal(product.price(), 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                    </p>
+                    <p class="m-0 font-bold text-red-600"
+                       th:text="${#numbers.formatDecimal(product.price() * (1 - (product.discount())), 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                    </p>
+                </div>
+                <p class="m-0 font-bold"
+                   th:if="${product.discount() == 0}"
+                   th:text="${#numbers.formatDecimal(product.price(), 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script th:inline="javascript">
+        const items = document.querySelectorAll("[data-carousel-item]");
+        const indicators = document.querySelectorAll("[data-carousel-indicator]");
+
+        let current = 0;
+        let numberOfItems = /*[[${carouselItems.size()}]]*/ 0;
+
+        function updateCarousel() {
+            items.forEach((item, index) => {
+                item.dataset.active = index === current;
+            });
+
+            indicators.forEach((indicator, index) => {
+                indicator.dataset.active = index === current;
+            });
+        }
+
+        function handleIndicatorClick(index) {
+            current = index;
+            updateCarousel();
+        }
+
+        function handleClick(direction) {
+            current = (current + numberOfItems + direction) % numberOfItems;
+            updateCarousel();
+        }
+    </script>
+</th:block>
+</body>
+</html>
