@@ -15,7 +15,7 @@
                 type="button">
             <i class="fa fa-bars"></i>
         </button>
-        <form class="hidden md:flex" action="/products">
+        <form action="/danh-sach-san-pham" class="hidden md:flex">
             <label>
                 <span class="hidden">Từ khóa</span>
                 <input class="border-b px-3 py-1"
@@ -44,7 +44,7 @@
     <div class="flex shrink grow basis-0 flex-row items-center justify-end gap-3">
         <div class="group relative">
             <a class="relative before:absolute before:top-full before:left-[0.15rem] before:z-10 before:hidden before:rotate-45 before:border-t-2 before:border-l-2 before:border-gray-500 before:bg-white before:p-1 group-hover:before:block"
-               href="/cart"
+               href="/gio-hang"
                title="Giỏ hàng">
                 <i class="fa fa-bag-shopping"></i>
                 <span class="hidden md:inline"> Giỏ hàng</span>
@@ -55,7 +55,7 @@
         <!--Account-->
         <a class="cursor-pointer"
            sec:authorize="isAnonymous()"
-           th:href="@{/login}"
+           th:href="@{/dang-nhap}"
            title="Tài khoản">
             <i class="fa fa-user"></i>
             <span class="hidden md:inline">Tài khoản</span>
@@ -63,10 +63,10 @@
 
         <a class="cursor-pointer"
            sec:authorize="isAuthenticated()"
-           th:href="@{/user}"
+           th:href="@{/thong-tin-tai-khoan}"
            title="Tài khoản">
             <i class="fa fa-user"></i>
-            <span class="hidden md:inline" sec:authentication="name"></span>
+            <span class="hidden md:inline" sec:authentication="principal.name"></span>
         </a>
     </div>
 

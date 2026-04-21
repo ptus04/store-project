@@ -1,10 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Đăng nhập | SLY</title>
 </head>
 <body>
+<main class="flex flex-col items-center justify-center">
+    <form action="/dang-nhap" class="mt-4 flex w-10/12 flex-col gap-4 rounded-md border border-gray-300 p-4 md:w-5/12 lg:w-3/12"
+          method="post">
+        <h1 class="text-center text-2xl font-semibold">ĐĂNG NHẬP</h1>
 
+        <div th:if="${param.error}">
+            <span class="text-red-500" th:text="${param.message} ?: 'Đăng nhập thất bại'"></span>
+        </div>
+
+        <input th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}"
+               type="hidden"/>
+
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold" for="username">Số điện thoại đã đăng ký</label>
+            <input autoComplete="tel"
+                   autoFocus
+                   class="peer rounded-md border border-gray-300 px-4 py-2 hover:border-red-500 focus:outline-red-500"
+                   id="username"
+                   name="username"
+                   pattern="^0[2-9]\d{8}$"
+                   required
+                   type="tel"/>
+            <span class="hidden text-red-500 peer-invalid:block">Số điện thoại không hợp lệ</span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold" for="password">Mật khẩu</label>
+            <input autoComplete="current-password"
+                   autoFocus
+                   class="peer rounded-md border border-gray-300 px-4 py-2 hover:border-red-500 focus:outline-red-500"
+                   id="password"
+                   name="password"
+                   pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&_]).{8,}$"
+                   required
+                   type="password"/>
+            <span class="hidden text-red-500 peer-invalid:block">Mật khẩu không hợp lệ</span>
+        </div>
+
+        <button class="flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold duration-200 not-disabled:focus:outline-offset-2 not-disabled:focus:outline-red-500 bg-red-500 text-white not-disabled:hover:bg-red-400 not-disabled:active:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer">
+            ĐĂNG NHẬP
+        </button>
+
+        <div class="flex flex-wrap justify-between">
+            <a class="hover:text-red-500" href="/dang-ky">Đăng ký tài khoản</a>
+            <a class="hover:text-red-500" href="/khoi-phuc-mat-khau">Quên mật khẩu?</a>
+        </div>
+    </form>
+</main>
 </body>
 </html>
