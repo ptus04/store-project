@@ -36,7 +36,7 @@
         <ul class="flex flex-col gap-2">
             <th:block th:each="category : ${categories}">
                 <th:block
-                        th:replace="~{layout/fragments/category-item::categoryItem(${category.key}, ${category.value})}"></th:block>
+                        th:replace="~{fragments/category-item::categoryItem(${category.key}, ${category.value})}"></th:block>
             </th:block>
         </ul>
 

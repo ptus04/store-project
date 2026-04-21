@@ -3,6 +3,10 @@
 
 @source "../resources/templates/**/*.html";
 
+* {
+    font-family: Helvetica, "Segoe UI", Arial, sans-serif;
+}
+
 @keyframes fadeIn {
     from {
         visibility: visible;
@@ -35,4 +39,12 @@
 
 a.active {
     color: var(--color-red-500);
+}
+
+/* Webfont configs */
+@font-face {
+    font-family: 'Helvetica';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Helvetica'), url('webfonts/Helvetica.woff') format('woff');
 }

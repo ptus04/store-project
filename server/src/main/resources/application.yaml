@@ -2,13 +2,15 @@ spring:
   application:
     name: server
   config:
-    import: optional:file:.env[.properties]
+    import: file:.env[.properties]
 
+# Twilio configuration properties, values are injected from environment variables
 twilio:
   account-sid: ${TWILIO_ACCOUNT_SID}
   auth-token: ${TWILIO_AUTH_TOKEN}
   verify-service-sid: ${TWILIO_VERIFY_SERVICE_SID}
 
+# Storage configuration properties, values are injected from environment variables
 storage:
   url: ${STORAGE_URL}
 
