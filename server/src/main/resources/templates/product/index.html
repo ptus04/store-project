@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi"
+      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
+      xmlns:th="https://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Danh sách sản phẩm | SLY</title>
+</head>
+<body>
+<main class="container mx-auto px-3 pt-5">
+  <h1 class="text-2xl">Danh sách sản phẩm</h1>
+  <div class="flex flex-wrap">
+    <div class="w-full p-2 text-center md:w-1/4 lg:w-1/5" th:each="product:${products}">
+      <a class="relative" th:href="@{/products/{id}(id=${product.id()})}">
+        <div class="relative">
+          <p class="absolute top-1/10 left-1/10 rounded-full bg-red-500 px-3 py-1 text-white"
+             th:if="${product.discount() != 0}"
+             th:text="${#numbers.formatDecimal(product.discount() * 100, 0, 0)} + '%'">
+          </p>
+          <img class="w-full"
+               loading="lazy"
+               th:alt="${product.name()}"
+               th:src="@{${storageUrl} + '/images/' + ${product.productImages().get(0).file()}}"/>
+          <p class="absolute top-1/2 w-full bg-white/75 px-6 py-2 text-2xl font-bold text-red-600"
+             th:if="${product.inStock() == 0}">
+            HẾT HÀNG
+          </p>
+        </div>
+        <p class="overflow-hidden text-nowrap text-ellipsis whitespace-nowrap"
+           th:text="${product.name()}">
+        </p>
+      </a>
+
+      <div th:unless="${product.discount() == 0}">
+        <p class="m-0 text-sm text-gray-500 line-through"
+           th:text="${#numbers.formatDecimal(product.price(), 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+        </p>
+        <p class="m-0 font-bold text-red-600"
+           th:text="${#numbers.formatDecimal(product.price() * (1 - (product.discount())), 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+        </p>
+      </div>
+      <p class="m-0 font-bold"
+         th:if="${product.discount() == 0}"
+         th:text="${#numbers.formatDecimal(product.price(), 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+      </p>
+    </div>
+  </div>
+</main>
+</body>
+</html>
