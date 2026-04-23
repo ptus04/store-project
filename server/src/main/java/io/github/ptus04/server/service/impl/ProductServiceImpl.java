@@ -5,6 +5,8 @@ import io.github.ptus04.server.mapper.ProductMapper;
 import io.github.ptus04.server.repository.ProductRepository;
 import io.github.ptus04.server.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,6 +32,13 @@ public class ProductServiceImpl implements ProductService {
                 .stream()
                 .map(productMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    public Page<ProductResponse> getProductsPage(int page, int size) {
+        return productRepository
+                .findAll(PageRequest.of(page, size))
+                .map(productMapper::toDto);
     }
 
     @Override
