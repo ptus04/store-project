@@ -15,7 +15,7 @@ public class HomeController {
     private final ProductService productService;
     private final CarouselService carouselService;
 
-    @GetMapping
+    @GetMapping()
     public String getHomePage(Model model) {
         model.addAttribute("carouselItems", carouselService.getAllCarousels());
         model.addAttribute("newProducts", productService.getProducts(true));
