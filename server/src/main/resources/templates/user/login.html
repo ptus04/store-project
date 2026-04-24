@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"
-      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
+<html lang="vi" th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
       xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -8,8 +7,8 @@
 </head>
 <body>
 <main class="flex flex-col items-center justify-center">
-    <form action="/dang-nhap" class="mt-4 flex w-10/12 flex-col gap-4 rounded-md border border-gray-300 p-4 md:w-5/12 lg:w-3/12"
-          method="post">
+    <form action="/dang-nhap" method="post"
+          class="mt-4 flex w-10/12 flex-col gap-4 rounded-md border border-gray-300 p-4 md:w-5/12 lg:w-3/12">
         <h1 class="text-center text-2xl font-semibold">ĐĂNG NHẬP</h1>
 
         <div th:if="${param.error}">
@@ -36,7 +35,6 @@
         <div class="flex flex-col gap-2">
             <label class="font-semibold" for="password">Mật khẩu</label>
             <input autocomplete="current-password"
-                   autofocus
                    class="peer rounded-md border border-gray-300 px-4 py-2 hover:border-red-500 focus:outline-red-500"
                    id="password"
                    name="password"
