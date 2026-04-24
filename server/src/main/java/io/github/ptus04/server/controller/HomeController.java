@@ -21,4 +21,20 @@ public class HomeController {
         model.addAttribute("newProducts", productService.getProducts(true));
         return "home/index";
     }
+
+    @GetMapping("/about-us")
+    public String getAboutUsPage() {
+        return "home/about-us";
+    }
+
+    @GetMapping("/privacy-policy")
+    public String getPrivacyPolicyPage() {
+        return "home/privacy-policy";
+    }
+
+    @GetMapping("/refund-policy")
+    public String getRefundPolicyPage() {
+        return "home/refund-policy";
+    }
+
 }
