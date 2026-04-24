@@ -14,7 +14,8 @@ custom:
     url: ${STORAGE_URL}
 
   security:
-    allowed-origins: ${ALLOWED_ORIGINS}
-    allowed-methods: ${ALLOWED_METHODS}
-    allowed-headers: ${ALLOWED_HEADERS}
-    allow-credentials: ${ALLOW_CREDENTIALS}
+    cors:
+      allowed-origins: ${ALLOWED_ORIGINS}
+      allowed-methods: ${ALLOWED_METHODS}
+      allowed-headers: ${ALLOWED_HEADERS}
+      allow-credentials: ${ALLOW_CREDENTIALS}
