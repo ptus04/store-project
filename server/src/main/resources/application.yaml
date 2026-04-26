@@ -1,8 +1,10 @@
 spring:
   application:
     name: server
-  config:
-    import: file:.env[.properties]
+  data:
+    redis:
+      repositories:
+        enabled: false
 
 custom:
   twilio:
