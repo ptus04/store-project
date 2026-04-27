@@ -1,10 +1,15 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Outlet } from "react-router-dom";
+import ProductDetailPage from "@components/pages/ProductDetailPage.tsx";
+import HomePage from "@components/pages/HomePage.tsx";
 
 const App = () => {
   return (
     <Routes>
-      <Route path="/" element={<></>}>
-        <Route index element={<h1>BLANK</h1>} />
+      <Route path="/" element={<Outlet />}>
+        <Route index element={<HomePage />} />
+        <Route path="products">
+          <Route path=":id" element={<ProductDetailPage />} />
+        </Route>
       </Route>
     </Routes>
   );

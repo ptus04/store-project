@@ -16,7 +16,6 @@ public class LayoutControllerAdvice {
 
     @ModelAttribute("categories")
     public Map<String, String[]> getCategories() {
-        // TODO: Get from real service
         categories.put("TOPS", new String[]{"TOPS", "TEE", "POLO"});
         categories.put("OUTWEARS", new String[]{"OUTWEARS", "JACKETS", "HOODIES"});
         categories.put("BOTTOMS", new String[]{"BOTTOMS", "SHORTS", "PANTS"});

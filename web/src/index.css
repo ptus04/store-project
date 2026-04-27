@@ -1,2 +1,7 @@
-@import url("/css/fontawesome/all.min.css");
 @import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+}

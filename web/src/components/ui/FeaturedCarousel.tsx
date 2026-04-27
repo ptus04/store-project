@@ -38,8 +38,25 @@ const FeaturedCarousel = () => {
     );
     const data = await res.json();
 
-    caches[orientation] = data;
-    setItems(data);
+    interface CarouselItem {
+      id: string;
+      title: string;
+      landscapeImage: string;
+      portraitImage?: string;
+      link: string;
+      content: string;
+    }
+
+    const mappedData = data.map((item: CarouselItem) => ({
+      ...item,
+      image:
+        orientation === "landscape"
+          ? item.landscapeImage
+          : item.portraitImage || item.landscapeImage,
+    }));
+
+    caches[orientation] = mappedData;
+    setItems(mappedData);
   }, []);
 
   useEffect(() => {
@@ -67,7 +84,7 @@ const FeaturedCarousel = () => {
       <div className="h-dvh">
         {items?.map((item, i) => (
           <FeaturedCarouselItem
-            key={item._id}
+            key={item.id}
             item={item}
             isActive={active === i}
           />
@@ -77,7 +94,7 @@ const FeaturedCarousel = () => {
       <div className="absolute bottom-4 left-4 flex gap-1">
         {items?.map((item, i) => (
           <FeaturedCarouselIndicator
-            key={item._id}
+            key={item.id}
             title={item.title}
             isActive={active === i}
             onClick={() => handleChangeItem(i)}

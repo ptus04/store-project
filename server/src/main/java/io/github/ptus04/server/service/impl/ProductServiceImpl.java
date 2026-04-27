@@ -6,8 +6,10 @@ import io.github.ptus04.server.repository.ProductRepository;
 import io.github.ptus04.server.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -16,8 +18,8 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
 
     @Override
-    public List<ProductResponse> getProducts(boolean isNew) {
-        if (isNew) {
+    public List<ProductResponse> getProducts(Boolean isNew) {
+        if (Boolean.TRUE.equals(isNew)) {
             return productRepository
                     .findByIsNew(true)
                     .stream()
@@ -33,8 +35,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponse getProductById(long id) {
-        return null;
+    @Transactional(readOnly = true)
+    public ProductResponse getProductById(UUID id) {
+        return productRepository.findById(id)
+                .map(productMapper::toDto)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với id: " + id));
     }
 
 }
+

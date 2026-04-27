@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/carousel")
+@RequestMapping("/api/products/carousel")
 @RequiredArgsConstructor
 class CarouselApiController {
     private final CarouselService carouselService;

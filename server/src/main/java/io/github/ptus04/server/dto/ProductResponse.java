@@ -15,5 +15,6 @@ import java.util.UUID;
 public record ProductResponse(@Size(max = 16) UUID id, @NotNull @Size(max = 255) String name, String description,
                               String careInstructions, @NotNull BigDecimal price, @NotNull Integer inStock,
                               @NotNull Boolean isNew, @NotNull Float discount, @NotNull Instant createdAt,
-                              @NotNull Instant updatedAt, List<ProductImageResponse> productImages) implements Serializable {
-}
+                              @NotNull Instant updatedAt, List<ProductImageResponse> productImages,
+                              List<ProductSizeResponse> productSizes) implements Serializable {
+}
