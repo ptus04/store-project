@@ -13,7 +13,7 @@ custom:
     verify-service-sid: ${TWILIO_VERIFY_SERVICE_SID}
 
   storage:
-    url: ${STORAGE_URL}
+    url: ${STORAGE_URL:http://localhost:10000/devstoreaccount1}
 
   security:
     cors:

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +34,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponse getProductById(long id) {
-        return null;
+    public ProductResponse getProductById(UUID id) {
+        return productRepository.findById(id)
+                .map(productMapper::toDto)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
 }
