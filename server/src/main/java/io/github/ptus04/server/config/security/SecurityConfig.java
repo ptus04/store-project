@@ -29,9 +29,11 @@ public class SecurityConfig {
                         .loginProcessingUrl("/dang-nhap")
                         .failureHandler(customAuthFailureHandler)
                         .defaultSuccessUrl("/"))
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/dang-xuat"))
                 .logout(logout -> logout
-                        .logoutUrl("/dang-xuat")
-                        .logoutSuccessUrl("/dang-nhap")
+                        .logoutRequestMatcher(new org.springframework.security.web.util.matcher.RegexRequestMatcher("/dang-xuat", "GET"))
+                        .logoutSuccessUrl("http://localhost:8080/dang-nhap")
                         .invalidateHttpSession(true)
                         .deleteCookies("SESSION")
                         .permitAll())

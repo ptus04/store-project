@@ -18,9 +18,8 @@ import java.util.*;
 @Table(name = "products")
 public class Product {
     @Id
-    @Size(max = 16)
-    @ColumnDefault("(uuid_to_bin(uuid(), 1))")
-    @Column(name = "id", nullable = false, length = 16)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID id;
 
     @Size(max = 255)
@@ -57,11 +56,13 @@ public class Product {
     private Float discount;
 
     @NotNull
+    @org.hibernate.annotations.CreationTimestamp
     @ColumnDefault("(now())")
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @NotNull
+    @org.hibernate.annotations.UpdateTimestamp
     @ColumnDefault("(now())")
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;

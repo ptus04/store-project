@@ -18,9 +18,8 @@ import java.util.UUID;
 @Table(name = "product_images")
 public class ProductImage {
     @Id
-    @Size(max = 16)
-    @ColumnDefault("(uuid_to_bin(uuid(), 1))")
-    @Column(name = "id", nullable = false, length = 16)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID id;
 
     @NotNull
@@ -35,8 +34,9 @@ public class ProductImage {
     private String file;
 
     @NotNull
+    @org.hibernate.annotations.CreationTimestamp
     @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
 

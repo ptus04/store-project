@@ -11,8 +11,10 @@ import java.util.*;
 @Getter
 @Builder(toBuilder = true)
 public class CustomUserDetails implements UserDetails {
+    private static final long serialVersionUID = 1L;
     private UUID id;
     private String name;
+    private String phone;
     private String password;
     private Set<GrantedAuthority> authorities;
 
@@ -23,6 +25,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public @NonNull String getUsername() {
-        return id.toString();
+        return phone;
     }
 }

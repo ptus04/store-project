@@ -1,13 +1,14 @@
 import { memo, useCallback, useEffect, useState } from "react";
 import FeaturedCarouselIndicator from "./CarouselIndicator.tsx";
 import FeaturedCarouselItem from "./FeaturedCarouselItem.tsx";
+import { CarouselItem } from "@/types";
 
-const caches = {} as Record<string, Record<string, string>[]>;
+const caches = {} as Record<string, CarouselItem[]>;
 
 const getOrientation = () => screen.orientation.type.split("-")[0];
 
 const FeaturedCarousel = () => {
-  const [items, setItems] = useState<Record<string, string>[]>([]);
+  const [items, setItems] = useState<CarouselItem[]>([]);
   const [active, setActive] = useState(0);
   const [reset, setReset] = useState(false);
 
@@ -33,13 +34,19 @@ const FeaturedCarousel = () => {
       return;
     }
 
-    const res = await fetch(
-      `/api/products/carousel?orientation=${orientation}`,
-    );
+    const res = await fetch("/api/carousel");
     const data = await res.json();
 
-    caches[orientation] = data;
-    setItems(data);
+    const mappedData = data.map((item: any) => ({
+      ...item,
+      image:
+        orientation === "landscape"
+          ? item.landscapeImage
+          : item.portraitImage || item.landscapeImage,
+    }));
+
+    caches[orientation] = mappedData;
+    setItems(mappedData);
   }, []);
 
   useEffect(() => {
@@ -67,7 +74,7 @@ const FeaturedCarousel = () => {
       <div className="h-dvh">
         {items?.map((item, i) => (
           <FeaturedCarouselItem
-            key={item._id}
+            key={item.id}
             item={item}
             isActive={active === i}
           />
@@ -77,7 +84,7 @@ const FeaturedCarousel = () => {
       <div className="absolute bottom-4 left-4 flex gap-1">
         {items?.map((item, i) => (
           <FeaturedCarouselIndicator
-            key={item._id}
+            key={item.id}
             title={item.title}
             isActive={active === i}
             onClick={() => handleChangeItem(i)}

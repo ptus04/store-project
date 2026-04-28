@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký | SLY</title>
+</head>
+<body>
+<main class="flex flex-col items-center justify-center">
+    <form th:action="@{/dang-ky}" th:object="${user}" method="post"
+          class="mt-4 flex w-10/12 flex-col gap-4 rounded-md border border-gray-300 p-4 md:w-5/12 lg:w-3/12">
+        <h1 class="text-center text-2xl font-semibold">ĐĂNG KÝ TÀI KHOẢN</h1>
+
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold" for="name">Họ và tên</label>
+            <input class="rounded-md border border-gray-300 px-4 py-2 hover:border-red-500 focus:outline-red-500"
+                   id="name"
+                   th:field="*{name}"
+                   required
+                   type="text"/>
+            <span class="text-red-500" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold" for="phone">Số điện thoại</label>
+            <input class="rounded-md border border-gray-300 px-4 py-2 hover:border-red-500 focus:outline-red-500"
+                   id="phone"
+                   th:field="*{phone}"
+                   required
+                   type="tel"/>
+            <span class="text-red-500" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold" for="email">Email (tùy chọn)</label>
+            <input class="rounded-md border border-gray-300 px-4 py-2 hover:border-red-500 focus:outline-red-500"
+                   id="email"
+                   th:field="*{email}"
+                   type="email"/>
+            <span class="text-red-500" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold" for="password">Mật khẩu</label>
+            <input class="rounded-md border border-gray-300 px-4 py-2 hover:border-red-500 focus:outline-red-500"
+                   id="password"
+                   th:field="*{password}"
+                   required
+                   type="password"/>
+            <span class="text-red-500" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+            <p class="text-xs text-gray-500">Mật khẩu phải từ 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.</p>
+        </div>
+
+        <button class="flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold duration-200 bg-red-500 text-white hover:bg-red-400 active:bg-red-600 cursor-pointer">
+            ĐĂNG KÝ
+        </button>
+
+        <div class="text-center">
+            Đã có tài khoản? <a class="text-red-500 hover:underline" href="/dang-nhap">Đăng nhập ngay</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

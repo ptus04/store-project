@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chỉnh sửa thông tin | SLY</title>
+</head>
+<body>
+<main class="container mx-auto mt-8 max-w-4xl px-4">
+    <div class="flex flex-col gap-8 md:flex-row">
+        <!-- Sidebar -->
+        <div class="w-full md:w-1/4">
+            <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                <div class="mb-4 flex flex-col items-center">
+                    <div class="mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-red-100 text-2xl font-bold text-red-500">
+                        <span th:text="${#strings.substring(user.name, 0, 1)}">U</span>
+                    </div>
+                    <h2 class="text-lg font-semibold" th:text="${user.name}">Tên người dùng</h2>
+                    <p class="text-sm text-gray-500">KHÁCH HÀNG THÂN THIẾT</p>
+                </div>
+                <nav class="flex flex-col gap-2">
+                    <a class="rounded-md px-4 py-2 font-medium text-gray-600 hover:bg-gray-50" href="/tai-khoan">Thông tin cá nhân</a>
+                    <a class="rounded-md px-4 py-2 text-gray-600 hover:bg-gray-50" href="/don-hang">Đơn hàng của tôi</a>
+                    <a href="/dang-xuat" class="block w-full text-left rounded-md px-4 py-2 text-red-600 hover:bg-red-50">Đăng xuất</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1">
+            <div class="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
+                <h1 class="mb-6 text-2xl font-bold">Chỉnh sửa thông tin</h1>
+                
+                <form id="editProfileForm" class="flex flex-col gap-6">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-semibold text-gray-700">Họ và tên</label>
+                        <input type="text" id="name" name="name" th:value="${user.name}" 
+                               class="rounded-md border border-gray-300 px-4 py-2 focus:border-black focus:outline-none" required>
+                    </div>
+                    
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-semibold text-gray-700">Số điện thoại (Không thể thay đổi)</label>
+                        <input type="text" th:value="${user.phone}" 
+                               class="rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-gray-500" readonly>
+                    </div>
+                    
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-semibold text-gray-700">Email</label>
+                        <input type="email" id="email" name="email" th:value="${user.email}" 
+                               class="rounded-md border border-gray-300 px-4 py-2 focus:border-black focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-semibold text-gray-700">Giới tính</label>
+                            <select id="gender" name="gender" class="rounded-md border border-gray-300 px-4 py-2 focus:border-black focus:outline-none">
+                                <option value="" th:selected="${user.gender == null}">-- Chọn --</option>
+                                <option value="MALE" th:selected="${user.gender?.name() == 'MALE'}">Nam</option>
+                                <option value="FEMALE" th:selected="${user.gender?.name() == 'FEMALE'}">Nữ</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-semibold text-gray-700">Ngày sinh</label>
+                            <input type="date" id="birthDate" name="birthDate" th:value="${user.birthDate}" 
+                                   class="rounded-md border border-gray-300 px-4 py-2 focus:border-black focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div id="messageBox" class="hidden rounded-md p-4 text-sm font-medium"></div>
+
+                    <div class="mt-4 flex gap-4">
+                        <button type="submit" id="submitBtn" class="rounded-md bg-black px-8 py-2 font-semibold text-white hover:bg-gray-800 disabled:bg-gray-400">
+                            Lưu thay đổi
+                        </button>
+                        <a href="/tai-khoan" class="rounded-md border border-gray-300 px-8 py-2 font-semibold hover:bg-gray-50">
+                            Hủy
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        const messageBox = document.getElementById('messageBox');
+        
+        submitBtn.disabled = true;
+        messageBox.classList.add('hidden');
+
+        const formData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value || null,
+            gender: document.getElementById('gender').value || null,
+            birthDate: document.getElementById('birthDate').value || null
+        };
+
+        try {
+            const response = await fetch('/api/users/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                messageBox.textContent = 'Cập nhật thành công!';
+                messageBox.className = 'rounded-md p-4 text-sm font-medium bg-green-100 text-green-700';
+                messageBox.classList.remove('hidden');
+                setTimeout(() => {
+                    window.location.href = '/tai-khoan';
+                }, 1500);
+            } else {
+                messageBox.textContent = data.message || 'Có lỗi xảy ra, vui lòng thử lại.';
+                messageBox.className = 'rounded-md p-4 text-sm font-medium bg-red-100 text-red-700';
+                messageBox.classList.remove('hidden');
+            }
+        } catch (error) {
+            messageBox.textContent = 'Không thể kết nối đến máy chủ.';
+            messageBox.className = 'rounded-md p-4 text-sm font-medium bg-red-100 text-red-700';
+            messageBox.classList.remove('hidden');
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

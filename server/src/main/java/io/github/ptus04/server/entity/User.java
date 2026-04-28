@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -23,9 +22,7 @@ import java.util.UUID;
                 columnNames = {"email"})})
 public class User {
     @Id
-    @Size(max = 16)
-    @ColumnDefault("(uuid_to_bin(uuid(), 1))")
-    @Column(name = "id", nullable = false, length = 16)
+    @Column(name = "id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID id;
 
     @Size(max = 128)
@@ -48,25 +45,24 @@ public class User {
     private String password;
 
     @NotNull
-    @ColumnDefault("0")
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "role", nullable = false)
     private UserRoleEnum role;
 
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "gender")
     private UserGenderEnum gender;
 
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @NotNull
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_at", nullable = false)
+    @Size(max = 255)
+    @Column(name = "avatar", length = 255)
+    private String avatar;
+
+    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private Instant createdAt;
 
-    @NotNull
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
     private Instant updatedAt;
-
-
 }

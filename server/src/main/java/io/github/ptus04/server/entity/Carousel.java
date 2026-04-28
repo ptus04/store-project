@@ -1,9 +1,6 @@
 package io.github.ptus04.server.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -19,9 +16,8 @@ import java.util.UUID;
 @Table(name = "carousel")
 public class Carousel {
     @Id
-    @Size(max = 16)
-    @ColumnDefault("(uuid_to_bin(uuid(), 1))")
-    @Column(name = "id", nullable = false, length = 16)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID id;
 
     @Size(max = 32)
@@ -48,11 +44,13 @@ public class Carousel {
     private String portraitImage;
 
     @NotNull
+    @org.hibernate.annotations.CreationTimestamp
     @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @NotNull
+    @org.hibernate.annotations.UpdateTimestamp
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;

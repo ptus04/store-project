@@ -1,8 +1,9 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
+import { CarouselItem } from "@/types";
 
 type FeaturedCarouselItemProps = {
-  item: Record<string, string>;
+  item: CarouselItem;
   isActive: boolean;
 };
 

@@ -19,9 +19,8 @@ import java.util.UUID;
         columnNames = {"name"})})
 public class ProductSize {
     @Id
-    @Size(max = 16)
-    @ColumnDefault("(uuid_to_bin(uuid(), 1))")
-    @Column(name = "id", nullable = false, length = 16)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID id;
 
     @NotNull
@@ -36,11 +35,13 @@ public class ProductSize {
     private String name;
 
     @NotNull
+    @org.hibernate.annotations.CreationTimestamp
     @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @NotNull
+    @org.hibernate.annotations.UpdateTimestamp
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
