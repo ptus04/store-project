@@ -9,13 +9,16 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title th:replace="${title}">Sly clothing</title>
-    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/unpoly@3.14.2/unpoly.min.css"
-          integrity="sha384-w92USKrgJZk/UWqygsYAidMR0xAZqtQNp2sDSF8FkmR6tIJJeKHosVfDn74dWu+z" rel="stylesheet">
+    <link href="/favicon.png" rel="icon" type="image/png"/>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/unpoly@3.14.2/unpoly.min.css"
+          integrity="sha384-w92USKrgJZk/UWqygsYAidMR0xAZqtQNp2sDSF8FkmR6tIJJeKHosVfDn74dWu+z"
+          crossorigin="anonymous">
     <link href="/css/fontawesome/all.min.css" rel="stylesheet"/>
     <link href="/css/main.css" rel="stylesheet"/>
-    <script async crossorigin="anonymous"
+    <script src="https://cdn.jsdelivr.net/npm/unpoly@3.14.2/unpoly.min.js"
             integrity="sha384-hm4U+BjH9EP9Rfqe8tZoxm3smsG/jDE5SP8DDl4hNfeal+Q6yiGdxLW0C1aNVpP7"
-            src="https://cdn.jsdelivr.net/npm/unpoly@3.14.2/unpoly.min.js"></script>
+            crossorigin="anonymous"></script>
 </head>
 <body>
 <!-------------------------------------HEADER------------------------------------------------->
@@ -55,9 +58,56 @@
                title="Giỏ hàng">
                 <i class="fa fa-bag-shopping"></i>
                 <span class="hidden md:inline"> Giỏ hàng</span>
+                <span class="absolute -top-3/10 left-2 w-4 rounded-full bg-red-500 text-center text-xs text-white"
+                      th:if="${session.cart != null && session.cart.items.size() > 0}"
+                      th:text="${session.cart.items.size()}">
+                </span>
             </a>
 
             <!--Popup giỏ hàng-->
+            <div class="absolute top-11/10 -right-8 hidden max-h-[80vh] max-w-120 min-w-[20rem] overflow-auto border-2 border-gray-500 bg-white p-2 shadow group-hover:block">
+                <p class="m-0 text-center"
+                   th:if="${session.cart == null || session.cart.items.size() == 0}">
+                    Chưa có sản phẩm trong giỏ hàng.
+                </p>
+
+                <th:block th:if="${session.cart != null && session.cart.items.size() > 0}">
+                    <div class="flex items-center p-1"
+
+                         th:each="i : ${session.cart.items}">
+                        <a th:href="@{/danh-sach-san-pham/id(id=${product.productId})}">
+                            <img class="h-14" th:src="@{/images/image(image=${product.image})}" loading="lazy"
+                                 th:alt="${product.name}"/>
+                        </a>
+                        <div class="ms-2 overflow-hidden">
+                            <a th:href="@{/danh-sach-san-pham/id(id=${product.productId})}"
+                               th:text="${product.name + ' ' + product.size ? product.size : ''}">
+                            </a>
+                            <p>
+                                <span th:text="${product.quantity}"></span> &times;
+                                <span class="font-bold"
+                                      th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                            </span>
+                            </p>
+                        </div>
+                        <button class="ms-auto cursor-pointer"
+                                type="button"
+                                title="Xóa sản phẩm"
+                        >
+                            <i class="fa fa-remove"></i>
+                        </button>
+                    </div>
+                </th:block>
+
+                <hr class="my-2"/>
+
+                <div class="flex justify-between p-1 text-sm">
+                    <p class="font-bold">Tạm tính:</p>
+                    <p class="text-end font-bold"
+                       th:text="${#numbers.formatDecimal((subtotal ?: 0), 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                    </p>
+                </div>
+            </div>
         </div>
 
         <!--Account-->
@@ -130,7 +180,9 @@
 </nav>
 <!-------------------------------------NAV------------------------------------------------->
 
+<!-------------------------------------CONTENT------------------------------------------------->
 <th:block th:replace="${children}"></th:block>
+<!-------------------------------------CONTENT------------------------------------------------->
 
 <!-------------------------------------FOOTER------------------------------------------------->
 <footer class="mt-5 px-3 text-center" th:fragment="footer">
@@ -184,11 +236,12 @@
     }
 
     function handleUnsafeClose(e) {
-        if (e.target === nav) {
-            if (e.target === e.currentTarget ||
+        if (e.target === nav &&
+            (e.target === e.currentTarget ||
                 e.target instanceof HTMLAnchorElement ||
                 e.target instanceof HTMLButtonElement)
-                nav.toggleAttribute("data-open");
+        ) {
+            nav.toggleAttribute("data-open");
         }
     }
 
