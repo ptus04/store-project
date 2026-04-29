@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -16,16 +18,11 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "users", schema = "storedb", uniqueConstraints = {
-        @UniqueConstraint(name = "users_pk_2",
-                columnNames = {"phone"}),
-        @UniqueConstraint(name = "users_pk_3",
-                columnNames = {"email"})})
+@Table(name = "users")
 public class User {
     @Id
-    @Size(max = 16)
-    @ColumnDefault("(uuid_to_bin(uuid(), 1))")
     @Column(name = "id", nullable = false, length = 16)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Size(max = 128)
@@ -58,15 +55,21 @@ public class User {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @NotNull
-    @ColumnDefault("CURRENT_TIMESTAMP")
+    @CreationTimestamp
+    @ColumnDefault("(now())")
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
-    @NotNull
-    @ColumnDefault("CURRENT_TIMESTAMP")
+    @UpdateTimestamp
+    @ColumnDefault("(now())")
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "verified_at")
+    private Instant verifiedAt;
+
+    @Size(max = 128)
+    @Column(name = "avatar", length = 128)
+    private String avatar;
 
 }

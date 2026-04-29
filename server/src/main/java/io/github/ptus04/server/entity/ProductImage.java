@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -19,8 +20,8 @@ import java.util.UUID;
 public class ProductImage {
     @Id
     @Size(max = 16)
-    @ColumnDefault("(uuid_to_bin(uuid(), 1))")
     @Column(name = "id", nullable = false, length = 16)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @NotNull
@@ -34,7 +35,7 @@ public class ProductImage {
     @Column(name = "file", nullable = false, length = 128)
     private String file;
 
-    @NotNull
+    @CreationTimestamp
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
