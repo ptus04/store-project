@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Xác minh Số điện thoại | SLY</title>
+</head>
+<body>
+<main class="flex flex-col items-center justify-center">
+    <form class="mt-4 flex w-10/12 flex-col gap-4 rounded-md border border-gray-300 p-4 md:w-5/12 lg:w-3/12"
+          action="/xac-minh"
+          method="post">
+        <h1 class="text-center text-2xl font-semibold">XÁC MINH SỐ ĐIỆN THOẠI</h1>
+        <p>Một mã OTP đã được gửi về số điện thoại
+            <th:block th:text="${phone}"></th:block>
+        </p>
+
+        <div th:if="${error}">
+            <span class="text-red-500" th:text="${error} ?: 'Mã OTP không đúng'"></span>
+        </div>
+
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <input type="hidden" name="userId" th:value="${userId}">
+
+        <div class="flex flex-col gap-2 grow">
+            <label class="font-semibold" for="otp">Mã OTP</label>
+            <div class="flex gap-2 flex-wrap">
+                <input class="peer my-input w-full md:w-auto md:grow"
+                       type="text"
+                       id="otp"
+                       name="otp"
+                       autofocus
+                       autocomplete="one-time-code"
+                       required/>
+                <button class="my-btn-tertiary  w-full md:w-auto"
+                        type="button"
+                        id="btnResend"
+                        onclick="location.reload()"
+                        disabled>
+                    Gửi lại
+                </button>
+            </div>
+        </div>
+
+        <button class="my-btn-primary">XÁC MINH</button>
+    </form>
+
+    <script th:inline="javascript">
+        let remainingTime = /*[[${remainingTime}]]*/ 0;
+        const btnResend = document.getElementById("btnResend");
+
+        const interval = setInterval(updateCooldown, 1000);
+
+        function updateCooldown() {
+            if (btnResend instanceof HTMLButtonElement) {
+                btnResend.disabled = remainingTime > 0;
+                btnResend.innerText = `Gửi lại (${remainingTime})`;
+
+                if (remainingTime === 0) {
+                    clearInterval(interval);
+                    btnResend.innerText = `Gửi lại`;
+                }
+
+                remainingTime--;
+            }
+        }
+    </script>
+</main>
+</body>
+</html>

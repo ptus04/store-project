@@ -7,7 +7,9 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
+@Profile({"prod", "test"})
 @Configuration
 @EnableConfigurationProperties(TwilioProperties.class)
 @RequiredArgsConstructor
