@@ -10,5 +10,7 @@ public interface ProductService {
     List<ProductResponse> getNewProducts();
 
     Page<ProductResponse> getProductsPage(int page, int size);
+    
+    Page<ProductResponse> getProductsPageWithSort(int page, int size, String sortBy);
 
 }
