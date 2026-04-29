@@ -5,7 +5,6 @@ import io.github.ptus04.server.dto.response.ProductResponse;
 import java.util.List;
 
 public interface ProductService {
-    List<ProductResponse> getProducts(boolean isNew);
-
-    ProductResponse getProductById(long id);
+    List<ProductResponse> getAllProducts();
+    List<ProductResponse> getNewProducts();
 }

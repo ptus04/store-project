@@ -8,8 +8,5 @@ import org.mapstruct.*;
 public interface ProductMapper {
     Product toEntity(ProductResponse productResponse);
 
-    ProductResponse toDto(Product product);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    Product partialUpdate(ProductResponse productResponse, @MappingTarget Product product);
+    ProductResponse toProductResponse(Product product);
 }

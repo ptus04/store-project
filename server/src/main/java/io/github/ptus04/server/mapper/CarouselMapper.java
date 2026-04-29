@@ -8,8 +8,5 @@ import org.mapstruct.*;
 public interface CarouselMapper {
     Carousel toEntity(CarouselResponse carouselResponse);
 
-    CarouselResponse toDto(Carousel carousel);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    Carousel partialUpdate(CarouselResponse carouselResponse, @MappingTarget Carousel carousel);
+    CarouselResponse toCarouselResponse(Carousel carousel);
 }

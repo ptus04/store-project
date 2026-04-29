@@ -18,7 +18,7 @@ public class HomeController {
     @GetMapping()
     public String getHomePage(Model model) {
         model.addAttribute("carouselItems", carouselService.getAllCarousels());
-        model.addAttribute("newProducts", productService.getProducts(true));
+        model.addAttribute("newProducts", productService.getNewProducts());
         return "home/index";
     }
 

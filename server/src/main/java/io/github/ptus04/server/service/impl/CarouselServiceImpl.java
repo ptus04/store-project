@@ -20,7 +20,7 @@ public class CarouselServiceImpl implements CarouselService {
         return carouselRepository
                 .findAll()
                 .stream()
-                .map(carouselMapper::toDto)
+                .map(carouselMapper::toCarouselResponse)
                 .toList();
     }
 }
