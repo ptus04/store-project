@@ -41,6 +41,18 @@ a.active {
     color: var(--color-red-500);
 }
 
+button.my-btn-secondary {
+    @apply flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold duration-200 cursor-pointer not-disabled:focus:outline-offset-2 not-disabled:focus:outline-red-500 disabled:cursor-not-allowed disabled:opacity-50 border-red-500 border text-red-500 not-disabled:hover:text-white not-disabled:hover:bg-red-400 not-disabled:active:bg-red-600;
+}
+
+button.my-btn-primary {
+    @apply flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold duration-200 cursor-pointer not-disabled:focus:outline-offset-2 not-disabled:focus:outline-red-500 disabled:cursor-not-allowed disabled:opacity-50 bg-red-500 text-white not-disabled:hover:bg-red-400 not-disabled:active:bg-red-600;
+}
+
+button.my-btn-tertiary {
+    @apply flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold duration-200 cursor-pointer not-disabled:focus:outline-offset-2 not-disabled:focus:outline-red-500 disabled:cursor-not-allowed disabled:opacity-50 text-red-500 not-disabled:hover:text-red-400 not-disabled:active:text-red-600;
+}
+
 /* Webfont configs */
 @font-face {
     font-family: 'Helvetica';
