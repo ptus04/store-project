@@ -71,13 +71,13 @@
                 <!-- Edit Mode Form Fields (Hidden by default) -->
                 <div id="editMode" class="w-full hidden flex flex-col gap-5">
                     <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Họ và tên</label>
-                        <input type="text" name="name" th:value="${user.name}" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 outline-none transition-all font-medium" required>
+                        <label for="name" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Họ và tên</label>
+                        <input type="text" id="name" name="name" th:value="${user.name}" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 outline-none transition-all font-medium" required>
                     </div>
 
                     <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Địa chỉ Email</label>
-                        <input type="email" name="email" th:value="${user.email}" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 outline-none transition-all font-medium">
+                        <label for="email" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Địa chỉ Email</label>
+                        <input type="email" id="email" name="email" th:value="${user.email}" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 outline-none transition-all font-medium">
                     </div>
 
                     <div class="flex gap-3 mt-4">
