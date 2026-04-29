@@ -11,10 +11,14 @@ import java.util.*;
 @Getter
 @Builder(toBuilder = true)
 public class CustomUserDetails implements UserDetails {
+    private static final long serialVersionUID = 1L;
     private UUID id;
+
     private String name;
     private String phone;
     private String email;
+    private String avatar;
+
     private String password;
     private Set<GrantedAuthority> authorities;
 

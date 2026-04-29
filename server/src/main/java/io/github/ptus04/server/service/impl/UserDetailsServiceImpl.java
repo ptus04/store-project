@@ -28,6 +28,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .name(user.getName())
                 .phone(user.getPhone())
                 .email(user.getEmail())
+                .avatar(user.getAvatar())
                 .password(user.getPassword())
                 .authorities(Set.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())))
                 .build();

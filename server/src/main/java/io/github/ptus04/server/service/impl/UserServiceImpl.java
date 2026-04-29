@@ -51,4 +51,16 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
+    @Override
+    public UserResponse updateProfile(UUID id, String name, String email, String avatar) {
+        User user = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        user.setName(name);
+        user.setEmail(email);
+        if (avatar != null) {
+            user.setAvatar(avatar);
+        }
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+
 }
+
