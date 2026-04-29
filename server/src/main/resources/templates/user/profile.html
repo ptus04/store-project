@@ -25,16 +25,15 @@
                         <img id="avatarPreview" th:if="${user.avatar != null}" 
                              th:src="@{'/uploads/' + ${user.avatar}}" 
                              alt="Avatar" 
-                             style="width: 100%; height: 100%; object-fit: cover;"
-                             onerror="this.style.display='none'; document.getElementById('avatarIcon').style.display='flex';">
+                             style="width: 100%; height: 100%; object-fit: cover;">
                         
                         <!-- Default Icon (Show if no image OR if image fails to load) -->
-                        <i id="avatarIcon" class="fa fa-user" 
+                        <i id="avatarIcon" class="fa fa-user" aria-hidden="true"
                            th:style="${user.avatar == null} ? 'color: #9ca3af; font-size: 3rem; display: flex;' : 'color: #9ca3af; font-size: 3rem; display: none;'"></i>
                         
                         <!-- Overlay for changing photo (Always clickable but looks active in edit mode) -->
                         <label for="avatarFile" class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white text-[10px] font-bold tracking-widest">
-                            <i class="fa fa-camera mb-1 text-xl"></i>
+                            <i class="fa fa-camera mb-1 text-xl" aria-hidden="true"></i>
                             <span>THAY ĐỔI</span>
                         </label>
                     </div>
@@ -50,7 +49,7 @@
                     <div class="mt-2 flex w-full flex-col gap-3">
                         <div class="flex items-center gap-4 rounded-xl border border-gray-100 p-4 bg-gray-50/50">
                             <div class="flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100">
-                                <i class="fa fa-phone text-red-500"></i>
+                                <i class="fa fa-phone text-red-500" aria-hidden="true"></i>
                             </div>
                             <div class="flex flex-col">
                                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Số điện thoại</span>
@@ -60,7 +59,7 @@
 
                         <div class="flex items-center gap-4 rounded-xl border border-gray-100 p-4 bg-gray-50/50">
                             <div class="flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100">
-                                <i class="fa fa-envelope text-gray-400"></i>
+                                <i class="fa fa-envelope text-gray-400" aria-hidden="true"></i>
                             </div>
                             <div class="flex flex-col">
                                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Email liên hệ</span>
@@ -102,7 +101,7 @@
             <div class="mt-8 w-full border-t border-gray-100 pt-6">
                 <form th:action="@{/dang-xuat}" method="post" class="w-full">
                     <button type="submit" class="w-full group flex items-center justify-center gap-2 py-3 text-gray-300 hover:text-red-500 font-bold text-xs tracking-widest transition-colors cursor-pointer">
-                        <i class="fa fa-power-off group-hover:scale-110 transition-transform"></i> ĐĂNG XUẤT
+                        <i class="fa fa-power-off group-hover:scale-110 transition-transform" aria-hidden="true"></i> ĐĂNG XUẤT
                     </button>
                 </form>
             </div>
@@ -142,6 +141,22 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
+        // Handle avatar image load error
+        document.addEventListener('DOMContentLoaded', function() {
+            const avatarPreview = document.getElementById('avatarPreview');
+            if (avatarPreview) {
+                avatarPreview.addEventListener('error', function() {
+                    this.style.display = 'none';
+                    const icon = document.getElementById('avatarIcon');
+                    if (icon) icon.style.display = 'flex';
+                });
+                
+                // If already failed before script ran
+                if (avatarPreview.complete && avatarPreview.naturalHeight === 0) {
+                    avatarPreview.dispatchEvent(new Event('error'));
+                }
+            }
+        });
     </script>
 </main>
 </body>
