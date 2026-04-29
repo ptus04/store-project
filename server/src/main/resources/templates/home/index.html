@@ -7,7 +7,7 @@
     <title>Trang chủ | SLY</title>
 </head>
 <body>
-<th:block th:fragment="main">
+<main>
     <section class="relative h-dvh">
         <div class="h-dvh">
             <a class="absolute h-full w-full cursor-pointer data-[active=false]:animate-fade-out invisible data-[active=true]:animate-fade-in data-[active=true]:visible"
@@ -62,7 +62,7 @@
         </div>
     </section>
 
-    <main class="container mx-auto px-3 pt-5">
+    <section class="container mx-auto px-3 pt-5">
         <h1 class="text-2xl">Sản phẩm mới</h1>
         <div class="flex flex-wrap">
             <div class="w-full p-2 text-center md:w-1/4 lg:w-1/5" th:each="product:${newProducts}">
@@ -100,7 +100,7 @@
                 </p>
             </div>
         </div>
-    </main>
+    </section>
 
     <script th:inline="javascript">
         const items = document.querySelectorAll("[data-carousel-item]");
@@ -129,6 +129,6 @@
             updateCarousel();
         }
     </script>
-</th:block>
+</main>
 </body>
 </html>
