@@ -231,11 +231,15 @@
 <script>
     const nav = document.getElementsByTagName("nav")[0];
 
+    function toggleBodyScrolling(disabled) {
+        document.body.className = disabled ? "overflow-hidden" : "";
+    }
+
     function toggleNavBar() {
         nav.toggleAttribute("data-open");
     }
 
-    function handleUnsafeClose(e) {
+    function handleUnsafeToggle(e) {
         if (e.target === nav &&
             (e.target === e.currentTarget ||
                 e.target instanceof HTMLAnchorElement ||
@@ -245,7 +249,7 @@
         }
     }
 
-    nav.addEventListener("click", handleUnsafeClose);
+    nav.addEventListener("click", handleUnsafeToggle);
 </script>
 
 <script>
