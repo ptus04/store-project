@@ -262,7 +262,7 @@
     let currentHeaderClasses = "";
 
     function handlePageScrolling() {
-        if (window.scrollY >= window.innerHeight) {
+        if (window.scrollY >= window.innerHeight/3) {
             if (currentHeaderClasses !== HEADER_FIXED_BG_WHITE) {
                 currentHeaderClasses = header.className = HEADER_FIXED_BG_WHITE;
             }
