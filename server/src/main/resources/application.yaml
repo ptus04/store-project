@@ -1,6 +1,9 @@
 spring:
   application:
     name: server
+  threads:
+    virtual:
+      enabled: true
 
 custom:
   twilio:
