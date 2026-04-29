@@ -1,10 +1,6 @@
 spring:
   application:
     name: server
-  data:
-    redis:
-      repositories:
-        enabled: false
 
 custom:
   twilio:
