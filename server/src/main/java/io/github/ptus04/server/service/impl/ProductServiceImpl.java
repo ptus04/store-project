@@ -38,16 +38,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponse> getProductsPage(int page, int size) {
-        return productRepository
-                .findAll(PageRequest.of(page, size))
-                .map(productMapper::toProductResponse);
-    }
-
-    @Override
     public Page<ProductResponse> getProductsPageWithSort(int page, int size, String sortBy) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        
+
         Page<Product> productPage = switch (sortBy) {
             case "newest" -> {
                 PageRequest newest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -68,7 +61,7 @@ public class ProductServiceImpl implements ProductService {
                 yield productRepository.findAll(newest);
             }
         };
-        
+
         return productPage.map(productMapper::toProductResponse);
     }
 
