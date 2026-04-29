@@ -1,6 +1,6 @@
 package io.github.ptus04.server.service.impl;
 
-import io.github.ptus04.server.dto.ProductResponse;
+import io.github.ptus04.server.dto.response.ProductResponse;
 import io.github.ptus04.server.mapper.ProductMapper;
 import io.github.ptus04.server.repository.ProductRepository;
 import io.github.ptus04.server.service.ProductService;
@@ -30,11 +30,6 @@ public class ProductServiceImpl implements ProductService {
                 .stream()
                 .map(productMapper::toDto)
                 .toList();
-    }
-
-    @Override
-    public ProductResponse getProductById(long id) {
-        return null;
     }
 
 }

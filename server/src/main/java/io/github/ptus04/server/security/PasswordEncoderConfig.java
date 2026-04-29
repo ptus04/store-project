@@ -1,4 +1,4 @@
-package io.github.ptus04.server.config.security;
+package io.github.ptus04.server.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

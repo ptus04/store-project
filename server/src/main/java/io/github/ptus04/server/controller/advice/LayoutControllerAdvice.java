@@ -1,6 +1,6 @@
 package io.github.ptus04.server.controller.advice;
 
-import io.github.ptus04.server.config.storage.StorageProperties;
+import io.github.ptus04.server.config.StorageProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;

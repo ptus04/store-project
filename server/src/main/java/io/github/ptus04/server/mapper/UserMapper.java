@@ -1,6 +1,6 @@
 package io.github.ptus04.server.mapper;
 
-import io.github.ptus04.server.dto.UserLoginRequest;
+import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.entity.User;
 import org.mapstruct.*;
 

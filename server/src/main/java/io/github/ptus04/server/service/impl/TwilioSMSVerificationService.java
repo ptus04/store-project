@@ -2,7 +2,7 @@ package io.github.ptus04.server.service.impl;
 
 import com.twilio.rest.verify.v2.service.Verification;
 import com.twilio.rest.verify.v2.service.VerificationCheck;
-import io.github.ptus04.server.config.twilio.TwilioProperties;
+import io.github.ptus04.server.config.TwilioProperties;
 import io.github.ptus04.server.service.SMSVerificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

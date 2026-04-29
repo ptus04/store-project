@@ -1,6 +1,6 @@
 package io.github.ptus04.server.controller.api;
 
-import io.github.ptus04.server.dto.CarouselResponse;
+import io.github.ptus04.server.dto.response.CarouselResponse;
 import io.github.ptus04.server.service.CarouselService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/carousel")
 @RequiredArgsConstructor
-class CarouselApiController {
+public class CarouselApiController {
     private final CarouselService carouselService;
 
     @GetMapping

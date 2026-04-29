@@ -237,6 +237,7 @@
 
     function toggleNavBar() {
         nav.toggleAttribute("data-open");
+        toggleBodyScrolling(nav.dataset.open !== undefined);
     }
 
     function handleUnsafeToggle(e) {
@@ -245,7 +246,7 @@
                 e.target instanceof HTMLAnchorElement ||
                 e.target instanceof HTMLButtonElement)
         ) {
-            nav.toggleAttribute("data-open");
+            toggleNavBar();
         }
     }
 

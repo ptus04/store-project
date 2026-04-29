@@ -1,4 +1,4 @@
-package io.github.ptus04.server.config.security;
+package io.github.ptus04.server.security;
 
 import lombok.Builder;
 import lombok.Getter;

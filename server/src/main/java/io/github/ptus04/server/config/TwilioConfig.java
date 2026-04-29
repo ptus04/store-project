@@ -1,4 +1,4 @@
-package io.github.ptus04.server.config.twilio;
+package io.github.ptus04.server.config;
 
 import com.twilio.Twilio;
 import lombok.RequiredArgsConstructor;

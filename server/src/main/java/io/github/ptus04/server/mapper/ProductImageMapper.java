@@ -1,6 +1,6 @@
 package io.github.ptus04.server.mapper;
 
-import io.github.ptus04.server.dto.ProductImageResponse;
+import io.github.ptus04.server.dto.response.ProductImageResponse;
 import io.github.ptus04.server.entity.ProductImage;
 import org.mapstruct.*;
 

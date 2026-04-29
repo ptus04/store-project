@@ -1,4 +1,4 @@
-package io.github.ptus04.server.config.storage;
+package io.github.ptus04.server.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

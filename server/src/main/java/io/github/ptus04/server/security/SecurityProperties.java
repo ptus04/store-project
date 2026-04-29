@@ -1,4 +1,4 @@
-package io.github.ptus04.server.config.security;
+package io.github.ptus04.server.security;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "custom.security")
-public final class SecurityProperties {
+public class SecurityProperties {
     @NestedConfigurationProperty
     private final CorsProperties cors = new CorsProperties();
 

@@ -1,6 +1,6 @@
 package io.github.ptus04.server.mapper;
 
-import io.github.ptus04.server.dto.CarouselResponse;
+import io.github.ptus04.server.dto.response.CarouselResponse;
 import io.github.ptus04.server.entity.Carousel;
 import org.mapstruct.*;
 

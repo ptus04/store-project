@@ -1,5 +1,6 @@
-package io.github.ptus04.server.config.security;
+package io.github.ptus04.server.security;
 
+import io.github.ptus04.server.security.handlers.CustomAuthFailureHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -31,10 +32,7 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/"))
                 .logout(logout -> logout
                         .logoutUrl("/dang-xuat")
-                        .logoutSuccessUrl("/dang-nhap")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("SESSION")
-                        .permitAll())
+                        .logoutSuccessUrl("/dang-nhap"))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                         .maximumSessions(1));
