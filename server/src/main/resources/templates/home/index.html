@@ -36,11 +36,12 @@
         <div class="absolute bottom-4 left-4 flex gap-1">
             <button class="h-1 w-8 cursor-pointer rounded-full data-[active=true]:bg-white bg-gray-500"
                     data-carousel-indicator
+                    onClick="handleIndicatorClick(this.getAttribute('data-index'))"
+                    type="button"
+                    th:data-index="${i.index}"
                     th:data-active="${i.index == 0}"
                     th:each="item,i : ${carouselItems}"
-                    th:onClick="|handleIndicatorClick(${i.index})|"
-                    th:title="${item.title()}"
-                    type="button">
+                    th:title="${item.title()}">
             </button>
         </div>
 
@@ -119,7 +120,7 @@
         }
 
         function handleIndicatorClick(index) {
-            current = index;
+            current = Number.parseInt(index);
             updateCarousel();
         }
 
