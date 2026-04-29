@@ -1,6 +1,6 @@
 package io.github.ptus04.server.service.impl;
 
-import io.github.ptus04.server.dto.ProductResponse;
+import io.github.ptus04.server.dto.response.ProductResponse;
 import io.github.ptus04.server.mapper.ProductMapper;
 import io.github.ptus04.server.repository.ProductRepository;
 import io.github.ptus04.server.service.ProductService;
@@ -18,19 +18,20 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
 
     @Override
-    public List<ProductResponse> getProducts(boolean isNew) {
-        if (isNew) {
-            return productRepository
-                    .findByIsNew(true)
-                    .stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        }
-
+    public List<ProductResponse> getAllProducts() {
         return productRepository
                 .findAll()
                 .stream()
-                .map(productMapper::toDto)
+                .map(productMapper::toProductResponse)
+                .toList();
+    }
+
+    @Override
+    public List<ProductResponse> getNewProducts() {
+        return productRepository
+                .findByIsNew(true)
+                .stream()
+                .map(productMapper::toProductResponse)
                 .toList();
     }
 
@@ -39,11 +40,6 @@ public class ProductServiceImpl implements ProductService {
         return productRepository
                 .findAll(PageRequest.of(page, size))
                 .map(productMapper::toDto);
-    }
-
-    @Override
-    public ProductResponse getProductById(long id) {
-        return null;
     }
 
 }

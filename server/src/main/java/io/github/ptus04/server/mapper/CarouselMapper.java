@@ -1,6 +1,6 @@
 package io.github.ptus04.server.mapper;
 
-import io.github.ptus04.server.dto.CarouselResponse;
+import io.github.ptus04.server.dto.response.CarouselResponse;
 import io.github.ptus04.server.entity.Carousel;
 import org.mapstruct.*;
 
@@ -8,8 +8,5 @@ import org.mapstruct.*;
 public interface CarouselMapper {
     Carousel toEntity(CarouselResponse carouselResponse);
 
-    CarouselResponse toDto(Carousel carousel);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    Carousel partialUpdate(CarouselResponse carouselResponse, @MappingTarget Carousel carousel);
+    CarouselResponse toCarouselResponse(Carousel carousel);
 }

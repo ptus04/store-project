@@ -1,59 +1,280 @@
 <!DOCTYPE html>
-<html lang="vi" th:fragment="mainLayout(title, children)" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="mainLayout(title, children)">
 <head>
     <meta charset="UTF-8">
-    <link href="/favicon.png" rel="icon" type="image/png"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title th:replace="${title}">Sly clothing</title>
-    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/unpoly@3.14.2/unpoly.min.css"
-          integrity="sha384-w92USKrgJZk/UWqygsYAidMR0xAZqtQNp2sDSF8FkmR6tIJJeKHosVfDn74dWu+z" rel="stylesheet">
+    <link href="/favicon.png" rel="icon" type="image/png"/>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/unpoly@3.14.2/unpoly.min.css"
+          integrity="sha384-w92USKrgJZk/UWqygsYAidMR0xAZqtQNp2sDSF8FkmR6tIJJeKHosVfDn74dWu+z"
+          crossorigin="anonymous">
     <link href="/css/fontawesome/all.min.css" rel="stylesheet"/>
     <link href="/css/main.css" rel="stylesheet"/>
-    <script async crossorigin="anonymous"
+    <script src="https://cdn.jsdelivr.net/npm/unpoly@3.14.2/unpoly.min.js"
             integrity="sha384-hm4U+BjH9EP9Rfqe8tZoxm3smsG/jDE5SP8DDl4hNfeal+Q6yiGdxLW0C1aNVpP7"
-            src="https://cdn.jsdelivr.net/npm/unpoly@3.14.2/unpoly.min.js"></script>
+            crossorigin="anonymous"></script>
 </head>
 <body>
-<th:block th:replace="~{fragments/header::header}"></th:block>
-<th:block th:replace="~{fragments/nav::navBar}"></th:block>
-<th:block th:replace="${children}"></th:block>
-<th:block th:replace="~{fragments/footer::footer}"></th:block>
-<script>
-    const navBar = document.getElementById("nav-bar");
+<!-------------------------------------HEADER------------------------------------------------->
+<header class="fixed z-10 flex w-full items-center justify-between px-4 py-2">
+    <div class="flex shrink grow basis-0 flex-row items-center gap-3">
+        <button class="cursor-pointer duration-200 hover:text-red-500"
+                onClick={toggleNavBar()}
+                title="Mở menu">
+            <i class="fa fa-bars"></i>
+        </button>
+        <form action="/danh-sach-san-pham" class="hidden md:flex">
+            <label>
+                <span class="hidden">Từ khóa</span>
+                <input class="border-b px-3 py-1"
+                       name="query"
+                       placeholder="Nhập từ khóa"
+                       required
+                       type="search"/>
+            </label>
+            <button class="cursor-pointer px-1 py-1 duration-100 hover:text-red-500" title="Tìm kiếm" type="submit">
+                <i class="fa fa-search"></i>
+            </button>
+        </form>
+    </div>
 
-    function toggleNavBar() {
-        navBar.toggleAttribute("data-open");
+    <h1 class="mb-0 basis-auto text-center">
+        <a href="/">
+            <img alt="LOGO SLY" class="h-12" src="/img/SLYLOGO_black-800x298.png"/>
+            <span class="hidden">Sly clothing</span>
+        </a>
+    </h1>
+
+    <div class="flex shrink grow basis-0 flex-row items-center justify-end gap-3">
+        <div class="group relative">
+            <a class="relative before:absolute before:top-full before:left-[0.15rem] before:z-10 before:hidden before:rotate-45 before:border-t-2 before:border-l-2 before:border-gray-500 before:bg-white before:p-1 group-hover:before:block"
+               href="/gio-hang"
+               title="Giỏ hàng">
+                <i class="fa fa-bag-shopping"></i>
+                <span class="hidden md:inline"> Giỏ hàng</span>
+                <span class="absolute -top-3/10 left-2 w-4 rounded-full bg-red-500 text-center text-xs text-white"
+                      th:if="${session.cart != null && session.cart.items.size() > 0}"
+                      th:text="${session.cart.items.size()}">
+                </span>
+            </a>
+
+            <!--Popup giỏ hàng-->
+            <div class="absolute top-11/10 -right-8 hidden max-h-[80vh] max-w-120 min-w-[20rem] overflow-auto border-2 border-gray-500 bg-white p-2 shadow group-hover:block">
+                <p class="m-0 text-center"
+                   th:if="${session.cart == null || session.cart.items.size() == 0}">
+                    Chưa có sản phẩm trong giỏ hàng.
+                </p>
+
+                <th:block th:if="${session.cart != null && session.cart.items.size() > 0}">
+                    <div class="flex items-center p-1"
+
+                         th:each="i : ${session.cart.items}">
+                        <a th:href="@{/danh-sach-san-pham/id(id=${product.productId})}">
+                            <img class="h-14" th:src="@{/images/image(image=${product.image})}" loading="lazy"
+                                 th:alt="${product.name}"/>
+                        </a>
+                        <div class="ms-2 overflow-hidden">
+                            <a th:href="@{/danh-sach-san-pham/id(id=${product.productId})}"
+                               th:text="${product.name + ' ' + product.size ? product.size : ''}">
+                            </a>
+                            <p>
+                                <span th:text="${product.quantity}"></span> &times;
+                                <span class="font-bold"
+                                      th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                            </span>
+                            </p>
+                        </div>
+                        <button class="ms-auto cursor-pointer"
+                                type="button"
+                                title="Xóa sản phẩm"
+                        >
+                            <i class="fa fa-remove"></i>
+                        </button>
+                    </div>
+                </th:block>
+
+                <hr class="my-2"/>
+
+                <div class="flex justify-between p-1 text-sm">
+                    <p class="font-bold">Tạm tính:</p>
+                    <p class="text-end font-bold"
+                       th:text="${#numbers.formatDecimal((subtotal ?: 0), 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!--Account-->
+        <a class="cursor-pointer" title="Tài khoản" href="/dang-nhap" sec:authorize="isAnonymous()">
+            <i class="fa fa-user"></i>
+            <span class="hidden md:inline">Tài khoản</span>
+        </a>
+
+        <a class="cursor-pointer" title="Tài khoản" href="/thong-tin-tai-khoan" sec:authorize="isAuthenticated()">
+            <i class="fa fa-user"></i>
+            <span class="hidden md:inline" sec:authentication="principal.name"></span>
+        </a>
+    </div>
+</header>
+<!-------------------------------------HEADER------------------------------------------------->
+
+<!-------------------------------------NAV------------------------------------------------->
+<nav class="fixed top-0 z-30 h-dvh w-full flex-col duration-200 data-open:bg-black/50 not-data-open:invisible group">
+    <div class="flex h-full w-full flex-col gap-4 overflow-auto bg-white/75 px-4 py-2 shadow-md backdrop-blur-md duration-200 md:w-2/5 lg:w-1/4 -translate-x-full group-data-open:translate-x-0">
+        <!--Nav header-->
+        <div class="flex items-center justify-between">
+            <form action="/danh-sach-san-pham" class="flex gap-2">
+                <button class="cursor-pointer duration-200 hover:text-red-500" title="Tìm kiếm">
+                    <i class="fa fa-search"></i>
+                </button>
+                <label>
+                    <span class="hidden">Từ khóa tìm kiếm</span>
+                    <input class="border-b px-3 py-1"
+                           name="query"
+                           placeholder="Nhập từ khóa"
+                           required
+                           type="search"/>
+                </label>
+            </form>
+            <button class="aspect-square w-6 cursor-pointer duration-200 hover:bg-red-500 hover:text-white"
+                    onClick="toggleNavBar()"
+                    title="Đóng menu"
+                    type="button">
+                <i class="fa fa-close"></i>
+            </button>
+        </div>
+
+        <!--Categories-->
+        <ul class="flex flex-col gap-2">
+            <!--/*@thymesVar id="categories" type="java.util.Map<java.lang.String, java.lang.String[]>"*/-->
+            <th:block th:each="category : ${categories}">
+                <th:block
+                        th:replace="~{fragments/category-item::categoryItem(${category.key}, ${category.value})}"></th:block>
+            </th:block>
+        </ul>
+
+        <!--Nav footer-->
+        <div class="mt-auto">
+            <ul class="text-sm">
+                <li><a class="hover:text-red-500" href="/refund-policy">CHÍNH SÁCH ĐỔI TRẢ</a></li>
+                <li><a class="hover:text-red-500" href="/privacy-policy">CHÍNH SÁCH BẢO MẬT</a></li>
+                <li><a class="hover:text-red-500" href="/about-us">HỆ THỐNG CỬA HÀNG</a></li>
+            </ul>
+            <div class="flex items-center justify-center gap-2">
+                <a class="hover:text-red-500" href="#" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
+                <a class="0 hover:text-red-500" href="#" title="TikTok"> <i class="fa-brands fa-tiktok"></i></a>
+                <a class="hover:text-red-500" href="#" title="Instagram"> <i class="fa-brands fa-instagram"></i></a>
+            </div>
+            <p class="text-center">
+                <span th:text="'Copyright ' + ${#dates.year(#dates.createNow())} + ' &copy;'"></span>
+                <a class="hover:text-red-500" href="/">SLY</a>
+            </p>
+        </div>
+    </div>
+</nav>
+<!-------------------------------------NAV------------------------------------------------->
+
+<!-------------------------------------CONTENT------------------------------------------------->
+<th:block th:replace="${children}"></th:block>
+<!-------------------------------------CONTENT------------------------------------------------->
+
+<!-------------------------------------FOOTER------------------------------------------------->
+<footer class="mt-5 px-3 text-center" th:fragment="footer">
+    <p class="mb-1 text-2xl">THEO DÕI SLY NGAY</p>
+    <ul class="flex justify-center space-x-4">
+        <li class="p-2">
+            <a class="text-sm hover:text-red-500" href="#">
+                <i class="fa-brands fa-facebook"></i>
+                <span> FACEBOOK</span>
+            </a>
+        </li>
+        <li class="p-2">
+            <a class="text-sm hover:text-red-500" href="#">
+                <i class="fa-brands fa-tiktok"></i>
+                <span> TIKTOK</span>
+            </a>
+        </li>
+        <li class="p-2">
+            <a class="text-sm hover:text-red-500" href="#">
+                <i class="fa-brands fa-instagram"></i>
+                <span> INSTAGRAM</span>
+            </a>
+        </li>
+    </ul>
+
+    <hr class="my-1"/>
+    <ul class="flex flex-wrap justify-center">
+        <li class="mx-auto p-2"><a class="hover:text-red-500" href="/privacy-policy">CHÍNH SÁCH BẢO MẬT</a></li>
+        <li class="mx-auto p-2"><a class="hover:text-red-500" href="/refund-policy">CHÍNH SÁCH ĐỔI TRẢ</a></li>
+        <li class="mx-auto p-2"><a class="hover:text-red-500" href="/about-us">HỆ THỐNG CỬA HÀNG</a></li>
+    </ul>
+
+    <address class="mt-3 text-sm">
+        <span>Công ty TNHH Thương Mại và Dịch Vụ SLY</span><br/>
+        <span>123 Đường ABC, Phường XYZ, Quận 123, TP. HCM</span><br/>
+        <span>Điện thoại: </span><a class="hover:text-red-500" href="tel:+84868635209">+84 68635209</a><br/>
+        <span>Email: </span><a class="hover:text-red-500" href="mailto:cs@sly.vn">cs@sly.vn</a>
+    </address>
+    <p>
+        <span th:text="'Copyright ' + ${#dates.year(#dates.createNow())} + ' &copy;'"></span>
+        <a class="hover:text-red-500" href="/">SLY</a>
+    </p>
+</footer>
+<!-------------------------------------FOOTER------------------------------------------------->
+
+<script>
+    const nav = document.getElementsByTagName("nav")[0];
+
+    function toggleBodyScrolling(disabled) {
+        document.body.className = disabled ? "overflow-hidden" : "";
     }
 
-    function handleUnsafeClose(e) {
-        if (e.target === navBar) {
-            if (
-                e.target === e.currentTarget ||
+    function toggleNavBar() {
+        nav.toggleAttribute("data-open");
+        toggleBodyScrolling(nav.dataset.open !== undefined);
+    }
+
+    function handleUnsafeToggle(e) {
+        if (e.target === nav &&
+            (e.target === e.currentTarget ||
                 e.target instanceof HTMLAnchorElement ||
                 e.target instanceof HTMLButtonElement)
-                navBar.toggleAttribute("data-open");
+        ) {
+            toggleNavBar();
         }
     }
 
-    navBar.addEventListener("click", handleUnsafeClose);
+    nav.addEventListener("click", handleUnsafeToggle);
 </script>
 
 <script>
-    // TODO: Tối ưu
-    const header = document.getElementById("header");
+    const HEADER_STICKY = "sticky top-0 z-10 flex w-full items-center justify-between px-4 py-2 bg-white shadow-md";
+    const HEADER_FIXED_BG_WHITE = "fixed z-10 flex w-full items-center justify-between px-4 py-2 bg-white shadow-md";
+    const HEADER_FIXED_BG_TRANSPARENT = "fixed z-10 flex w-full items-center justify-between px-4 py-2";
+
+    const header = document.getElementsByTagName("header")[0];
+    let currentHeaderClasses = "";
 
     function handlePageScrolling() {
         if (window.scrollY >= window.innerHeight) {
-            header.className = "fixed z-10 flex w-full items-center justify-between px-4 py-2 bg-white shadow-md";
-        } else {
-            header.className = "fixed z-10 flex w-full items-center justify-between px-4 py-2";
+            if (currentHeaderClasses !== HEADER_FIXED_BG_WHITE) {
+                currentHeaderClasses = header.className = HEADER_FIXED_BG_WHITE;
+            }
+        } else if (currentHeaderClasses !== HEADER_FIXED_BG_TRANSPARENT) {
+            currentHeaderClasses = header.className = HEADER_FIXED_BG_TRANSPARENT;
         }
     }
 
     if (location.pathname === "/") {
         window.addEventListener("scroll", handlePageScrolling);
-    } else {
-        header.className = "sticky top-0 z-10 flex w-full items-center justify-between px-4 py-2 bg-white shadow-md";
+    } else if (currentHeaderClasses !== HEADER_STICKY) {
+        currentHeaderClasses = header.className = HEADER_STICKY;
     }
 </script>
 </body>

@@ -1,6 +1,6 @@
 package io.github.ptus04.server.mapper;
 
-import io.github.ptus04.server.dto.ProductResponse;
+import io.github.ptus04.server.dto.response.ProductResponse;
 import io.github.ptus04.server.entity.Product;
 import org.mapstruct.*;
 
@@ -8,8 +8,5 @@ import org.mapstruct.*;
 public interface ProductMapper {
     Product toEntity(ProductResponse productResponse);
 
-    ProductResponse toDto(Product product);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    Product partialUpdate(ProductResponse productResponse, @MappingTarget Product product);
+    ProductResponse toProductResponse(Product product);
 }

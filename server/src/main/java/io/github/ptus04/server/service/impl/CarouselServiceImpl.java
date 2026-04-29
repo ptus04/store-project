@@ -1,6 +1,6 @@
 package io.github.ptus04.server.service.impl;
 
-import io.github.ptus04.server.dto.CarouselResponse;
+import io.github.ptus04.server.dto.response.CarouselResponse;
 import io.github.ptus04.server.mapper.CarouselMapper;
 import io.github.ptus04.server.repository.CarouselRepository;
 import io.github.ptus04.server.service.CarouselService;
@@ -20,7 +20,7 @@ public class CarouselServiceImpl implements CarouselService {
         return carouselRepository
                 .findAll()
                 .stream()
-                .map(carouselMapper::toDto)
+                .map(carouselMapper::toCarouselResponse)
                 .toList();
     }
 }

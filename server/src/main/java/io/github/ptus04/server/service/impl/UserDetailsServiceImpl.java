@@ -1,8 +1,8 @@
 package io.github.ptus04.server.service.impl;
 
-import io.github.ptus04.server.config.security.CustomUserDetails;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.repository.UserRepository;
+import io.github.ptus04.server.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -1,4 +1,4 @@
-package io.github.ptus04.server.config.security;
+package io.github.ptus04.server.security.handlers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,15 +23,12 @@ public class CustomAuthFailureHandler implements AuthenticationFailureHandler {
             @NonNull HttpServletResponse response,
             @NonNull AuthenticationException exception
     ) throws IOException {
-
-        String message = "Đăng nhập thất bại";
-
-        if (exception instanceof BadCredentialsException) {
-            message = "Sai tài khoản hoặc mật khẩu";
-        } else if (exception instanceof LockedException) {
-            message = "Tài khoản bị khóa";
-        } else if (exception instanceof DisabledException) {
-            message = "Tài khoản bị vô hiệu hóa";
+        String message;
+        switch (exception) {
+            case BadCredentialsException ignored -> message = "Sai tài khoản hoặc mật khẩu";
+            case LockedException ignored -> message = "Tài khoản bị khóa";
+            case DisabledException ignored -> message = "Tài khoản bị vô hiệu hóa";
+            default -> message = "Đăng nhập thất bại";
         }
 
         response.sendRedirect("/dang-nhap?error&message=" + URLEncoder.encode(message, StandardCharsets.UTF_8));

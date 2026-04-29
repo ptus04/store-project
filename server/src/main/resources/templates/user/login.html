@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"
-      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
+<html lang="vi" th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
       xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -8,47 +7,42 @@
 </head>
 <body>
 <main class="flex flex-col items-center justify-center">
-    <form action="/dang-nhap" class="mt-4 flex w-10/12 flex-col gap-4 rounded-md border border-gray-300 p-4 md:w-5/12 lg:w-3/12"
-          method="post">
+    <form action="/dang-nhap" method="post"
+          class="mt-4 flex w-10/12 flex-col gap-4 rounded-md border border-gray-300 p-4 md:w-5/12 lg:w-3/12">
         <h1 class="text-center text-2xl font-semibold">ĐĂNG NHẬP</h1>
 
         <div th:if="${param.error}">
             <span class="text-red-500" th:text="${param.message} ?: 'Đăng nhập thất bại'"></span>
         </div>
 
-        <input th:name="${_csrf.parameterName}"
-               th:value="${_csrf.token}"
-               type="hidden"/>
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
         <div class="flex flex-col gap-2">
             <label class="font-semibold" for="username">Số điện thoại đã đăng ký</label>
-            <input autocomplete="tel"
-                   autofocus
-                   class="peer rounded-md border border-gray-300 px-4 py-2 hover:border-red-500 focus:outline-red-500"
+            <input class="peer rounded-md border border-gray-300 px-4 py-2 hover:border-red-500 focus:outline-red-500"
+                   type="tel"
                    id="username"
                    name="username"
                    pattern="^0[2-9]\d{8}$"
                    required
-                   type="tel"/>
+                   autocomplete="tel"
+                   autofocus/>
             <span class="hidden text-red-500 peer-invalid:block">Số điện thoại không hợp lệ</span>
         </div>
 
         <div class="flex flex-col gap-2">
             <label class="font-semibold" for="password">Mật khẩu</label>
-            <input autocomplete="current-password"
-                   autofocus
-                   class="peer rounded-md border border-gray-300 px-4 py-2 hover:border-red-500 focus:outline-red-500"
+            <input class="peer rounded-md border border-gray-300 px-4 py-2 hover:border-red-500 focus:outline-red-500"
+                   type="password"
                    id="password"
                    name="password"
                    pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&_]).{8,}$"
                    required
-                   type="password"/>
+                   autocomplete="current-password"/>
             <span class="hidden text-red-500 peer-invalid:block">Mật khẩu không hợp lệ</span>
         </div>
 
-        <button class="flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold duration-200 not-disabled:focus:outline-offset-2 not-disabled:focus:outline-red-500 bg-red-500 text-white not-disabled:hover:bg-red-400 not-disabled:active:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer">
-            ĐĂNG NHẬP
-        </button>
+        <button class="my-btn-primary">ĐĂNG NHẬP</button>
 
         <div class="flex flex-wrap justify-between">
             <a class="hover:text-red-500" href="/dang-ky">Đăng ký tài khoản</a>
