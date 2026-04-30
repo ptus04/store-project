@@ -12,7 +12,7 @@
 
     <div class="flex w-11/12 flex-col rounded-2xl border border-gray-300 bg-white shadow-md md:w-8/12 lg:w-5/12 overflow-hidden">
 
-        <!-- Header -->
+        <!-- HEADER -->
         <div class="h-[120px] w-full bg-gradient-to-br from-gray-800 to-black"></div>
 
         <div class="flex flex-col items-center px-6 pb-8 -mt-16">
@@ -28,42 +28,41 @@
 
                     <div class="bg-gray-200 flex items-center justify-center overflow-hidden relative w-[120px] h-[120px] rounded-full">
 
-                        <!-- Image -->
+                        <!-- IMAGE -->
                         <img id="avatarPreview"
                              th:if="${user.avatar != null}"
                              th:src="@{'/uploads/' + ${user.avatar}}"
-                             alt="Ảnh đại diện người dùng"
-                             class="w-full h-full object-cover">
+                             alt="Ảnh đại diện"
+                             class="w-full h-full object-cover object-center"
+                             style="object-position: center top;">
 
-                        <!-- Icon fallback -->
+                        <!-- FALLBACK ICON -->
                         <i id="avatarIcon"
                            class="fa fa-user text-gray-400 text-3xl"
                            aria-hidden="true"
                            th:classappend="${user.avatar == null} ? '' : ' hidden'"></i>
 
-                        <!-- Label upload -->
-                        <label for="avatarFile"
-                               aria-label="Chọn ảnh đại diện"
-                               class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer text-white text-[10px] font-bold tracking-widest">
-
+                        <!-- CLICK OVERLAY -->
+                        <div onclick="document.getElementById('avatarFile').click()"
+                             class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer text-white text-[10px] font-bold tracking-widest">
                             <i class="fa fa-camera mb-1 text-xl" aria-hidden="true"></i>
                             <span>THAY ĐỔI</span>
-                        </label>
+                        </div>
                     </div>
 
-                    <!-- Hidden input -->
+                    <!-- LABEL (ACCESSIBILITY) -->
+                    <label for="avatarFile" class="sr-only">
+                        Chọn ảnh đại diện
+                    </label>
+
+                    <!-- INPUT -->
                     <input type="file"
                            id="avatarFile"
                            name="avatarFile"
                            accept="image/*"
-                           class="hidden"
+                           class="sr-only"
                            onchange="previewImage(this)"
-                           aria-describedby="avatarHelp">
-
-                    <!-- Accessible text -->
-                    <span id="avatarHelp" class="sr-only">
-                        Chọn ảnh đại diện cho tài khoản
-                    </span>
+                           aria-label="Upload avatar">
                 </div>
 
                 <!-- VIEW MODE -->
@@ -101,7 +100,9 @@
                 <div id="editMode" class="w-full hidden flex flex-col gap-5">
 
                     <div>
-                        <label for="nameInput" class="text-xs text-gray-400">Họ và tên</label>
+                        <label for="nameInput" class="text-xs text-gray-400">
+                            Họ và tên
+                        </label>
                         <input id="nameInput"
                                name="name"
                                type="text"
@@ -111,7 +112,9 @@
                     </div>
 
                     <div>
-                        <label for="emailInput" class="text-xs text-gray-400">Email</label>
+                        <label for="emailInput" class="text-xs text-gray-400">
+                            Email
+                        </label>
                         <input id="emailInput"
                                name="email"
                                type="email"
@@ -123,7 +126,9 @@
                         <button type="submit" class="flex-1 bg-black text-white py-3 rounded-xl">
                             LƯU
                         </button>
-                        <button type="button" onclick="toggleEdit(false)" class="flex-1 bg-gray-200 py-3 rounded-xl">
+                        <button type="button"
+                                onclick="toggleEdit(false)"
+                                class="flex-1 bg-gray-200 py-3 rounded-xl">
                             HỦY
                         </button>
                     </div>
@@ -157,7 +162,8 @@
                     if (!preview) {
                         preview = document.createElement('img');
                         preview.id = 'avatarPreview';
-                        preview.className = 'w-full h-full object-cover';
+                        preview.className = 'w-full h-full object-cover object-center';
+                        preview.style.objectPosition = 'center top';
                         icon.parentElement.insertBefore(preview, icon);
                         icon.remove();
                     }
