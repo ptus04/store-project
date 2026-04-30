@@ -11,4 +11,7 @@ public interface UserService {
     UserResponse getUserById(UUID id);
 
     UserResponse updatePhoneVerificationState(UUID id, boolean isVerified);
+
+    UserResponse updateProfile(UUID id, String name, String email, String avatar);
 }
+

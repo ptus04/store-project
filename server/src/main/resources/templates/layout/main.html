@@ -25,9 +25,9 @@
 <header class="fixed z-10 flex w-full items-center justify-between px-4 py-2">
     <div class="flex shrink grow basis-0 flex-row items-center gap-3">
         <button class="cursor-pointer duration-200 hover:text-red-500"
-                onClick={toggleNavBar()}
+                onclick="toggleNavBar()"
                 title="Mở menu">
-            <i class="fa fa-bars"></i>
+            <i class="fa fa-bars" aria-hidden="true"></i>
         </button>
         <form action="/danh-sach-san-pham" class="hidden md:flex">
             <label>
@@ -39,7 +39,7 @@
                        type="search"/>
             </label>
             <button class="cursor-pointer px-1 py-1 duration-100 hover:text-red-500" title="Tìm kiếm" type="submit">
-                <i class="fa fa-search"></i>
+                <i class="fa fa-search" aria-hidden="true"></i>
             </button>
         </form>
     </div>
@@ -56,7 +56,7 @@
             <a class="relative before:absolute before:top-full before:left-[0.15rem] before:z-10 before:hidden before:rotate-45 before:border-t-2 before:border-l-2 before:border-gray-500 before:bg-white before:p-1 group-hover:before:block"
                href="/gio-hang"
                title="Giỏ hàng">
-                <i class="fa fa-bag-shopping"></i>
+                <i class="fa fa-bag-shopping" aria-hidden="true"></i>
                 <span class="hidden md:inline"> Giỏ hàng</span>
                 <span class="absolute -top-3/10 left-2 w-4 rounded-full bg-red-500 text-center text-xs text-white"
                       th:if="${session.cart != null && session.cart.items.size() > 0}"
@@ -94,7 +94,7 @@
                                 type="button"
                                 title="Xóa sản phẩm"
                         >
-                            <i class="fa fa-remove"></i>
+                            <i class="fa fa-remove" aria-hidden="true"></i>
                         </button>
                     </div>
                 </th:block>
@@ -112,12 +112,12 @@
 
         <!--Account-->
         <a class="cursor-pointer" title="Tài khoản" href="/dang-nhap" sec:authorize="isAnonymous()">
-            <i class="fa fa-user"></i>
+            <i class="fa fa-user" aria-hidden="true"></i>
             <span class="hidden md:inline">Tài khoản</span>
         </a>
 
         <a class="cursor-pointer" title="Tài khoản" href="/thong-tin-tai-khoan" sec:authorize="isAuthenticated()">
-            <i class="fa fa-user"></i>
+            <i class="fa fa-user" aria-hidden="true"></i>
             <span class="hidden md:inline" sec:authentication="principal.name"></span>
         </a>
     </div>
@@ -131,7 +131,7 @@
         <div class="flex items-center justify-between">
             <form action="/danh-sach-san-pham" class="flex gap-2">
                 <button class="cursor-pointer duration-200 hover:text-red-500" title="Tìm kiếm">
-                    <i class="fa fa-search"></i>
+                    <i class="fa fa-search" aria-hidden="true"></i>
                 </button>
                 <label>
                     <span class="hidden">Từ khóa tìm kiếm</span>
@@ -146,7 +146,7 @@
                     onClick="toggleNavBar()"
                     title="Đóng menu"
                     type="button">
-                <i class="fa fa-close"></i>
+                <i class="fa fa-close" aria-hidden="true"></i>
             </button>
         </div>
 
@@ -167,9 +167,9 @@
                 <li><a class="hover:text-red-500" href="/about-us">HỆ THỐNG CỬA HÀNG</a></li>
             </ul>
             <div class="flex items-center justify-center gap-2">
-                <a class="hover:text-red-500" href="#" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
-                <a class="0 hover:text-red-500" href="#" title="TikTok"> <i class="fa-brands fa-tiktok"></i></a>
-                <a class="hover:text-red-500" href="#" title="Instagram"> <i class="fa-brands fa-instagram"></i></a>
+                <a class="hover:text-red-500" href="#" title="Facebook"><i class="fa-brands fa-facebook" aria-hidden="true"></i></a>
+                <a class="0 hover:text-red-500" href="#" title="TikTok"> <i class="fa-brands fa-tiktok" aria-hidden="true"></i></a>
+                <a class="hover:text-red-500" href="#" title="Instagram"> <i class="fa-brands fa-instagram" aria-hidden="true"></i></a>
             </div>
             <p class="text-center">
                 <span th:text="'Copyright ' + ${#dates.year(#dates.createNow())} + ' &copy;'"></span>
@@ -190,19 +190,19 @@
     <ul class="flex justify-center space-x-4">
         <li class="p-2">
             <a class="text-sm hover:text-red-500" href="#">
-                <i class="fa-brands fa-facebook"></i>
+                <i class="fa-brands fa-facebook" aria-hidden="true"></i>
                 <span> FACEBOOK</span>
             </a>
         </li>
         <li class="p-2">
             <a class="text-sm hover:text-red-500" href="#">
-                <i class="fa-brands fa-tiktok"></i>
+                <i class="fa-brands fa-tiktok" aria-hidden="true"></i>
                 <span> TIKTOK</span>
             </a>
         </li>
         <li class="p-2">
             <a class="text-sm hover:text-red-500" href="#">
-                <i class="fa-brands fa-instagram"></i>
+                <i class="fa-brands fa-instagram" aria-hidden="true"></i>
                 <span> INSTAGRAM</span>
             </a>
         </li>

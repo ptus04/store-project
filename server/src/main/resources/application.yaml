@@ -4,6 +4,10 @@ spring:
   threads:
     virtual:
       enabled: true
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 8MB
 
 custom:
   twilio:
@@ -13,6 +17,8 @@ custom:
 
   storage:
     url: ${STORAGE_URL}
+    path: uploads
+
 
   security:
     cors:

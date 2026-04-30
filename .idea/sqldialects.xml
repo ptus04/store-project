@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/server/src/main/resources/db/migration/V10__add_avatar_to_users.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/server/src/main/resources/db/migration/V1__initialize_database.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/server/src/main/resources/db/migration/V2__insert_categories_data.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/server/src/main/resources/db/migration/V3__insert_products_data.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/server/src/main/resources/db/migration/V4__insert_carousel_data.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/server/src/main/resources/db/migration/V5__insert_product_images_data.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/server/src/main/resources/db/migration/V6__add_deleted_at_to_products.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/server/src/main/resources/db/migration/V7__drop_product_sizes_name_unique.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/server/src/main/resources/db/migration/V8__insert_product_sizes_data.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/server/src/main/resources/db/migration/V9__add_verified_at_to_users.sql" dialect="MySQL" />
+  </component>
+</project>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông tin tài khoản | SLY</title>
+</head>
+
+<body>
+<main class="flex flex-col items-center justify-center p-4" style="min-height: 60vh;">
+
+    <div class="flex w-11/12 flex-col rounded-2xl border border-gray-300 bg-white shadow-md md:w-8/12 lg:w-5/12 overflow-hidden">
+
+        <!-- HEADER -->
+        <div class="h-[120px] w-full bg-gradient-to-br from-gray-800 to-black"></div>
+
+        <div class="flex flex-col items-center px-6 pb-8 -mt-16">
+
+            <form id="profileForm"
+                  th:action="@{/thong-tin-tai-khoan/cap-nhat}"
+                  method="post"
+                  enctype="multipart/form-data"
+                  class="w-full flex flex-col items-center">
+
+                <!-- AVATAR -->
+                <div class="group relative bg-white rounded-full p-2 shadow-md mb-4">
+
+                    <div class="bg-gray-200 flex items-center justify-center overflow-hidden relative w-[120px] h-[120px] rounded-full">
+
+                        <!-- IMAGE -->
+                        <img id="avatarPreview"
+                             th:if="${!#strings.isEmpty(user.avatar)}"
+                             th:src="@{'/uploads/' + ${user.avatar}}"
+                             alt="Ảnh đại diện"
+                             class="w-full h-full object-cover object-center"
+                             style="object-position: center top;">
+
+                        <!-- FALLBACK ICON -->
+                        <i id="avatarIcon"
+                           th:if="${#strings.isEmpty(user.avatar)}"
+                           class="fa fa-user text-gray-400 text-3xl"
+                           aria-hidden="true"></i>
+
+                        <!-- CLICK OVERLAY -->
+                        <button type="button"
+                                onclick="document.getElementById('avatarFile').click()"
+                                class="absolute inset-0 w-full h-full bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition cursor-pointer text-white text-[10px] font-bold tracking-widest border-none">
+                            <i class="fa fa-camera mb-1 text-xl" aria-hidden="true"></i>
+                            <span>THAY ĐỔI</span>
+                        </button>
+                    </div>
+
+                    <!-- LABEL (ACCESSIBILITY) -->
+                    <label for="avatarFile" class="sr-only">
+                        Chọn ảnh đại diện
+                    </label>
+
+                    <!-- INPUT -->
+                    <input type="file"
+                           id="avatarFile"
+                           name="avatarFile"
+                           accept="image/*"
+                           class="sr-only"
+                           onchange="previewImage(this)"
+                           aria-label="Upload avatar">
+                </div>
+
+                <!-- VIEW MODE -->
+                <div id="viewMode" class="w-full flex flex-col items-center">
+                    <h1 class="font-bold text-2xl mb-1" th:text="${user.name}">Tên</h1>
+                    <p class="text-gray-400 text-sm mb-6" th:text="${user.email ?: ''}"></p>
+
+                    <div class="mt-2 flex w-full flex-col gap-3">
+
+                        <div class="flex items-center gap-4 rounded-xl border p-4 bg-gray-50">
+                            <i class="fa fa-phone text-red-500" aria-hidden="true"></i>
+                            <div>
+                                <span class="text-xs text-gray-400">Số điện thoại</span>
+                                <div class="font-bold" th:text="${user.phone}"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4 rounded-xl border p-4 bg-gray-50">
+                            <i class="fa fa-envelope text-gray-400" aria-hidden="true"></i>
+                            <div>
+                                <span class="text-xs text-gray-400">Email</span>
+                                <div class="font-bold" th:text="${user.email ?: ''}"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button"
+                            onclick="toggleEdit(true)"
+                            class="mt-8 px-10 py-3 bg-black text-white rounded-full text-xs font-bold">
+                        CHỈNH SỬA
+                    </button>
+                </div>
+
+                <!-- EDIT MODE -->
+                <div id="editMode" class="w-full hidden flex flex-col gap-5">
+
+                    <div>
+                        <label for="nameInput" class="text-xs text-gray-400">
+                            Họ và tên
+                        </label>
+                        <input id="nameInput"
+                               name="name"
+                               type="text"
+                               th:value="${user.name}"
+                               class="w-full border rounded-xl px-4 py-3"
+                               required>
+                    </div>
+
+                    <div>
+                        <label for="emailInput" class="text-xs text-gray-400">
+                            Email
+                        </label>
+                        <input id="emailInput"
+                               name="email"
+                               type="email"
+                               th:value="${user.email}"
+                               class="w-full border rounded-xl px-4 py-3">
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button type="submit" class="flex-1 bg-black text-white py-3 rounded-xl">
+                            LƯU
+                        </button>
+                        <button type="button"
+                                onclick="toggleEdit(false)"
+                                class="flex-1 bg-gray-200 py-3 rounded-xl">
+                            HỦY
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- LOGOUT -->
+            <form th:action="@{/dang-xuat}" method="post" class="w-full mt-6">
+                <button type="submit"
+                        class="w-full text-gray-400 hover:text-red-500 text-sm font-bold">
+                    ĐĂNG XUẤT
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <script>
+        function toggleEdit(show) {
+            document.getElementById('viewMode').classList.toggle('hidden', show);
+            document.getElementById('editMode').classList.toggle('hidden', !show);
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    let preview = document.getElementById('avatarPreview');
+                    const icon = document.getElementById('avatarIcon');
+
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.id = 'avatarPreview';
+                        preview.className = 'w-full h-full object-cover object-center';
+                        preview.style.objectPosition = 'center top';
+                        icon.parentElement.insertBefore(preview, icon);
+                        icon.remove();
+                    }
+
+                    preview.src = e.target.result;
+                    toggleEdit(true);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+
+</main>
+</body>
+</html>
