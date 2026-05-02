@@ -32,7 +32,8 @@ create table products
     is_new            tinyint(1)     default 0                        not null,
     discount          float          default 0                        not null,
     created_at        timestamp      default (now())                  not null,
-    updated_at        timestamp      default (now())                  not null on update CURRENT_TIMESTAMP
+    updated_at        timestamp      default (now())                  not null on update CURRENT_TIMESTAMP,
+    deleted_at        timestamp                                       null comment 'Sản phẩm bị xóa mềm'
 );
 
 create table category_product
@@ -68,8 +69,6 @@ create table product_sizes
     name       varchar(4)                                  not null,
     created_at timestamp  default CURRENT_TIMESTAMP        not null,
     updated_at timestamp  default CURRENT_TIMESTAMP        not null on update CURRENT_TIMESTAMP,
-    constraint product_sizes_pk_2
-        unique (name),
     constraint product_sizes_products_id_fk
         foreign key (product_id) references products (id)
             on delete cascade
@@ -77,17 +76,19 @@ create table product_sizes
 
 create table users
 (
-    id         binary(16) default (uuid_to_bin(uuid(), 1)) not null
+    id          binary(16) default (uuid_to_bin(uuid(), 1)) not null
         primary key,
-    name       varchar(128)                                not null,
-    phone      varchar(10)                                 not null,
-    email      varchar(64)                                 null,
-    password   varchar(255)                                not null comment 'Hashed password',
-    role       tinyint    default 0                        not null comment '0 = CUSTOMER;1 = EMPLOYEE;2 = ADMIN',
-    gender     tinyint(1)                                  null,
-    birth_date date                                        null,
-    created_at timestamp  default CURRENT_TIMESTAMP        not null,
-    updated_at timestamp  default CURRENT_TIMESTAMP        not null on update CURRENT_TIMESTAMP,
+    name        varchar(128)                                not null,
+    phone       varchar(10)                                 not null,
+    email       varchar(64)                                 null,
+    password    varchar(255)                                not null comment 'Hashed password',
+    role        tinyint    default 0                        not null comment '0 = CUSTOMER;1 = EMPLOYEE;2 = ADMIN',
+    gender      tinyint(1)                                  null,
+    birth_date  date                                        null,
+    avatar      varchar(128)                                null,
+    verified_at timestamp                                   null,
+    created_at  timestamp  default CURRENT_TIMESTAMP        not null,
+    updated_at  timestamp  default CURRENT_TIMESTAMP        not null on update CURRENT_TIMESTAMP,
     constraint users_pk_2
         unique (phone),
     constraint users_pk_3
@@ -159,4 +160,20 @@ create table user_addresses
             on delete cascade
 );
 
+create table transactions
+(
+    id                  binary(16) default (uuid_to_bin(uuid(), 1)) not null
+        primary key,
+    order_id            binary(16)                                  null,
+    gateway_name        varchar(100)                                not null,
+    transaction_code    varchar(255)                                null,
+    amount              decimal(18, 2)                              not null,
+    transaction_content text                                        null,
+    transaction_date    datetime                                    not null,
+    raw_payload         json                                        null,
+    created_at          timestamp  default CURRENT_TIMESTAMP        not null,
+    constraint transactions_orders_id_fk
+        foreign key (order_id) references orders (id)
+);
 
+create index idx_transaction_code on transactions (transaction_code);
