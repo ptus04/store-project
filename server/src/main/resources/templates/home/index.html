@@ -17,11 +17,11 @@
                th:href="@{${item.link()}}">
                 <picture>
                     <source media="(orientation: portrait)"
-                            th:srcset="@{${storageUrl} + '/images/carousel/' + ${item.portraitImage()}}"/>
+                            th:srcset="@{${imageContainerUrl} + 'carousel/' + ${item.portraitImage()}}"/>
                     <img class="h-full w-full object-cover"
                          loading="lazy"
                          th:alt="${item.title()}"
-                         th:src="@{${storageUrl} + '/images/carousel/' + ${item.landscapeImage()}}"/>
+                         th:src="@{${imageContainerUrl} + 'carousel/' + ${item.landscapeImage()}}"/>
                 </picture>
 
                 <div class="absolute right-0 bottom-0 left-0 bg-linear-to-t from-black to-75% pt-9 pr-4 pb-6 pl-4 text-white"
@@ -75,7 +75,7 @@
                         <img class="w-full"
                              loading="lazy"
                              th:alt="${product.name()}"
-                             th:src="@{${storageUrl} + '/images/' + ${product.productImages().get(0).file()}}"/>
+                             th:src="@{${imageContainerUrl} + ${product.productImages().get(0).file()}}"/>
                         <p class="absolute top-1/2 w-full bg-white/75 px-6 py-2 text-2xl font-bold text-red-600"
                            th:if="${product.inStock() == 0}">
                             HẾT HÀNG
