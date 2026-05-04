@@ -296,5 +296,6 @@ dist
 # user-defined ignore patterns
 sonarlint.xml
 **/resources/**/main.css
+copilot.data.migration.ask2agent.xml
 db-forest-config.xml
 
