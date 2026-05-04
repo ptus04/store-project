@@ -296,4 +296,5 @@ dist
 # user-defined ignore patterns
 sonarlint.xml
 **/resources/**/main.css
+db-forest-config.xml
 
