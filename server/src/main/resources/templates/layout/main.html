@@ -25,7 +25,7 @@
 <header class="fixed z-10 flex w-full items-center justify-between px-4 py-2">
     <div class="flex shrink grow basis-0 flex-row items-center gap-3">
         <button class="cursor-pointer duration-200 hover:text-red-500"
-                onClick={toggleNavBar()}
+                onClick="toggleNavBar()"
                 title="Mở menu">
             <i class="fa fa-bars"></i>
         </button>
@@ -151,13 +151,24 @@
         </div>
 
         <!--Categories-->
-        <ul class="flex flex-col gap-2">
-            <!--/*@thymesVar id="categories" type="java.util.Map<java.lang.String, java.lang.String[]>"*/-->
-            <th:block th:each="category : ${categories}">
-                <th:block
-                        th:replace="~{fragments/category-item::categoryItem(${category.key}, ${category.value})}"></th:block>
-            </th:block>
-        </ul>
+        <a class="duration-200 hover:text-red-500" href="/danh-sach-san-pham">
+            <i class="fa fa-caret-right"></i>
+            <span>Xem Danh sách sản phẩm</span>
+        </a>
+        <div>
+            <h3 class="font-bold">Phân loại theo:</h3>
+            <ul class="flex flex-col gap-1 ml-3">
+                <!--/*@thymesVar id="categories" type="java.util.List<io.github.ptus04.server.entity.Category>"*/-->
+                <li th:each="category : ${categories}">
+                    <i class="fa fa-caret-right"></i>
+                    <a class="duration-200 hover:text-red-500"
+                       th:href="@{/danh-sach-san-pham(category=${#strings.toLowerCase(category.name)})}"
+                       th:text="${category.name}">
+                    </a>
+                </li>
+            </ul>
+        </div>
+
 
         <!--Nav footer-->
         <div class="mt-auto">
@@ -262,7 +273,7 @@
     let currentHeaderClasses = "";
 
     function handlePageScrolling() {
-        if (window.scrollY >= window.innerHeight/3) {
+        if (window.scrollY >= window.innerHeight / 3) {
             if (currentHeaderClasses !== HEADER_FIXED_BG_WHITE) {
                 currentHeaderClasses = header.className = HEADER_FIXED_BG_WHITE;
             }

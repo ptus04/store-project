@@ -9,8 +9,19 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      database: ${REDIS_DATABASE}
-      username: ${REDIS_USERNAME}
-      password: ${REDIS_PASSWORD}
+      url: ${REDIS_URL}
+      ssl:
+        enabled: true
+  cloud:
+    azure:
+      storage:
+        account-name: ${AZURE_STORAGE_ACCOUNT}
+        account-key: ${AZURE_STORAGE_KEY}
+        blob:
+          endpoint: ${AZURE_STORAGE_BLOB_ENDPOINT}
+custom:
+  twilio:
+    account-sid: ${TWILIO_ACCOUNT_SID}
+    auth-token: ${TWILIO_AUTH_TOKEN}
+    verify:
+      service-sid: ${TWILIO_VERIFY_SERVICE_SID}

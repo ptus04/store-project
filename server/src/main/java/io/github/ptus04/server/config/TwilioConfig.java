@@ -9,10 +9,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-@Profile({"prod", "test"})
-@Configuration
+@Profile("prod")
 @EnableConfigurationProperties(TwilioProperties.class)
 @RequiredArgsConstructor
+@Configuration
 public class TwilioConfig implements ApplicationRunner {
     private final TwilioProperties twilioProperties;
 

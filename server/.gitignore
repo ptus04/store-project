@@ -33,5 +33,6 @@ build/
 .vscode/
 
 ### Project specific ###
-/.env
+.env
+.env.prod
 application-test.yaml
