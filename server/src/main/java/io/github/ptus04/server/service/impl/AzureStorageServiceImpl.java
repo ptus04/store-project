@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -37,7 +38,7 @@ public class AzureStorageServiceImpl implements StorageService {
 
         BlobClient blobClient = createContainerIfNotExist(containerName).getBlobClient(blobName);
         String url = blobClient.getBlobUrl() + "?" + blobClient.generateSas(values);
-        return new StorageSasResponse(url, expiration);
+        return new StorageSasResponse(blobName, url, Instant.now(), expiration);
     }
 
     @Override
