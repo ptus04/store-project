@@ -1,22 +1,13 @@
 spring:
   application:
-    name: server
+    name: store-server
   threads:
     virtual:
       enabled: true
-
 custom:
-  twilio:
-    account-sid: ${TWILIO_ACCOUNT_SID}
-    auth-token: ${TWILIO_AUTH_TOKEN}
-    verify-service-sid: ${TWILIO_VERIFY_SERVICE_SID}
-
-  storage:
-    url: ${STORAGE_URL}
-
   security:
     cors:
-      allowed-origins: ${ALLOWED_ORIGINS:*}
-      allowed-methods: ${ALLOWED_METHODS:*}
-      allowed-headers: ${ALLOWED_HEADERS:*}
-      allow-credentials: ${ALLOW_CREDENTIALS:false}
+      allowed-origins: ${ALLOWED_ORIGINS}
+      allowed-methods: ${ALLOWED_METHODS}
+      allowed-headers: ${ALLOWED_HEADERS}
+      allow-credentials: ${ALLOW_CREDENTIALS}

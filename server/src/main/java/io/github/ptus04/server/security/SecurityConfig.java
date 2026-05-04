@@ -23,8 +23,12 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/thong-tin-tai-khoan").authenticated()
-                        .anyRequest().permitAll())
+                        .requestMatchers("/css/**", "/img/**", "/favicon.png").permitAll()
+                        .requestMatchers("/", "/danh-sach-san-pham/**", "/gio-hang").permitAll()
+                        .requestMatchers("/dang-nhap/**", "/dang-ky/**").permitAll()
+                        .requestMatchers("/about-us", "/privacy-policy", "/refund-policy").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/dang-nhap")
                         .loginProcessingUrl("/dang-nhap")

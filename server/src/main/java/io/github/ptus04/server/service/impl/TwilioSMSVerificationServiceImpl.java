@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 @ConditionalOnBean(TwilioProperties.class)
 @RequiredArgsConstructor
 @Service
-public class TwilioSMSVerificationService implements SMSVerificationService {
+public class TwilioSMSVerificationServiceImpl implements SMSVerificationService {
     private final TwilioProperties twilioProperties;
     private final StringRedisTemplate redisTemplate;
 
@@ -26,7 +26,7 @@ public class TwilioSMSVerificationService implements SMSVerificationService {
         String value = redisTemplate.opsForValue().get(key);
         if (value == null) {
             Verification.creator(
-                    twilioProperties.getVerifyServiceSid(),
+                    twilioProperties.getVerify().getServiceSid(),
                     prefixWithVietnameseCode(phone),
                     "sms"
             ).create();
@@ -40,7 +40,7 @@ public class TwilioSMSVerificationService implements SMSVerificationService {
     @Override
     public boolean verifyOtp(String phone, String otp) {
         VerificationCheck check = VerificationCheck
-                .creator(twilioProperties.getVerifyServiceSid())
+                .creator(twilioProperties.getVerify().getServiceSid())
                 .setCode(otp)
                 .setTo(prefixWithVietnameseCode(phone))
                 .create();
