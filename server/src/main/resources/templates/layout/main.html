@@ -75,12 +75,12 @@
                     <div class="flex items-center p-1"
 
                          th:each="i : ${session.cart.items}">
-                        <a th:href="@{/danh-sach-san-pham/id(id=${product.productId})}">
+                        <a th:href="@{/danh-sach-san-pham/{id}(id=${product.productId})}">
                             <img class="h-14" th:src="@{/images/image(image=${product.image})}" loading="lazy"
                                  th:alt="${product.name}"/>
                         </a>
                         <div class="ms-2 overflow-hidden">
-                            <a th:href="@{/danh-sach-san-pham/id(id=${product.productId})}"
+                            <a th:href="@{/danh-sach-san-pham/{id}(id=${product.productId})}"
                                th:text="${product.name + ' ' + product.size ? product.size : ''}">
                             </a>
                             <p>
