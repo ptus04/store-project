@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông tin tài khoản | SLY</title>
+</head>
+
+<body>
+<main class="min-h-screen bg-[#f7f7f7] px-4 py-8 md:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl space-y-8">
+
+        <!-- HEADER -->
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Profile</p>
+                <h1 class="mt-2 text-3xl font-bold text-gray-900">Thông tin tài khoản</h1>
+            </div>
+        </div>
+
+        <!-- LAYOUT -->
+        <section class="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+
+            <!-- SIDEBAR -->
+            <aside class="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm flex flex-col min-h-[520px]">
+
+                <div class="flex flex-col items-center text-center">
+                    <!-- Avatar -->
+                    <div class="flex h-24 w-24 items-center justify-center rounded-full
+                                bg-gradient-to-br from-gray-200 to-gray-400
+                                shadow-inner ring-8 ring-white">
+                        <i class="fa fa-user text-3xl text-gray-600"></i>
+                    </div>
+
+                    <!-- Info -->
+                    <h2 class="mt-5 text-xl font-bold text-gray-900"
+                        th:text="${user.name()}">Tên người dùng</h2>
+
+                    <p class="mt-2 text-sm text-gray-500"
+                       th:text="${user.email() != null ? user.email() : 'Chưa cập nhật email'}"></p>
+
+                    <p class="mt-1 text-sm text-gray-500"
+                       th:text="${user.phone() != null ? user.phone() : 'Chưa cập nhật số điện thoại'}"></p>
+                </div>
+
+                <!-- ACTION -->
+                <div class="mt-auto space-y-3">
+                   <button class="my-btn-secondary w-full">
+                       <a th:href="@{/thong-tin-tai-khoan}"
+                               class="">
+                       Cập nhật
+                   </a>
+                   </button>
+
+                    <form th:action="@{/dang-xuat}" method="post">
+                        <button type="submit"
+                                class="my-btn-primary w-full">
+                            Đăng xuất
+                        </button>
+                    </form>
+                </div>
+            </aside>
+
+            <!-- CONTENT -->
+            <div class="space-y-6">
+
+                <!-- ĐƠN HÀNG -->
+                <section class="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm min-h-[240px] flex flex-col">
+
+                    <div class="mb-4 flex items-center gap-2">
+                        <i class="fa fa-bag-shopping text-gray-500"></i>
+                        <h3 class="text-lg font-bold">Đơn hàng</h3>
+                    </div>
+
+                    <!-- CENTER CONTENT -->
+                    <div class="flex flex-1 flex-col items-center justify-center gap-2 text-gray-500">
+                        <i class="fa fa-box-open text-3xl"></i>
+                        <span>Chưa có đơn hàng</span>
+                    </div>
+
+                    <!-- CTA -->
+                    <div class="pt-4 flex justify-end">
+                       <button class="my-btn-tertiary ">
+                           <a th:href="@{/danh-sach-san-pham}">
+                               Mua sắm ngay
+                           </a>
+                       </button>
+                    </div>
+                </section>
+
+                <!-- GRID -->
+                <section class="grid gap-6 md:grid-cols-2">
+
+                    <!-- ĐỊA CHỈ -->
+                    <div class="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm
+                                min-h-[240px] flex flex-col">
+
+                        <div class="mb-4 flex items-center gap-2">
+                            <i class="fa fa-location-dot text-gray-500"></i>
+                            <h3 class="text-lg font-bold">Địa chỉ</h3>
+                        </div>
+
+                        <div class="flex flex-1 flex-col items-center justify-center gap-2 text-gray-500">
+                            <i class="fa fa-map-location-dot text-2xl"></i>
+                            <span>Chưa có địa chỉ</span>
+                        </div>
+
+                        <button class="mt-4 rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-gray-50">
+                            Thêm địa chỉ
+                        </button>
+                    </div>
+
+                    <!-- (GIỮ CHỖ TRỐNG CÂN BẰNG) -->
+                    <div class="rounded-[28px] border border-dashed border-gray-200
+                                bg-gray-50 min-h-[240px] flex items-center justify-center text-gray-400 text-sm">
+                        Nội dung sẽ bổ sung sau
+                    </div>
+
+                </section>
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>
