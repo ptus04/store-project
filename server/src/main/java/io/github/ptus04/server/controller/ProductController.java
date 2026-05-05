@@ -8,7 +8,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.UUID;
 
 
 @Controller
@@ -28,5 +31,12 @@ public class ProductController {
         model.addAttribute("totalPages", productPage.getTotalPages());
         model.addAttribute("sortBy", sortBy);
         return "product/index";
+    }
+
+    @GetMapping("/{id}")
+    public String getProductDetailPage(@PathVariable UUID id, Model model) {
+        ProductResponse product = productService.getProductById(id);
+        model.addAttribute("product", product);
+        return "product/detail";
     }
 }

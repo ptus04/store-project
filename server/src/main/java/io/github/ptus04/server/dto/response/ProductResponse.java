@@ -19,5 +19,6 @@ public record ProductResponse(UUID id,
                               Float discount,
                               Instant createdAt,
                               Instant updatedAt,
-                              List<ProductImageResponse> productImages) implements Serializable {
+                              List<ProductImageResponse> productImages,
+                              List<ProductSizeResponse> productSizes) implements Serializable {
 }
