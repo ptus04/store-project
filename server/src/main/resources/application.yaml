@@ -4,6 +4,15 @@ spring:
   threads:
     virtual:
       enabled: true
+server:
+  http2:
+    enabled: true
+management:
+  endpoint:
+    health:
+      roles: ADMIN
+      show-components: when_authorized
+      show-details: when_authorized
 custom:
   security:
     cors:

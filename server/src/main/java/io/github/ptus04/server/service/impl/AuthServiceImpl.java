@@ -26,14 +26,13 @@ public class AuthServiceImpl implements AuthService {
     private final SMSVerificationService smsVerificationService;
 
     @Override
-    public void register(HttpSession httpSession,
-                         RegistrationRequest registrationRequest) {
+    public void register(HttpSession httpSession, RegistrationRequest registrationRequest) {
         UserResponse user = userService.createUser(registrationRequest);
 
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(user.phone(), registrationRequest.password());
         Authentication auth = authenticationManager.authenticate(token);
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        SecurityContext context = SecurityContextHolder.getContext();
         context.setAuthentication(auth);
         httpSession.setAttribute(
                 HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
@@ -63,8 +62,7 @@ public class AuthServiceImpl implements AuthService {
             return false;
         }
 
-        userService.updatePhoneVerificationState(userId, true);
-
-        return true;
+        user = userService.updatePhoneVerificationState(userId, true);
+        return user.isPhoneVerified();
     }
 }

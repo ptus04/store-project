@@ -1,7 +1,4 @@
 spring:
-  docker:
-    compose:
-      enabled: false
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
@@ -10,8 +7,6 @@ spring:
   data:
     redis:
       url: ${REDIS_URL}
-      ssl:
-        enabled: true
   cloud:
     azure:
       storage:
