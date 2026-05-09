@@ -1,6 +1,7 @@
 package io.github.ptus04.server.service.impl;
 
 import io.github.ptus04.server.dto.request.RegistrationRequest;
+import io.github.ptus04.server.dto.request.UpdateProfileRequest;
 import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.enums.UserRoleEnum;
@@ -12,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -42,6 +44,25 @@ public class UserServiceImpl implements UserService {
     public UserResponse getUserById(UUID id) {
         User user = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
         return userMapper.toUserResponse(user);
+    }
+
+    @Override
+    public UserResponse updateProfile(UUID id, UpdateProfileRequest request) {
+        User user = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+
+        if (StringUtils.hasText(request.phone())) {
+            userRepository.findByPhone(request.phone())
+                    .filter(existed -> !existed.getId().equals(id))
+                    .ifPresent(existed -> {
+                        throw new ExistedPhoneNumberException("Số điện thoại đang được sử dụng");
+                    });
+            user.setPhone(request.phone());
+        }
+
+        user.setName(request.name());
+        user.setEmail(StringUtils.hasText(request.email()) ? request.email() : null);
+
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     @Override
