@@ -6,17 +6,20 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Configuration
+@EnableMethodSecurity
 @EnableWebSecurity
 @EnableConfigurationProperties(SecurityProperties.class)
 @RequiredArgsConstructor
+@Configuration
 public class SecurityConfig {
     private final CustomAuthFailureHandler customAuthFailureHandler;
 
@@ -27,6 +30,7 @@ public class SecurityConfig {
                 .securityMatcher("/api/**")
                 .csrf(CsrfConfigurer::spa)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET, "/api/carousel").permitAll()
                         .anyRequest().authenticated());
 
         return http.build();
@@ -42,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/dang-nhap/**", "/dang-ky/**").permitAll()
                         .requestMatchers("/about-us", "/privacy-policy", "/refund-policy").permitAll()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/dang-nhap")
