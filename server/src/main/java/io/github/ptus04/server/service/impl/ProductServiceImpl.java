@@ -9,9 +9,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +38,12 @@ public class ProductServiceImpl implements ProductService {
                 .stream()
                 .map(productMapper::toProductResponse)
                 .toList();
+    }
+
+    @Override
+    public ProductResponse getProductById(UUID id) {
+        Product product = productRepository.findById(id).orElse(null);
+        return productMapper.toProductResponse(product);
     }
 
     @Override
