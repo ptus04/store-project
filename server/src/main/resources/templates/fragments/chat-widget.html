@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<!-- 
+    Chat Widget Fragment 
+    Include this in your main layout just before </body>:
+    <div th:replace="~{fragments/chat-widget :: chatWidget}"></div>
+-->
+<div th:fragment="chatWidget" class="font-sans">
+
+    <!-- FAB Button -->
+    <button id="chat-fab"
+        class="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-900 text-white shadow-[0_8px_30px_rgb(0,0,0,0.2)] transition-all duration-300 hover:scale-110 hover:bg-black active:scale-95 group border border-neutral-700">
+        <i class="fa-solid fa-robot text-2xl group-hover:hidden transition-opacity"></i>
+        <i class="fa-solid fa-comment-dots text-2xl hidden group-hover:block transition-opacity"></i>
+
+        <!-- Unread Badge -->
+        <span id="chat-unread-badge"
+            class="absolute -top-1 -right-1 flex h-5 w-5 scale-0 items-center justify-center rounded-full border-2 border-neutral-900 bg-red-500 text-[10px] font-bold text-white shadow-sm transition-transform duration-300">
+            0
+        </span>
+
+        <!-- Pulse animation element -->
+        <div class="absolute inset-0 -z-10 animate-ping rounded-full bg-neutral-600 opacity-20"></div>
+    </button>
+
+    <!-- Chat Popup -->
+    <div id="chat-popup"
+        class="fixed bottom-0 right-4 z-50 flex h-[600px] max-h-[calc(100vh-8rem)] w-[380px] max-w-[calc(100vw-3rem)] origin-bottom-right scale-0 flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] opacity-0 transition-all duration-300">
+
+        <!-- Header -->
+        <div
+            class="relative flex items-center justify-between border-b border-neutral-200 bg-white p-4 text-neutral-800">
+            <div class="flex items-center gap-3">
+                <div id="header-avatar-bg"
+                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 shadow-inner">
+                    <i id="header-avatar-icon" class="fa-solid fa-robot text-lg"></i>
+                </div>
+                <div class="flex flex-col">
+                    <h3 class="font-semibold text-neutral-900 tracking-wide text-sm" id="chat-header-title">Trợ lý AI
+                        SLY</h3>
+                    <div class="flex items-center gap-1">
+                        <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                        <span id="chat-header-status" class="text-[11px] text-neutral-500">SLY AI sẵn sàng</span>
+                    </div>
+                </div>
+            </div>
+            <button id="chat-minimize"
+                class="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-neutral-500 transition-colors hover:bg-neutral-200 hover:text-neutral-800">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Messages Area -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto bg-[#f3f4f6] p-4 space-y-5 scroll-smooth">
+            <!-- Sample AI Welcome Message -->
+            <div class="flex flex-col gap-1 w-full animate-fade-in-up">
+                <div class="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500 mb-0.5 ml-1">
+                    <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> Trợ lý AI SLY
+                </div>
+                <div class="flex gap-2">
+                    <div class="flex flex-col gap-1 max-w-[85%]">
+                        <div
+                            class="rounded-2xl rounded-tl-sm bg-[#e5e7eb] px-4 py-3 text-[14px] text-neutral-800 leading-relaxed">
+                            Xin chào! Tôi là trợ lý AI của SLY — sẵn sàng gợi ý outfit, tư vấn size và tìm sản phẩm cho
+                            bạn. Bạn đang tìm gì hôm nay?
+                        </div>
+                        <span class="text-[10px] text-neutral-400 ml-1"
+                            th:text="${#dates.format(#dates.createNow(), 'HH:mm')}">20:45</span>
+                    </div>
+                </div>
+
+                <!-- Quick Replies (High Contrast) -->
+                <div class="grid grid-cols-2 gap-2 mt-3 w-full pr-4">
+                    <button
+                        class="quick-reply-btn rounded-xl border border-neutral-300 bg-white py-2 px-3 text-xs font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:border-neutral-400 active:scale-95 text-center">
+                        Xem áo mới nhất
+                    </button>
+                    <button
+                        class="quick-reply-btn rounded-xl border border-neutral-300 bg-white py-2 px-3 text-xs font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:border-neutral-400 active:scale-95 text-center">
+                        Hướng dẫn chọn size
+                    </button>
+                    <button
+                        class="quick-reply-btn rounded-xl border border-neutral-300 bg-white py-2 px-3 text-xs font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:border-neutral-400 active:scale-95 text-center">
+                        Chính sách đổi trả
+                    </button>
+                    <button
+                        class="quick-reply-btn rounded-xl border border-neutral-300 bg-white py-2 px-3 text-xs font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:border-neutral-400 active:scale-95 text-center">
+                        Ưu đãi hôm nay
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="bg-white p-3 pb-4 border-t border-neutral-200">
+            <form id="chat-form" class="relative flex items-center gap-2">
+                <!-- Dropdown Trigger -->
+                <div class="relative">
+                    <button type="button" id="chat-mode-switch"
+                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-800"
+                        title="Chọn chế độ">
+                        <i id="mode-switch-icon" class="fa-solid fa-robot text-lg"></i>
+                    </button>
+                    <!-- Dropdown Menu (Pops Up) -->
+                    <div id="chat-mode-dropdown"
+                        class="absolute bottom-12 left-0 z-50 hidden w-48 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                        <button type="button" id="select-ai-mode"
+                            class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100">
+                            <i class="fa-solid fa-robot text-neutral-500 w-5"></i> Chat với AI
+                        </button>
+                        <button type="button" id="select-staff-mode"
+                            class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100">
+                            <i class="fa-solid fa-user text-neutral-500 w-5"></i> Chat với Nhân viên
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative w-full">
+                    <input type="text" id="chat-input"
+                        class="w-full rounded-full border border-neutral-200 bg-neutral-50 py-2.5 pl-4 pr-12 text-sm text-neutral-800 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-400 transition-all"
+                        placeholder="Nhắn tin với SLY AI..." autocomplete="off">
+                    <button type="submit" id="chat-send-btn"
+                        class="absolute right-1 top-1 bottom-1 flex aspect-square items-center justify-center rounded-full bg-neutral-800 text-white shadow-sm transition-all hover:bg-neutral-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-paper-plane text-[11px] ml-0.5"></i>
+                    </button>
+                </div>
+            </form>
+            <div class="mt-3 text-center text-[10px] text-neutral-400">
+                Powered by <span class="font-semibold text-neutral-600">SLY AI</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- STOMP & SockJS for WebSocket (if needed later) -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <!-- Tailwind CDN to ensure newly added classes work immediately during dev -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Chat JS -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Configuration ---
+            const CONFIG = {
+                // Set this to true to use your Spring Boot Backend API (/api/chat & websockets)
+                // Set to false to directly call Gemini API from client-side for testing
+                useBackendApi: false,
+
+                // If useBackendApi is false, use this Gemini API Key
+                geminiApiKey: 'AIzaSyA0_850uzXrOW8iCDTSkPBWe-_BbGkQYrE', // CHANGE THIS TO YOUR ACTUAL KEY OR PASS FROM MODEL
+                model: 'gemini-3-flash-preview',
+
+                geminiApiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/', // Note: URL base
+            };
+
+            // --- DOM Elements ---
+            const fabBtn = document.getElementById('chat-fab');
+            const popup = document.getElementById('chat-popup');
+            const minimizeBtn = document.getElementById('chat-minimize');
+            const chatMessages = document.getElementById('chat-messages');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const unreadBadge = document.getElementById('chat-unread-badge');
+
+            const modeSwitchBtn = document.getElementById('chat-mode-switch');
+            const modeDropdown = document.getElementById('chat-mode-dropdown');
+            const selectAiMode = document.getElementById('select-ai-mode');
+            const selectStaffMode = document.getElementById('select-staff-mode');
+            const headerTitle = document.getElementById('chat-header-title');
+            const headerAvatarBg = document.getElementById('header-avatar-bg');
+            const headerAvatarIcon = document.getElementById('header-avatar-icon');
+
+            // --- State ---
+            let isPopupOpen = false;
+            let unreadCount = 0;
+            let currentMode = 'AI'; // 'AI' or 'STAFF'
+            let isWaitingForResponse = false;
+            let stompClient = null;
+            let sessionId = Math.random().toString(36).substring(7);
+
+            // --- UI Functions ---
+            function togglePopup() {
+                isPopupOpen = !isPopupOpen;
+                if (isPopupOpen) {
+                    popup.classList.remove('scale-0', 'opacity-0');
+                    popup.classList.add('scale-100', 'opacity-100');
+                    fabBtn.classList.add('scale-0', 'opacity-0');
+
+                    // Reset unread
+                    unreadCount = 0;
+                    updateBadge();
+
+                    // Focus input
+                    setTimeout(() => chatInput.focus(), 300);
+                    scrollToBottom();
+                } else {
+                    popup.classList.remove('scale-100', 'opacity-100');
+                    popup.classList.add('scale-0', 'opacity-0');
+                    fabBtn.classList.remove('scale-0', 'opacity-0');
+                }
+            }
+
+            function updateBadge() {
+                if (unreadCount > 0 && !isPopupOpen) {
+                    unreadBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                    unreadBadge.classList.remove('scale-0');
+                    unreadBadge.classList.add('scale-100');
+                } else {
+                    unreadBadge.classList.add('scale-0');
+                    unreadBadge.classList.remove('scale-100');
+                }
+            }
+
+            function scrollToBottom() {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function getTimestamp() {
+                const now = new Date();
+                return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            }
+
+            // --- Add Message to UI ---
+            function appendMessage(sender, text, isHtml = false) {
+                const time = getTimestamp();
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'flex flex-col gap-1 w-full animate-fade-in-up transition-all duration-300';
+
+                if (sender === 'USER') {
+                    msgDiv.innerHTML = `
+                        <div class="flex items-center justify-end gap-1.5 text-[11px] font-medium text-neutral-500 mb-0.5 mr-1">
+                            Bạn <i class="fa-solid fa-user text-[10px]"></i>
+                        </div>
+                        <div class="flex gap-2 justify-end">
+                            <div class="flex flex-col gap-1 max-w-[85%] items-end">
+                                <div class="rounded-2xl rounded-tr-sm bg-neutral-800 px-4 py-3 text-[14px] text-white shadow-sm break-words leading-relaxed">
+                                    ${escapeHtml(text)}
+                                </div>
+                                <span class="text-[10px] text-neutral-400 mr-1">${time}</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (sender === 'AI') {
+                    msgDiv.innerHTML = `
+                        <div class="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500 mb-0.5 ml-1">
+                            <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> Trợ lý AI SLY
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="flex flex-col gap-1 max-w-[85%]">
+                                <div class="rounded-2xl rounded-tl-sm bg-[#e5e7eb] px-4 py-3 text-[14px] text-neutral-800 shadow-sm leading-relaxed prose prose-sm prose-neutral">
+                                    ${isHtml ? text : escapeHtml(text).replace(/\n/g, '<br>')}
+                                </div>
+                                <span class="text-[10px] text-neutral-400 ml-1">${time}</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (sender === 'STAFF') {
+                    msgDiv.innerHTML = `
+                        <div class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 mb-0.5 ml-1">
+                            <i class="fa-solid fa-user-headset text-[10px]"></i> Nhân viên SLY
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="flex flex-col gap-1 max-w-[85%]">
+                                <div class="rounded-2xl rounded-tl-sm border border-emerald-200 bg-emerald-50 px-4 py-3 text-[14px] text-emerald-900 shadow-sm leading-relaxed">
+                                    ${escapeHtml(text).replace(/\n/g, '<br>')}
+                                </div>
+                                <span class="text-[10px] text-neutral-400 ml-1">${time}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                chatMessages.appendChild(msgDiv);
+                scrollToBottom();
+
+                if (!isPopupOpen && sender !== 'USER') {
+                    unreadCount++;
+                    updateBadge();
+
+                    // Trigger pulse animation on FAB
+                    fabBtn.classList.add('animate-bounce');
+                    setTimeout(() => fabBtn.classList.remove('animate-bounce'), 1000);
+                }
+            }
+
+            function showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.id = 'typing-indicator';
+                typingDiv.className = 'flex flex-col gap-1 w-full animate-fade-in-up';
+
+                const nameHeader = currentMode === 'AI'
+                    ? `<div class="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500 mb-0.5 ml-1"><i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> Trợ lý AI SLY đang gõ...</div>`
+                    : `<div class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 mb-0.5 ml-1"><i class="fa-solid fa-user-headset text-[10px]"></i> Nhân viên đang gõ...</div>`;
+
+                const dotColor = currentMode === 'AI' ? 'bg-neutral-500' : 'bg-emerald-500';
+
+                typingDiv.innerHTML = `
+                    ${nameHeader}
+                    <div class="flex gap-2">
+                        <div class="flex flex-col gap-1 max-w-[85%]">
+                            <div class="rounded-2xl rounded-tl-sm bg-[#e5e7eb] px-4 py-4 shadow-sm flex items-center gap-1.5 h-11">
+                                <div class="h-1.5 w-1.5 rounded-full ${dotColor} animate-bounce" style="animation-delay: 0ms;"></div>
+                                <div class="h-1.5 w-1.5 rounded-full ${dotColor} animate-bounce" style="animation-delay: 150ms;"></div>
+                                <div class="h-1.5 w-1.5 rounded-full ${dotColor} animate-bounce" style="animation-delay: 300ms;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(typingDiv);
+                scrollToBottom();
+            }
+
+            function hideTypingIndicator() {
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+
+            // --- API Calls ---
+            async function callGeminiApi(message) {
+                // If using client-side direct fetch to Gemini
+                const url = CONFIG.geminiApiUrl + CONFIG.model + ':generateContent?key=' + CONFIG.geminiApiKey;
+                const payload = {
+                    contents: [{
+                        parts: [{
+                            text: "Bạn là một trợ lý ảo hỗ trợ bán hàng của cửa hàng thời trang SLY (Sly clothing). Hãy trả lời lịch sự, thân thiện, ngắn gọn và hữu ích. Khách hàng hỏi: " + message
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.7,
+                    }
+                };
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error('API Error');
+
+                    const data = await response.json();
+                    if (data.candidates && data.candidates[0].content.parts[0].text) {
+                        return data.candidates[0].content.parts[0].text;
+                    }
+                    return "Xin lỗi, tôi không thể xử lý yêu cầu lúc này.";
+                } catch (error) {
+                    console.error("Gemini API Error:", error);
+                    return "Đã có lỗi xảy ra khi kết nối tới AI. Vui lòng thử lại sau.";
+                }
+            }
+
+            async function callBackendApi(message) {
+                try {
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // Add CSRF token if enabled in Spring Security
+                            // 'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                        },
+                        body: JSON.stringify({
+                            sessionId: sessionId,
+                            message: message,
+                            mode: currentMode
+                        })
+                    });
+
+                    if (!response.ok) throw new Error('Backend Error');
+                    const data = await response.json();
+                    return data.reply;
+                } catch (error) {
+                    console.error("Backend API Error:", error);
+                    return "Không thể kết nối đến máy chủ SLY. Vui lòng thử lại.";
+                }
+            }
+
+            // --- WebSocket / STOMP ---
+            function connectWebSocket() {
+                if (!CONFIG.useBackendApi) return; // Skip if purely client side
+
+                const socket = new SockJS('/ws');
+                stompClient = Stomp.over(socket);
+                stompClient.debug = null; // disable debug logs
+
+                stompClient.connect({}, function (frame) {
+                    stompClient.subscribe('/topic/chat/' + sessionId, function (messageOutput) {
+                        const message = JSON.parse(messageOutput.body);
+                        if (message.sender === 'STAFF') {
+                            hideTypingIndicator();
+                            appendMessage('STAFF', message.content);
+                        }
+                    });
+                });
+            }
+
+            // --- Mode Switch ---
+            modeSwitchBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                modeDropdown.classList.toggle('hidden');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!modeSwitchBtn.contains(e.target) && !modeDropdown.contains(e.target)) {
+                    modeDropdown.classList.add('hidden');
+                }
+            });
+
+            function setMode(mode) {
+                const modeIcon = document.getElementById('mode-switch-icon');
+                modeDropdown.classList.add('hidden');
+
+                if (mode === 'STAFF') {
+                    currentMode = 'STAFF';
+                    headerTitle.textContent = 'Nhân viên hỗ trợ';
+                    headerAvatarBg.className = 'flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-inner';
+                    headerAvatarIcon.className = 'fa-solid fa-user-headset text-lg';
+                    if (modeIcon) modeIcon.className = 'fa-solid fa-user-headset text-lg';
+                    document.getElementById('chat-header-status').textContent = 'Nhân viên sẵn sàng';
+
+                    const statusDot = document.querySelector('#chat-header-status').previousElementSibling;
+                    if (statusDot) statusDot.className = 'h-1.5 w-1.5 rounded-full bg-emerald-500';
+
+                    appendMessage('STAFF', 'Xin chào! Bạn đang trò chuyện với nhân viên tư vấn. Vui lòng đợi trong giây lát...');
+
+                    if (CONFIG.useBackendApi) {
+                        fetch('/api/support/request', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ sessionId: sessionId })
+                        });
+                    }
+                } else {
+                    currentMode = 'AI';
+                    headerTitle.textContent = 'Trợ lý AI SLY';
+                    headerAvatarBg.className = 'flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 shadow-inner';
+                    headerAvatarIcon.className = 'fa-solid fa-robot text-lg';
+                    if (modeIcon) modeIcon.className = 'fa-solid fa-robot text-lg';
+                    document.getElementById('chat-header-status').textContent = 'SLY AI sẵn sàng';
+
+                    const statusDot = document.querySelector('#chat-header-status').previousElementSibling;
+                    if (statusDot) statusDot.className = 'h-1.5 w-1.5 rounded-full bg-green-500';
+
+                    appendMessage('AI', 'Đã chuyển về chế độ AI trợ lý. Tôi có thể giúp gì tiếp cho bạn?');
+                }
+            }
+
+            selectAiMode.addEventListener('click', () => setMode('AI'));
+            selectStaffMode.addEventListener('click', () => setMode('STAFF'));
+
+            // --- Form Submit ---
+            chatForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const text = chatInput.value.trim();
+                if (!text || isWaitingForResponse) return;
+
+                appendMessage('USER', text);
+                chatInput.value = '';
+
+                if (currentMode === 'STAFF' && CONFIG.useBackendApi && stompClient) {
+                    stompClient.send("/app/chat.send", {}, JSON.stringify({
+                        sender: 'USER',
+                        content: text,
+                        sessionId: sessionId
+                    }));
+                    return;
+                }
+
+                // AI Processing
+                if (currentMode === 'AI') {
+                    isWaitingForResponse = true;
+                    showTypingIndicator();
+                    chatInput.disabled = true;
+
+                    let responseText = "";
+                    if (CONFIG.useBackendApi) {
+                        responseText = await callBackendApi(text);
+                    } else {
+                        // Mock slightly if no API key provided to avoid ugly error
+                        if (CONFIG.geminiApiKey === 'YOUR_GEMINI_API_KEY') {
+                            await new Promise(r => setTimeout(r, 1500));
+                            responseText = "Đây là bản demo giao diện (API Key chưa được cấu hình). Tin nhắn của bạn: '" + text + "'. Model: " + CONFIG.model;
+                        } else {
+                            responseText = await callGeminiApi(text);
+                        }
+                    }
+
+                    hideTypingIndicator();
+                    // Format markdown-like bold text **text** to HTML
+                    const formattedHtml = escapeHtml(responseText)
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\n/g, '<br>');
+
+                    appendMessage('AI', formattedHtml, true);
+
+                    chatInput.disabled = false;
+                    chatInput.focus();
+                    isWaitingForResponse = false;
+                }
+            });
+
+            // Utilities
+            function escapeHtml(unsafe) {
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            // Add custom CSS for animations that aren't native to Tailwind v4 out-of-the-box
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fade-in-up {
+                    0% { opacity: 0; transform: translateY(10px); }
+                    100% { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fade-in-up {
+                    animation: fade-in-up 0.3s ease-out forwards;
+                }
+            `;
+            document.head.appendChild(style);
+
+            // --- Event Listeners ---
+            fabBtn.addEventListener('click', togglePopup);
+            document.getElementById('chat-minimize').addEventListener('click', togglePopup);
+
+            // Quick reply buttons listener
+            document.querySelectorAll('.quick-reply-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    chatInput.value = this.textContent.trim();
+                    chatForm.dispatchEvent(new Event('submit'));
+                    // Hide quick replies after clicking one
+                    this.parentElement.style.display = 'none';
+                });
+            });
+
+            // Connect socket if using backend
+            if (CONFIG.useBackendApi) {
+                connectWebSocket();
+            }
+        });
+    </script>
+</div>
+
+</html>
