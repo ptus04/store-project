@@ -9,7 +9,7 @@
 <body>
 <main class="flex flex-col items-center justify-center">
     <form class="mt-4 flex w-10/12 flex-col gap-4 rounded-md border border-gray-300 p-4 md:w-5/12 lg:w-3/12"
-          method="post"
+          action="/auth/register" method="post"
           th:object="${request}">
         <h2 class="text-center text-2xl font-semibold">ĐĂNG KÝ TÀI KHOẢN</h2>
 
@@ -50,7 +50,9 @@
                    pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&_]).{8,}$"
                    required
                    th:field="*{password}"/>
-            <span class="hidden text-red-500 peer-invalid:block">Mật khẩu phải có ít nhất 8 ký tự và chứa ít nhất một chữ cái, một số và một ký tự đặc biệt.</span>
+            <span class="hidden text-red-500 peer-invalid:block">
+                Mật khẩu phải có ít nhất 8 ký tự và chứa ít nhất một chữ cái, một số và một ký tự đặc biệt.
+            </span>
             <span th:errorclass="text-red-500" th:errors="*{password}"></span>
         </div>
 
@@ -65,15 +67,16 @@
 
         <button class="my-btn-primary">ĐĂNG KÝ</button>
 
-        <p>Đã có tài khoản? <a class="hover:text-red-500" href="/dang-nhap">Đăng nhập</a></p>
+        <p>Đã có tài khoản? <a class="hover:text-red-500" href="/auth/login">Đăng nhập</a></p>
     </form>
 
     <script>
         const password = document.getElementById('password');
         const passwordReType = document.getElementById('password-retype');
 
-        if (password instanceof HTMLInputElement)
+        if (password instanceof HTMLInputElement) {
             password.addEventListener('input', () => (passwordReType.pattern = password.value));
+        }
     </script>
 </main>
 </body>
