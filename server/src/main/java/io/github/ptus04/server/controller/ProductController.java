@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -16,13 +15,12 @@ import java.util.UUID;
 
 
 @Controller
-@RequestMapping("/danh-sach-san-pham")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
     private final CategoryService categoryService;
 
-    @GetMapping
+    @GetMapping({"/products"})
     public String getListProductPage(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "newest") String sortBy,
@@ -47,7 +45,7 @@ public class ProductController {
         return "product/index";
     }
 
-    @GetMapping("/{id}")
+    @GetMapping({"/products/{id}"})
     public String getProductDetailPage(@PathVariable UUID id, Model model) {
         ProductResponse product = productService.getProductById(id);
         model.addAttribute("product", product);

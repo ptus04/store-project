@@ -14,11 +14,11 @@
                 <h3 class="font-bold mb-2">Danh mục</h3>
                 <ul class="flex flex-col gap-1">
                     <li>
-                        <a th:href="@{/danh-sach-san-pham}"
+                        <a th:href="@{/products}"
                            th:classappend="${activeCategory == null or activeCategory == ''} ? ' font-bold text-red-500' : ''">Tất cả</a>
                     </li>
                     <li th:each="category : ${categories}">
-                        <a th:href="@{/danh-sach-san-pham(category=${category.name.toLowerCase()})}"
+                        <a th:href="@{/products(category=${category.name.toLowerCase()})}"
                            th:classappend="${activeCategory != null and activeCategory.equals(category.name.toLowerCase())} ? ' font-bold text-red-500' : ''"
                            th:text="${category.name}">
                         </a>
@@ -48,7 +48,7 @@
 
             <div class="flex flex-wrap">
                 <div class="w-full p-2 text-center md:w-1/4 lg:w-1/5" th:each="product:${products}">
-            <a class="relative" th:href="@{/danh-sach-san-pham/{id}(id=${product.id()})}">
+            <a class="relative" th:href="@{/products/{id}(id=${product.id()})}">
                 <div class="relative">
                     <p class="absolute top-1/10 left-1/10 rounded-full bg-red-500 px-3 py-1 text-white"
                        th:if="${product.discount() != 0}"
@@ -90,14 +90,14 @@
     <div class="mt-6 font-bold flex items-center justify-center gap-2" th:if="${totalPages > 1}">
 
         <a class="px-3 py-2 text-xl hover:bg-gray-300 rounded"
-           th:href="@{/danh-sach-san-pham(page=0, sortBy=${sortBy}, category=${activeCategory})}"
+           th:href="@{/products(page=0, sortBy=${sortBy}, category=${activeCategory})}"
            th:if="${currentPage > 0}"
            title="Về đầu">
             &laquo;
         </a>
 
         <a class="px-3 py-2 text-xl hover:bg-gray-300 rounded"
-           th:href="@{/danh-sach-san-pham(page=${currentPage - 1}, sortBy=${sortBy}, category=${activeCategory})}"
+           th:href="@{/products(page=${currentPage - 1}, sortBy=${sortBy}, category=${activeCategory})}"
            th:if="${currentPage > 0}"
            title="Trang trước">
             &lsaquo;
@@ -106,19 +106,19 @@
         <a class="px-3 py-2 rounded hover:bg-gray-300 transition"
            th:classappend="${i == currentPage} ? ' bg-black text-white' : ''"
            th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-           th:href="@{/danh-sach-san-pham(page=${i}, sortBy=${sortBy}, category=${activeCategory})}"
+           th:href="@{/products(page=${i}, sortBy=${sortBy}, category=${activeCategory})}"
            th:text="${i + 1}">
         </a>
 
         <a class="px-3 py-2 text-xl hover:bg-gray-300 rounded"
-           th:href="@{/danh-sach-san-pham(page=${currentPage + 1}, sortBy=${sortBy}, category=${activeCategory})}"
+           th:href="@{/products(page=${currentPage + 1}, sortBy=${sortBy}, category=${activeCategory})}"
            th:if="${currentPage < totalPages - 1}"
            title="Trang sau">
             &rsaquo;
         </a>
 
         <a class="px-3 py-2 text-xl hover:bg-gray-300 rounded"
-           th:href="@{/danh-sach-san-pham(page=${totalPages - 1}, sortBy=${sortBy}, category=${activeCategory})}"
+           th:href="@{/products(page=${totalPages - 1}, sortBy=${sortBy}, category=${activeCategory})}"
            th:if="${currentPage < totalPages - 1}"
            title="Đến cuối">
             &raquo;

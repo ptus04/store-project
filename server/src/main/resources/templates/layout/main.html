@@ -29,7 +29,7 @@
                 title="Mở menu">
             <i class="fa fa-bars"></i>
         </button>
-        <form action="/danh-sach-san-pham" class="hidden md:flex">
+        <form action="/products" class="hidden md:flex">
             <label>
                 <span class="hidden">Từ khóa</span>
                 <input class="border-b px-3 py-1"
@@ -75,12 +75,12 @@
                     <div class="flex items-center p-1"
 
                          th:each="i : ${session.cart.items}">
-                        <a th:href="@{/danh-sach-san-pham/{id}(id=${product.productId})}">
+                        <a th:href="@{/products/{id}(id=${product.productId})}">
                             <img class="h-14" th:src="@{/images/image(image=${product.image})}" loading="lazy"
                                  th:alt="${product.name}"/>
                         </a>
                         <div class="ms-2 overflow-hidden">
-                            <a th:href="@{/danh-sach-san-pham/{id}(id=${product.productId})}"
+                            <a th:href="@{/products/{id}(id=${product.productId})}"
                                th:text="${product.name + ' ' + product.size ? product.size : ''}">
                             </a>
                             <p>
@@ -129,7 +129,7 @@
     <div class="flex h-full w-full flex-col gap-4 overflow-auto bg-white/75 px-4 py-2 shadow-md backdrop-blur-md duration-200 md:w-2/5 lg:w-1/4 -translate-x-full group-data-open:translate-x-0">
         <!--Nav header-->
         <div class="flex items-center justify-between">
-            <form action="/danh-sach-san-pham" class="flex gap-2">
+            <form action="/products" class="flex gap-2">
                 <button class="cursor-pointer duration-200 hover:text-red-500" title="Tìm kiếm">
                     <i class="fa fa-search"></i>
                 </button>
@@ -151,7 +151,7 @@
         </div>
 
         <!--Categories-->
-        <a class="duration-200 hover:text-red-500" href="/danh-sach-san-pham">
+        <a class="duration-200 hover:text-red-500" href="/products">
             <i class="fa fa-caret-right"></i>
             <span>Xem Danh sách sản phẩm</span>
         </a>
@@ -162,7 +162,7 @@
                 <li th:each="category : ${categories}">
                     <i class="fa fa-caret-right"></i>
                     <a class="duration-200 hover:text-red-500"
-                       th:href="@{/danh-sach-san-pham(category=${#strings.toLowerCase(category.name)})}"
+                       th:href="@{/products(category=${#strings.toLowerCase(category.name)})}"
                        th:text="${category.name}">
                     </a>
                 </li>
