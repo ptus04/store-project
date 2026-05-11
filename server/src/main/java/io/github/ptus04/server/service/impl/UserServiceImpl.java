@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse updatePhoneVerificationState(UUID id, boolean isVerified) {
         User user = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        user.setVerifiedAt(isVerified ? Instant.now() : null);
+        user.setPhoneVerifiedAt(isVerified ? Instant.now() : null);
         return userMapper.toUserResponse(userRepository.save(user));
     }
 

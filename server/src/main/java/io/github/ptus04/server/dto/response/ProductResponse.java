@@ -14,11 +14,13 @@ public record ProductResponse(UUID id,
                               String description,
                               String careInstructions,
                               BigDecimal price,
-                              Integer inStock,
                               Boolean isNew,
                               Float discount,
                               Instant createdAt,
                               Instant updatedAt,
                               List<ProductImageResponse> productImages,
                               List<ProductSizeResponse> productSizes) implements Serializable {
+    public boolean isOutOfStock() {
+        return productImages.isEmpty() || productSizes.stream().allMatch(ProductSizeResponse::isOutOfStock);
+    }
 }

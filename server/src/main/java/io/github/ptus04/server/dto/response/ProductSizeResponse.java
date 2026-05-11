@@ -9,6 +9,10 @@ import java.util.UUID;
  */
 public record ProductSizeResponse(UUID id,
                                   String name,
+                                  Integer inStock,
                                   Instant createdAt,
                                   Instant updatedAt) implements Serializable {
+    public boolean isOutOfStock() {
+        return inStock == 0;
+    }
 }

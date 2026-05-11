@@ -47,11 +47,6 @@ public class Product {
 
     @NotNull
     @ColumnDefault("0")
-    @Column(name = "in_stock", nullable = false)
-    private Integer inStock;
-
-    @NotNull
-    @ColumnDefault("0")
     @Column(name = "is_new", nullable = false)
     private Boolean isNew;
 
@@ -69,6 +64,9 @@ public class Product {
     @ColumnDefault("(now())")
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 
     @NonNull
     @BatchSize(size = 10)

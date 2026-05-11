@@ -77,7 +77,7 @@
                              th:alt="${product.name()}"
                              th:src="@{${imageContainerUrl} + ${product.productImages().get(0).file()}}"/>
                         <p class="absolute top-1/2 w-full bg-white/75 px-6 py-2 text-2xl font-bold text-red-600"
-                           th:if="${product.inStock() == 0}">
+                           th:if="${product.isOutOfStock()}">
                             HẾT HÀNG
                         </p>
                     </div>
@@ -111,11 +111,15 @@
 
         function updateCarousel() {
             items.forEach((item, index) => {
-                item.dataset.active = index === current;
+                if (item instanceof HTMLElement) {
+                    item.dataset.active = (index === current).toString();
+                }
             });
 
             indicators.forEach((indicator, index) => {
-                indicator.dataset.active = index === current;
+                if (indicator instanceof HTMLElement) {
+                    indicator.dataset.active = (index === current).toString();
+                }
             });
         }
 
