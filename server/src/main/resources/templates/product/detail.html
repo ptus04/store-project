@@ -25,24 +25,24 @@
                 </div>
 
                 <div class="relative"
+                     data-gallery
                      th:attr="data-image-base-url=${imageContainerUrl}"
-                     th:unless="${#lists.isEmpty(product.productImages())}"
-                     data-gallery>
+                     th:unless="${#lists.isEmpty(product.productImages())}">
                     <img class="mx-auto h-128 w-full object-contain"
+                         data-gallery-main
                          th:alt="${product.name()}"
-                         th:src="@{${imageContainerUrl} + ${product.productImages().get(0).file()}}"
-                         data-gallery-main/>
+                         th:src="@{${imageContainerUrl} + ${product.productImages().get(0).file()}}"/>
 
                     <button class="absolute top-1/2 left-2 -translate-y-1/2 rounded-full bg-black/50 px-3 py-2 text-white hover:bg-black/70"
-                            type="button"
+                            data-gallery-prev
                             title="Ảnh trước"
-                            data-gallery-prev>
+                            type="button">
                         <i class="fa fa-chevron-left"></i>
                     </button>
                     <button class="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-black/50 px-3 py-2 text-white hover:bg-black/70"
-                            type="button"
+                            data-gallery-next
                             title="Ảnh tiếp"
-                            data-gallery-next>
+                            type="button">
                         <i class="fa fa-chevron-right"></i>
                     </button>
 
@@ -105,15 +105,15 @@
 
             <div class="mt-4 flex gap-3 overflow-x-auto pb-2" th:if="${#lists.size(product.productImages()) > 1}">
                 <button class="flex-none overflow-hidden rounded border border-gray-200 bg-white p-1 transition data-[active=true]:border-red-500 data-[active=true]:ring-2 data-[active=true]:ring-red-200"
-                        type="button"
-                        th:each="image, imageStat : ${product.productImages()}"
-                        th:data-active="${imageStat.index == 0}"
-                        th:attr="data-gallery-thumb=${imageStat.index}"
                         style="width: 6rem;"
-                        th:title="${product.name()} + ' - ảnh ' + (${imageStat.index} + 1)">
+                        th:attr="data-gallery-thumb=${imageStat.index}"
+                        th:data-active="${imageStat.index == 0}"
+                        th:each="image, imageStat : ${product.productImages()}"
+                        th:title="${product.name()} + ' - ảnh ' + (${imageStat.index} + 1)"
+                        type="button">
                     <img class="h-24 w-full object-contain"
-                         th:src="@{${imageContainerUrl} + ${image.file()}}"
-                         th:alt="${product.name()}"/>
+                         th:alt="${product.name()}"
+                         th:src="@{${imageContainerUrl} + ${image.file()}}"/>
                 </button>
             </div>
         </div>
@@ -125,7 +125,8 @@
             </p>
             <p class="mb-2 inline-flex rounded-full bg-red-500 px-3 py-1 text-sm font-semibold text-white"
                th:if="${product.discount() != 0}">
-                Giảm giá <span class="ml-1" th:text="${#numbers.formatDecimal(product.discount() * 100, 0, 0)} + '%'">0%</span>
+                Giảm giá <span class="ml-1"
+                               th:text="${#numbers.formatDecimal(product.discount() * 100, 0, 0)} + '%'">0%</span>
             </p>
 
             <h1 class="mb-3 text-3xl font-bold" th:text="${product.name()}">Tên sản phẩm</h1>
@@ -149,7 +150,7 @@
                    th:text="${'Còn ' + product.inStock() + ' sản phẩm'}">
                     Còn hàng
                 </p>
-                <p class="font-semibold text-red-600" th:if="${product.isOutOfStock()}" data-product-stock-status>
+                <p class="font-semibold text-red-600" data-product-stock-status th:if="${product.isOutOfStock()}">
                     Hết hàng
                 </p>
             </div>
@@ -162,11 +163,11 @@
                            th:each="size, sizeStat : ${product.productSizes()}">
                         <input class="peer sr-only"
                                name="size"
-                               type="radio"
-                               th:value="${size.name()}"
+                               required
                                th:attr="data-size-stock=${size.inStock()}"
                                th:disabled="${size.isOutOfStock()}"
-                               required>
+                               th:value="${size.name()}"
+                               type="radio">
                         <span class="block rounded border border-gray-300 px-4 py-2 font-semibold transition peer-checked:border-red-500 peer-checked:bg-red-500 peer-checked:text-white"
                               th:classappend="${size.isOutOfStock()} ? ' bg-gray-100 text-gray-400' : ''"
                               th:text="${size.name()}">
@@ -184,23 +185,23 @@
                 <label class="hidden" for="product-quantity">Số lượng sản phẩm</label>
                 <div class="flex items-center gap-2">
                     <button class="h-10 w-10 rounded border border-gray-300 text-xl font-bold hover:border-red-500 hover:text-red-500"
-                            type="button"
-                            data-quantity-minus>
+                            data-quantity-minus
+                            type="button">
                         −
                     </button>
                     <input class="h-10 w-20 rounded border border-gray-300 text-center focus:outline-red-500"
+                           data-quantity-input
                            id="product-quantity"
+                           max="1"
                            min="1"
                            name="quantity"
-                           max="1"
-                           th:value="${1}"
-                           type="number"
-                           data-quantity-input
+                           required
                            th:disabled="${product.isOutOfStock()}"
-                           required>
+                           th:value="${1}"
+                           type="number">
                     <button class="h-10 w-10 rounded border border-gray-300 text-xl font-bold hover:border-red-500 hover:text-red-500"
-                            type="button"
-                            data-quantity-plus>
+                            data-quantity-plus
+                            type="button">
                         +
                     </button>
                 </div>
@@ -227,10 +228,10 @@
 
             <div class="mt-6 flex flex-wrap gap-3">
                 <button class="rounded bg-red-500 px-5 py-3 font-semibold text-white hover:bg-red-400 disabled:cursor-not-allowed disabled:bg-gray-300"
-                        type="button"
-                        title="Chức năng thêm giỏ hàng sẽ được bổ sung sau"
                         data-add-to-cart-button
-                        th:disabled="${product.isOutOfStock()}">
+                        th:disabled="${product.isOutOfStock()}"
+                        title="Chức năng thêm giỏ hàng sẽ được bổ sung sau"
+                        type="button">
                     Thêm giỏ hàng
                 </button>
                 <a class="rounded border border-gray-300 px-5 py-3 font-semibold hover:border-red-500 hover:text-red-500"
@@ -264,7 +265,7 @@
                         const selected = getSelectedSize();
                         if (!selected) return 0;
 
-                        const stock = Number.parseInt(selected.getAttribute("data-size-stock") || "0", 10);
+                        const stock = Number.parseInt(selected.dataset.sizeStock || "0", 10);
                         return Number.isFinite(stock) && stock > 0 ? stock : 0;
                     };
 
@@ -274,7 +275,7 @@
                     });
 
                     const clamp = (value) => {
-                        const { min, max } = getBounds();
+                        const {min, max} = getBounds();
                         return Math.min(max, Math.max(min, value));
                     };
 
@@ -328,10 +329,10 @@
                             stockStatus.textContent = isOutOfStock ? "Hết hàng" : "Còn hàng";
                         }
 
-                        if (!isOutOfStock) {
-                            restoreQuantityForSize(currentSizeName, selectedStock);
-                        } else {
+                        if (isOutOfStock) {
                             input.value = "1";
+                        } else {
+                            restoreQuantityForSize(currentSizeName, selectedStock);
                         }
                     };
 
