@@ -22,7 +22,7 @@ public class AuthenticatedRedirectFilter extends OncePerRequestFilter {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
             String path = request.getRequestURI();
-            if (path.equals("/dang-nhap") || path.equals("/dang-ky")) {
+            if (path.equals("/auth/login") || path.equals("/auth/register")) {
                 response.sendRedirect("/");
                 return;
             }
