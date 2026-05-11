@@ -40,7 +40,7 @@ public class NotVerifiedRedirectFilter extends OncePerRequestFilter {
             if (customUserDetails != null) {
                 UserResponse user = userService.getUserById(customUserDetails.getId());
                 if (!user.isPhoneVerified()) {
-                    response.sendRedirect("/xac-minh");
+                    response.sendRedirect("/auth/verify-phone");
                     return;
                 }
             }
