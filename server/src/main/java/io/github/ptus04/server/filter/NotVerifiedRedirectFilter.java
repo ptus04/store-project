@@ -22,7 +22,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class NotVerifiedRedirectFilter extends OncePerRequestFilter {
     private final UserService userService;
-    private final String[] excludePatterns = {"/xac-minh", "/css", "/img", "/favicon.png"};
+    private final String[] excludePatterns = {"/auth/verify-phone", "/css", "/img", "/favicon.png"};
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
