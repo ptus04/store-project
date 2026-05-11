@@ -7,13 +7,10 @@
 </head>
 <body>
 <main class="flex flex-col items-center justify-center">
-    <form action="/dang-nhap" method="post"
-          class="mt-4 flex w-10/12 flex-col gap-4 rounded-md border border-gray-300 p-4 md:w-5/12 lg:w-3/12">
+    <form class="mt-4 flex w-10/12 flex-col gap-4 rounded-md border border-gray-300 p-4 md:w-5/12 lg:w-3/12"
+          action="/auth/login" method="post">
         <h1 class="text-center text-2xl font-semibold">ĐĂNG NHẬP</h1>
-
-        <div th:if="${param.error}">
-            <span class="text-red-500" th:text="${param.message} ?: 'Đăng nhập thất bại'"></span>
-        </div>
+        <span class="text-red-500" th:if="${param.error}" th:text="${param.message} ?: 'Đăng nhập thất bại'"></span>
 
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
@@ -45,8 +42,8 @@
         <button class="my-btn-primary">ĐĂNG NHẬP</button>
 
         <div class="flex flex-wrap justify-between">
-            <a class="hover:text-red-500" href="/dang-ky">Đăng ký tài khoản</a>
-            <a class="hover:text-red-500" href="/khoi-phuc-mat-khau">Quên mật khẩu?</a>
+            <a class="hover:text-red-500" href="/auth/register">Đăng ký tài khoản</a>
+            <a class="hover:text-red-500" href="/auth/change-password">Quên mật khẩu?</a>
         </div>
     </form>
 </main>
