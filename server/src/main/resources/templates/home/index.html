@@ -65,7 +65,7 @@
     <section class="container mx-auto px-3 pt-5">
         <h1 class="text-2xl">Sản phẩm mới</h1>
         <div class="flex flex-wrap">
-            <div class="w-full p-2 text-center md:w-1/4 lg:w-1/5" th:each="product : ${newProducts}">
+            <div class="w-full p-2 text-center md:w-1/4 lg:w-1/5" th:each="product:${newProducts}">
                 <a class="relative" th:href="@{/products/{id}(id=${product.id()})}">
                     <div class="relative">
                         <p class="absolute top-1/10 left-1/10 rounded-full bg-red-500 px-3 py-1 text-white"
@@ -77,7 +77,7 @@
                              th:alt="${product.name()}"
                              th:src="@{${imageContainerUrl} + ${product.productImages().get(0).file()}}"/>
                         <p class="absolute top-1/2 w-full bg-white/75 px-6 py-2 text-2xl font-bold text-red-600"
-                           th:if="${product.isOutOfStock()}">
+                           th:if="${product.inStock() == 0}">
                             HẾT HÀNG
                         </p>
                     </div>
@@ -111,15 +111,11 @@
 
         function updateCarousel() {
             items.forEach((item, index) => {
-                if (item instanceof HTMLElement) {
-                    item.dataset.active = (index === current).toString();
-                }
+                item.dataset.active = index === current;
             });
 
             indicators.forEach((indicator, index) => {
-                if (indicator instanceof HTMLElement) {
-                    indicator.dataset.active = (index === current).toString();
-                }
+                indicator.dataset.active = index === current;
             });
         }
 

@@ -11,7 +11,7 @@
     <nav class="mb-4 text-sm text-gray-500">
         <a class="hover:text-red-500" href="/">Trang chủ</a>
         <span class="mx-1">/</span>
-        <a class="hover:text-red-500" href="/danh-sach-san-pham">Danh sách sản phẩm</a>
+        <a class="hover:text-red-500" href="/products">Danh sách sản phẩm</a>
         <span class="mx-1">/</span>
         <span th:text="${product.name()}">Tên sản phẩm</span>
     </nav>
@@ -25,24 +25,24 @@
                 </div>
 
                 <div class="relative"
+                     data-gallery
                      th:attr="data-image-base-url=${imageContainerUrl}"
-                     th:unless="${#lists.isEmpty(product.productImages())}"
-                     data-gallery>
+                     th:unless="${#lists.isEmpty(product.productImages())}">
                     <img class="mx-auto h-128 w-full object-contain"
+                         data-gallery-main
                          th:alt="${product.name()}"
-                         th:src="@{${imageContainerUrl} + ${product.productImages().get(0).file()}}"
-                         data-gallery-main/>
+                         th:src="@{${imageContainerUrl} + ${product.productImages().get(0).file()}}"/>
 
                     <button class="absolute top-1/2 left-2 -translate-y-1/2 rounded-full bg-black/50 px-3 py-2 text-white hover:bg-black/70"
-                            type="button"
+                            data-gallery-prev
                             title="Ảnh trước"
-                            data-gallery-prev>
+                            type="button">
                         <i class="fa fa-chevron-left"></i>
                     </button>
                     <button class="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-black/50 px-3 py-2 text-white hover:bg-black/70"
-                            type="button"
+                            data-gallery-next
                             title="Ảnh tiếp"
-                            data-gallery-next>
+                            type="button">
                         <i class="fa fa-chevron-right"></i>
                     </button>
 
@@ -105,15 +105,15 @@
 
             <div class="mt-4 flex gap-3 overflow-x-auto pb-2" th:if="${#lists.size(product.productImages()) > 1}">
                 <button class="flex-none overflow-hidden rounded border border-gray-200 bg-white p-1 transition data-[active=true]:border-red-500 data-[active=true]:ring-2 data-[active=true]:ring-red-200"
-                        type="button"
-                        th:each="image, imageStat : ${product.productImages()}"
-                        th:data-active="${imageStat.index == 0}"
-                        th:attr="data-gallery-thumb=${imageStat.index}"
                         style="width: 6rem;"
-                        th:title="${product.name()} + ' - ảnh ' + (${imageStat.index} + 1)">
+                        th:attr="data-gallery-thumb=${imageStat.index}"
+                        th:data-active="${imageStat.index == 0}"
+                        th:each="image, imageStat : ${product.productImages()}"
+                        th:title="${product.name()} + ' - ảnh ' + (${imageStat.index} + 1)"
+                        type="button">
                     <img class="h-24 w-full object-contain"
-                         th:src="@{${imageContainerUrl} + ${image.file()}}"
-                         th:alt="${product.name()}"/>
+                         th:alt="${product.name()}"
+                         th:src="@{${imageContainerUrl} + ${image.file()}}"/>
                 </button>
             </div>
         </div>
@@ -125,7 +125,8 @@
             </p>
             <p class="mb-2 inline-flex rounded-full bg-red-500 px-3 py-1 text-sm font-semibold text-white"
                th:if="${product.discount() != 0}">
-                Giảm giá <span class="ml-1" th:text="${#numbers.formatDecimal(product.discount() * 100, 0, 0)} + '%'">0%</span>
+                Giảm giá <span class="ml-1"
+                               th:text="${#numbers.formatDecimal(product.discount() * 100, 0, 0)} + '%'">0%</span>
             </p>
 
             <h1 class="mb-3 text-3xl font-bold" th:text="${product.name()}">Tên sản phẩm</h1>
@@ -145,11 +146,11 @@
 
             <div class="mb-6 rounded border border-gray-200 bg-white p-4">
                 <p class="mb-1 font-semibold">Tình trạng</p>
-                <p class="text-gray-700" th:if="${product.inStock() > 0}"
+                <p class="text-gray-700" th:if="${!product.isOutOfStock()}"
                    th:text="${'Còn ' + product.inStock() + ' sản phẩm'}">
                     Còn hàng
                 </p>
-                <p class="font-semibold text-red-600" th:if="${product.inStock() == 0}">
+                <p class="font-semibold text-red-600" data-product-stock-status th:if="${product.isOutOfStock()}">
                     Hết hàng
                 </p>
             </div>
@@ -158,14 +159,17 @@
                 <p class="mb-2 font-semibold">Chọn kích cỡ</p>
                 <div class="flex flex-wrap gap-2" th:if="${!#lists.isEmpty(product.productSizes())}">
                     <label class="cursor-pointer"
+                           th:classappend="${size.isOutOfStock()} ? ' opacity-50 cursor-not-allowed' : ''"
                            th:each="size, sizeStat : ${product.productSizes()}">
                         <input class="peer sr-only"
                                name="size"
-                               type="radio"
+                               required
+                               th:attr="data-size-stock=${size.inStock()}"
+                               th:disabled="${size.isOutOfStock()}"
                                th:value="${size.name()}"
-                               th:checked="${sizeStat.first}"
-                               required>
+                               type="radio">
                         <span class="block rounded border border-gray-300 px-4 py-2 font-semibold transition peer-checked:border-red-500 peer-checked:bg-red-500 peer-checked:text-white"
+                              th:classappend="${size.isOutOfStock()} ? ' bg-gray-100 text-gray-400' : ''"
                               th:text="${size.name()}">
                             M
                         </span>
@@ -181,23 +185,23 @@
                 <label class="hidden" for="product-quantity">Số lượng sản phẩm</label>
                 <div class="flex items-center gap-2">
                     <button class="h-10 w-10 rounded border border-gray-300 text-xl font-bold hover:border-red-500 hover:text-red-500"
-                            type="button"
-                            data-quantity-minus>
+                            data-quantity-minus
+                            type="button">
                         −
                     </button>
                     <input class="h-10 w-20 rounded border border-gray-300 text-center focus:outline-red-500"
+                           data-quantity-input
                            id="product-quantity"
+                           max="1"
                            min="1"
                            name="quantity"
-                           th:max="${product.inStock() > 0 ? product.inStock() : 1}"
+                           required
+                           th:disabled="${product.isOutOfStock()}"
                            th:value="${1}"
-                           type="number"
-                           data-quantity-input
-                           th:disabled="${product.inStock() == 0}"
-                           required>
+                           type="number">
                     <button class="h-10 w-10 rounded border border-gray-300 text-xl font-bold hover:border-red-500 hover:text-red-500"
-                            type="button"
-                            data-quantity-plus>
+                            data-quantity-plus
+                            type="button">
                         +
                     </button>
                 </div>
@@ -224,24 +228,46 @@
 
             <div class="mt-6 flex flex-wrap gap-3">
                 <button class="rounded bg-red-500 px-5 py-3 font-semibold text-white hover:bg-red-400 disabled:cursor-not-allowed disabled:bg-gray-300"
-                        type="button"
+                        data-add-to-cart-button
+                        th:disabled="${product.isOutOfStock()}"
                         title="Chức năng thêm giỏ hàng sẽ được bổ sung sau"
-                        th:disabled="${product.inStock() == 0}">
+                        type="button">
                     Thêm giỏ hàng
                 </button>
                 <a class="rounded border border-gray-300 px-5 py-3 font-semibold hover:border-red-500 hover:text-red-500"
-                   href="/danh-sach-san-pham">
+                   href="/products">
                     Quay lại danh sách
                 </a>
             </div>
 
             <script>
                 (() => {
+                    const sizeOptions = Array.from(document.querySelectorAll("input[name='size']"));
                     const input = document.querySelector("[data-quantity-input]");
                     const minus = document.querySelector("[data-quantity-minus]");
                     const plus = document.querySelector("[data-quantity-plus]");
+                    const addToCartButton = document.querySelector("[data-add-to-cart-button]");
+                    const stockStatus = document.querySelector("[data-product-stock-status]");
+                    const quantityBySize = new Map();
+                    let currentSizeName = null;
 
                     if (!(input instanceof HTMLInputElement) || !minus || !plus) return;
+
+                    const getSelectedSize = () => {
+                        return sizeOptions.find((option) => option instanceof HTMLInputElement && option.checked && !option.disabled);
+                    };
+
+                    const getFirstAvailableSize = () => {
+                        return sizeOptions.find((option) => option instanceof HTMLInputElement && !option.disabled);
+                    };
+
+                    const getSelectedSizeStock = () => {
+                        const selected = getSelectedSize();
+                        if (!selected) return 0;
+
+                        const stock = Number.parseInt(selected.dataset.sizeStock || "0", 10);
+                        return Number.isFinite(stock) && stock > 0 ? stock : 0;
+                    };
 
                     const getBounds = () => ({
                         min: Number.parseInt(input.min || "1", 10),
@@ -249,7 +275,7 @@
                     });
 
                     const clamp = (value) => {
-                        const { min, max } = getBounds();
+                        const {min, max} = getBounds();
                         return Math.min(max, Math.max(min, value));
                     };
 
@@ -257,9 +283,77 @@
                         input.value = String(clamp(value));
                     };
 
-                    minus.addEventListener("click", () => sync(Number.parseInt(input.value || "1", 10) - 1));
-                    plus.addEventListener("click", () => sync(Number.parseInt(input.value || "1", 10) + 1));
-                    input.addEventListener("change", () => sync(Number.parseInt(input.value || "1", 10)));
+                    const getCurrentQuantity = () => Number.parseInt(input.value || "1", 10);
+
+                    const persistCurrentQuantity = () => {
+                        if (!currentSizeName) return;
+                        quantityBySize.set(currentSizeName, getCurrentQuantity());
+                    };
+
+                    const restoreQuantityForSize = (sizeName, maxStock) => {
+                        const saved = quantityBySize.get(sizeName);
+                        const nextQuantity = Number.isFinite(saved) ? saved : 1;
+                        input.max = String(Math.max(1, maxStock));
+                        sync(nextQuantity);
+                    };
+
+                    const syncBySelectedSize = () => {
+                        if (sizeOptions.length > 0 && !getSelectedSize()) {
+                            const available = getFirstAvailableSize();
+                            if (available) {
+                                available.checked = true;
+                            }
+                        }
+
+                        const selected = getSelectedSize();
+                        const selectedStock = getSelectedSizeStock();
+                        const isOutOfStock = selectedStock <= 0;
+                        const selectedName = selected?.value || null;
+
+                        if (selectedName && selectedName !== currentSizeName) {
+                            persistCurrentQuantity();
+                            currentSizeName = selectedName;
+                        } else if (!currentSizeName && selectedName) {
+                            currentSizeName = selectedName;
+                        }
+
+                        input.disabled = isOutOfStock;
+                        minus.toggleAttribute("disabled", isOutOfStock);
+                        plus.toggleAttribute("disabled", isOutOfStock);
+
+                        if (addToCartButton) {
+                            addToCartButton.toggleAttribute("disabled", isOutOfStock);
+                        }
+
+                        if (stockStatus) {
+                            stockStatus.textContent = isOutOfStock ? "Hết hàng" : "Còn hàng";
+                        }
+
+                        if (isOutOfStock) {
+                            input.value = "1";
+                        } else {
+                            restoreQuantityForSize(currentSizeName, selectedStock);
+                        }
+                    };
+
+                    minus.addEventListener("click", () => {
+                        sync(getCurrentQuantity() - 1);
+                        persistCurrentQuantity();
+                    });
+                    plus.addEventListener("click", () => {
+                        sync(getCurrentQuantity() + 1);
+                        persistCurrentQuantity();
+                    });
+                    input.addEventListener("change", () => {
+                        sync(getCurrentQuantity());
+                        persistCurrentQuantity();
+                    });
+
+                    sizeOptions.forEach((option) => {
+                        option.addEventListener("change", () => syncBySelectedSize());
+                    });
+
+                    syncBySelectedSize();
                 })();
             </script>
         </div>

@@ -20,7 +20,19 @@ public record ProductResponse(UUID id,
                               Instant updatedAt,
                               List<ProductImageResponse> productImages,
                               List<ProductSizeResponse> productSizes) implements Serializable {
+    public int inStock() {
+        if (productSizes == null || productSizes.isEmpty()) {
+            return 0;
+        }
+
+        return productSizes.stream()
+                .map(ProductSizeResponse::inStock)
+                .filter(stock -> stock != null && stock > 0)
+                .mapToInt(Integer::intValue)
+                .sum();
+    }
+
     public boolean isOutOfStock() {
-        return productImages.isEmpty() || productSizes.stream().allMatch(ProductSizeResponse::isOutOfStock);
+        return productSizes == null || productSizes.isEmpty() || productSizes.stream().allMatch(ProductSizeResponse::isOutOfStock);
     }
 }

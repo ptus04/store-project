@@ -1,6 +1,7 @@
 package io.github.ptus04.server.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -35,6 +36,8 @@ public class ProductSize {
     private String name;
 
     @NotNull
+    @Min(0)
+    @ColumnDefault("0")
     @Column(name = "in_stock", nullable = false)
     private Integer inStock;
 

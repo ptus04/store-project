@@ -9,9 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -65,13 +63,34 @@ public class ProductServiceImpl implements ProductService {
                 PageRequest discountSort = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "discount"));
                 yield productRepository.findAll(discountSort);
             }
-            default -> {
-                PageRequest newest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-                yield productRepository.findAll(newest);
-            }
+            default -> productRepository.findAll(pageRequest);
         };
 
         return productPage.map(productMapper::toProductResponse);
     }
 
+    @Override
+    public Page<ProductResponse> getProductsPageWithSortAndCategory(int page, int size, String sortBy, String category) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        Page<Product> productPage = switch (sortBy) {
+            case "newest" -> {
+                PageRequest newest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+                yield productRepository.findDistinctByCategories_NameIgnoreCase(category, newest);
+            }
+            case "price_asc" -> productRepository.findAllByCategoryOrderByDiscountedPriceAsc(category, pageRequest);
+            case "price_desc" -> productRepository.findAllByCategoryOrderByDiscountedPriceDesc(category, pageRequest);
+            case "discount_asc" -> {
+                PageRequest discountSort = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "discount"));
+                yield productRepository.findDistinctByCategories_NameIgnoreCase(category, discountSort);
+            }
+            case "discount_desc" -> {
+                PageRequest discountSort = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "discount"));
+                yield productRepository.findDistinctByCategories_NameIgnoreCase(category, discountSort);
+            }
+            default -> productRepository.findDistinctByCategories_NameIgnoreCase(category, pageRequest);
+        };
+
+        return productPage.map(productMapper::toProductResponse);
+    }
 }

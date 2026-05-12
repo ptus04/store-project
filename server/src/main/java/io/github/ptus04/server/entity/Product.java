@@ -16,6 +16,9 @@ import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 
 @Getter
 @Setter
@@ -76,5 +79,12 @@ public class Product {
     @NonNull
     @OneToMany(mappedBy = "product")
     private List<ProductSize> productSizes = new LinkedList<>();
+
+    @NonNull
+    @ManyToMany
+    @JoinTable(name = "category_product",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private List<Category> categories = new LinkedList<>();
 
 }

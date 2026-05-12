@@ -15,4 +15,6 @@ public interface ProductService {
 
     Page<ProductResponse> getProductsPageWithSort(int page, int size, String sortBy);
 
+    Page<ProductResponse> getProductsPageWithSortAndCategory(int page, int size, String sortBy, String category);
+
 }

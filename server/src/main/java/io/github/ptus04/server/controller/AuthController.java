@@ -1,6 +1,5 @@
 package io.github.ptus04.server.controller;
 
-import io.github.ptus04.server.dto.request.ChangePasswordRequest;
 import io.github.ptus04.server.dto.request.RegistrationRequest;
 import io.github.ptus04.server.exception.ExistedPhoneNumberException;
 import io.github.ptus04.server.security.CustomUserDetails;
