@@ -17,9 +17,7 @@ public class CarouselServiceImpl implements CarouselService {
 
     @Override
     public List<CarouselResponse> getAllCarousels() {
-        return carouselRepository
-                .findAll()
-                .stream()
+        return carouselRepository.findAll().stream()
                 .map(carouselMapper::toCarouselResponse)
                 .toList();
     }

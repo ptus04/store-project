@@ -22,18 +22,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductResponse> getAllProducts() {
-        return productRepository
-                .findAll()
-                .stream()
+        return productRepository.findAll().stream()
                 .map(productMapper::toProductResponse)
                 .toList();
     }
 
     @Override
     public List<ProductResponse> getNewProducts() {
-        return productRepository
-                .findByIsNew(true)
-                .stream()
+        return productRepository.findByIsNew(true).stream()
                 .map(productMapper::toProductResponse)
                 .toList();
     }
@@ -93,4 +89,5 @@ public class ProductServiceImpl implements ProductService {
 
         return productPage.map(productMapper::toProductResponse);
     }
+
 }
