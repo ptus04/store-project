@@ -79,7 +79,7 @@
                                  th:alt="${product.name}"/>
                         </a>
                         <div class="ms-2 overflow-hidden">
-                            <a th:href="@{/danh-sach-san-pham/{id}(id=${product.productId})}"
+                            <a th:href="@{/products/{id}(id=${product.productId})}"
                                th:text="${product.name + ' ' + product.size ? product.size : ''}">
                             </a>
                             <p>
