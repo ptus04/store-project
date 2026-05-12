@@ -4,6 +4,9 @@ spring:
   threads:
     virtual:
       enabled: true
+  web:
+    error:
+      include-exception: true
 server:
   http2:
     enabled: true
