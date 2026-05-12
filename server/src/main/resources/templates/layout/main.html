@@ -54,7 +54,7 @@
     <div class="flex shrink grow basis-0 flex-row items-center justify-end gap-3">
         <div class="group relative">
             <a class="relative before:absolute before:top-full before:left-[0.15rem] before:z-10 before:hidden before:rotate-45 before:border-t-2 before:border-l-2 before:border-gray-500 before:bg-white before:p-1 group-hover:before:block"
-               href="/gio-hang"
+               href="/cart"
                title="Giỏ hàng">
                 <i class="fa fa-bag-shopping"></i>
                 <span class="hidden md:inline"> Giỏ hàng</span>
@@ -66,21 +66,20 @@
 
             <!--Popup giỏ hàng-->
             <div class="absolute top-11/10 -right-8 hidden max-h-[80vh] max-w-120 min-w-[20rem] overflow-auto border-2 border-gray-500 bg-white p-2 shadow group-hover:block">
-                <p class="m-0 text-center"
-                   th:if="${session.cart == null || session.cart.items.size() == 0}">
+                <p class="m-0 text-center" th:if="${session.cart == null || session.cart.items.size() == 0}">
                     Chưa có sản phẩm trong giỏ hàng.
                 </p>
 
                 <th:block th:if="${session.cart != null && session.cart.items.size() > 0}">
-                    <div class="flex items-center p-1"
-
-                         th:each="i : ${session.cart.items}">
+                    <div class="flex items-center p-1" th:each="i : ${session.cart.items}">
                         <a th:href="@{/products/{id}(id=${product.productId})}">
-                            <img class="h-14" th:src="@{/images/image(image=${product.image})}" loading="lazy"
+                            <img class="h-14"
+                                 loading="lazy"
+                                 th:src="@{${imageContainerUrl} + ${product.productImages().get(0).file()}}"
                                  th:alt="${product.name}"/>
                         </a>
                         <div class="ms-2 overflow-hidden">
-                            <a th:href="@{/products/{id}(id=${product.productId})}"
+                            <a th:href="@{/danh-sach-san-pham/{id}(id=${product.productId})}"
                                th:text="${product.name + ' ' + product.size ? product.size : ''}">
                             </a>
                             <p>
@@ -90,10 +89,7 @@
                             </span>
                             </p>
                         </div>
-                        <button class="ms-auto cursor-pointer"
-                                type="button"
-                                title="Xóa sản phẩm"
-                        >
+                        <button class="ms-auto cursor-pointer" type="button" title="Xóa sản phẩm">
                             <i class="fa fa-remove"></i>
                         </button>
                     </div>
@@ -111,12 +107,12 @@
         </div>
 
         <!--Account-->
-        <a class="cursor-pointer" title="Tài khoản" href="/dang-nhap" sec:authorize="isAnonymous()">
+        <a class="cursor-pointer" title="Tài khoản" href="/auth/login" sec:authorize="isAnonymous()">
             <i class="fa fa-user"></i>
             <span class="hidden md:inline">Tài khoản</span>
         </a>
 
-        <a class="cursor-pointer" title="Tài khoản" href="/thong-tin-tai-khoan" sec:authorize="isAuthenticated()">
+        <a class="cursor-pointer" title="Tài khoản" href="/profile" sec:authorize="isAuthenticated()">
             <i class="fa fa-user"></i>
             <span class="hidden md:inline" sec:authentication="principal.name"></span>
         </a>
@@ -223,7 +219,7 @@
     <ul class="flex flex-wrap justify-center">
         <li class="mx-auto p-2"><a class="hover:text-red-500" href="/privacy-policy">CHÍNH SÁCH BẢO MẬT</a></li>
         <li class="mx-auto p-2"><a class="hover:text-red-500" href="/refund-policy">CHÍNH SÁCH ĐỔI TRẢ</a></li>
-        <li class="mx-auto p-2"><a class="hover:text-red-500" href="/about-us">HỆ THỐNG CỬA HÀNG</a></li>
+        <li class="mx-auto p-2"><a class="hover:text-red-500" href="/about-us">VỀ CHÚNG TÔI</a></li>
     </ul>
 
     <address class="mt-3 text-sm">
