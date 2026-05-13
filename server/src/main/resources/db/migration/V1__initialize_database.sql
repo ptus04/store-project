@@ -86,6 +86,7 @@ create table users
 create table orders
 (
     id                  binary(16)     default (uuid_to_bin(uuid(), 1)) not null primary key,
+    order_code          varchar(20) unique                              not null,
     user_id             binary(16)                                      not null,
     order_date          datetime       default CURRENT_TIMESTAMP        not null,
     shipping_date       datetime                                        not null,
@@ -147,15 +148,16 @@ create table user_addresses
 
 create table transactions
 (
-    id                  binary(16) default (uuid_to_bin(uuid(), 1)) not null primary key,
-    order_id            binary(16)                                  null,
-    gateway_name        varchar(100)                                not null,
-    transaction_code    varchar(255)                                null,
-    amount              decimal(18, 2)                              not null,
-    transaction_content text                                        null,
-    transaction_date    datetime                                    not null,
-    raw_payload         json                                        null,
-    created_at          timestamp  default CURRENT_TIMESTAMP        not null,
+    id               binary(16) default (uuid_to_bin(uuid(), 1)) not null primary key,
+    order_id         binary(16)                                  not null,
+    transaction_code varchar(14)                                 not null comment 'order_code',
+    gateway_name     varchar(100)                                not null,
+    content          text                                        not null,
+    amount           decimal(18, 2)                              not null,
+    reference_code   varchar(32)                                 not null,
+    raw_payload      json                                        not null,
+    transaction_date datetime                                    not null,
+    created_at       timestamp  default CURRENT_TIMESTAMP        not null,
     constraint transactions_orders_id_fk foreign key (order_id) references orders (id),
     index idx_transaction_code (transaction_code)
 );
