@@ -1,6 +1,10 @@
 spring:
   application:
     name: store-server
+  data:
+    redis:
+      repositories:
+        enabled: false
   threads:
     virtual:
       enabled: true
