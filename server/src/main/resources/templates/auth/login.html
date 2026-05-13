@@ -10,7 +10,7 @@
     <form class="mt-4 flex w-10/12 flex-col gap-4 rounded-md border border-gray-300 p-4 md:w-5/12 lg:w-3/12"
           action="/auth/login" method="post">
         <h1 class="text-center text-2xl font-semibold">ĐĂNG NHẬP</h1>
-        <span class="text-red-500" th:if="${param.error}" th:text="${param.message} ?: 'Đăng nhập thất bại'"></span>
+        <span class="text-red-500" th:if="${error}" th:text="${error} ?: 'Đăng nhập thất bại'"></span>
 
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 

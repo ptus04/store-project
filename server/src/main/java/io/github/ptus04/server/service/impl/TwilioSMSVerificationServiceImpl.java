@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Primary
@@ -28,7 +29,7 @@ public class TwilioSMSVerificationServiceImpl implements SMSVerificationService 
             Verification.creator(
                     twilioProperties.getVerify().getServiceSid(),
                     prefixWithVietnameseCode(phone),
-                    "sms"
+                    Verification.Channel.SMS.toString()
             ).create();
             redisTemplate.opsForValue().setIfAbsent(key, "sent");
             redisTemplate.expire(key, 60, TimeUnit.SECONDS);
@@ -45,13 +46,10 @@ public class TwilioSMSVerificationServiceImpl implements SMSVerificationService 
                 .setTo(prefixWithVietnameseCode(phone))
                 .create();
 
-        return "approved".equals(check.getStatus());
+        return Objects.equals(check.getStatus(), Verification.Status.APPROVED.toString());
     }
 
     private String prefixWithVietnameseCode(String phoneNumber) {
-        if (phoneNumber.startsWith("0")) {
-            return "+84" + phoneNumber.substring(1);
-        }
-        return phoneNumber;
+        return phoneNumber.startsWith("0") ? "+84" + phoneNumber.substring(1) : phoneNumber;
     }
 }

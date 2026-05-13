@@ -69,4 +69,8 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    public boolean isPhoneVerified() {
+        return phoneVerifiedAt != null;
+    }
+
 }

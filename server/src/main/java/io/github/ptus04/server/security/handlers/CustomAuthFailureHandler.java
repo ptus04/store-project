@@ -11,8 +11,6 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 @Component
 public class CustomAuthFailureHandler implements AuthenticationFailureHandler {
@@ -23,14 +21,15 @@ public class CustomAuthFailureHandler implements AuthenticationFailureHandler {
             @NonNull HttpServletResponse response,
             @NonNull AuthenticationException exception
     ) throws IOException {
-        String message;
+        String error;
         switch (exception) {
-            case BadCredentialsException ignored -> message = "Sai tài khoản hoặc mật khẩu";
-            case LockedException ignored -> message = "Tài khoản bị khóa";
-            case DisabledException ignored -> message = "Tài khoản bị vô hiệu hóa";
-            default -> message = "Đăng nhập thất bại";
+            case BadCredentialsException ignored -> error = "Sai tài khoản hoặc mật khẩu";
+            case LockedException ignored -> error = "Tài khoản bị khóa";
+            case DisabledException ignored -> error = "Tài khoản bị vô hiệu hóa";
+            default -> error = "Đăng nhập thất bại";
         }
 
-        response.sendRedirect("/dang-nhap?error&message=" + URLEncoder.encode(message, StandardCharsets.UTF_8));
+        request.getSession().setAttribute("error", error);
+        response.sendRedirect("/auth/login");
     }
 }
