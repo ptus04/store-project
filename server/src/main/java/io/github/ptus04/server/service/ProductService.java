@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ProductService {
-    List<ProductResponse> getAllProducts();
-
     List<ProductResponse> getNewProducts();
 
     ProductResponse getProductById(UUID id);

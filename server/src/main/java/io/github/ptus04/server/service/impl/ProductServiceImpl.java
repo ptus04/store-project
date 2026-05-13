@@ -21,13 +21,6 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
 
     @Override
-    public List<ProductResponse> getAllProducts() {
-        return productRepository.findAll().stream()
-                .map(productMapper::toProductResponse)
-                .toList();
-    }
-
-    @Override
     public List<ProductResponse> getNewProducts() {
         return productRepository.findByIsNew(true).stream()
                 .map(productMapper::toProductResponse)

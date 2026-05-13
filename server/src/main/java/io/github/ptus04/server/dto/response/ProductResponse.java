@@ -14,24 +14,14 @@ public record ProductResponse(UUID id,
                               String description,
                               String careInstructions,
                               BigDecimal price,
+                              Integer inStock,
                               Boolean isNew,
                               Float discount,
                               Instant createdAt,
                               Instant updatedAt,
                               List<ProductImageResponse> productImages,
                               List<ProductSizeResponse> productSizes) implements Serializable {
-    public int inStock() {
-        if (productSizes == null || productSizes.isEmpty()) {
-            return 0;
-        }
-
-        return productSizes.stream()
-                .map(ProductSizeResponse::inStock)
-                .filter(stock -> stock != null && stock > 0)
-                .mapToInt(Integer::intValue)
-                .sum();
-    }
-
+    //TODO: Remove this :)))
     public boolean isOutOfStock() {
         return productSizes == null || productSizes.isEmpty() || productSizes.stream().allMatch(ProductSizeResponse::isOutOfStock);
     }

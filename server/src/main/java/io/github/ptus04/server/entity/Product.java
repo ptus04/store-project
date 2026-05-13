@@ -16,9 +16,6 @@ import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 
 @Getter
 @Setter
@@ -50,6 +47,10 @@ public class Product {
 
     @NotNull
     @ColumnDefault("0")
+    @Column(name = "in_stock", nullable = false)
+    private Integer inStock;
+
+    @NotNull
     @Column(name = "is_new", nullable = false)
     private Boolean isNew;
 
