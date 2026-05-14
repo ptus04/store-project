@@ -2,7 +2,7 @@ package io.github.ptus04.server.service.impl;
 
 import io.github.ptus04.server.dto.request.UpdateProfileRequest;
 import io.github.ptus04.server.entity.User;
-import io.github.ptus04.server.exception.ExistedPhoneNumberException;
+import io.github.ptus04.server.exception.PhoneExistedException;
 import io.github.ptus04.server.exception.UserNotFoundException;
 import io.github.ptus04.server.repository.UserRepository;
 import io.github.ptus04.server.service.UserService;
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
             userRepository.findByPhone(request.phone())
                     .filter(existed -> !existed.getId().equals(id))
                     .ifPresent(existed -> {
-                        throw new ExistedPhoneNumberException("Số điện thoại đang được sử dụng");
+                        throw new PhoneExistedException("Số điện thoại đang được sử dụng");
                     });
             user.setPhone(request.phone());
         }

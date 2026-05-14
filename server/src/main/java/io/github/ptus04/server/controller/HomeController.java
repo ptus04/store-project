@@ -41,14 +41,6 @@ public class HomeController {
         return "home/refund-policy";
     }
 
-    @GetMapping({"/profile", "/thong-tin-tai-khoan"})
-    public String getProfilePage(Model model, @AuthenticationPrincipal CustomUserDetails details) {
-        if (details == null) {
-            return "redirect:/dang-nhap";
-        }
 
-        model.addAttribute("user", userService.getUserById(details.getId()));
-        return "user/profile";
-    }
 
 }
