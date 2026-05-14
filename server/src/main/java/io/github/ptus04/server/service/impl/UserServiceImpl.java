@@ -1,6 +1,6 @@
 package io.github.ptus04.server.service.impl;
 
-import io.github.ptus04.server.dto.request.UpdateProfileRequest;
+import io.github.ptus04.server.dto.request.UserProfileUpdateRequest;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.exception.PhoneExistedException;
 import io.github.ptus04.server.exception.UserNotFoundException;
@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateProfile(UUID id, UpdateProfileRequest request) {
+    public User updateProfile(UUID id, UserProfileUpdateRequest request) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
 
         if (StringUtils.hasText(request.phone())) {

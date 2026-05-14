@@ -27,7 +27,7 @@ public class UserController {
     public String getUpdateProfilePage(Model model, @AuthenticationPrincipal CustomUserDetails details) {
         if (!model.containsAttribute("updateProfileRequest")) {
             io.github.ptus04.server.entity.User user = userService.getUserById(details.getId());
-            model.addAttribute("updateProfileRequest", new io.github.ptus04.server.dto.request.UpdateProfileRequest(
+            model.addAttribute("updateProfileRequest", new io.github.ptus04.server.dto.request.UserProfileUpdateRequest(
                     user.getPhone(),
                     user.getName(),
                     user.getEmail()
@@ -38,7 +38,7 @@ public class UserController {
 
     @org.springframework.web.bind.annotation.PostMapping("/update")
     public String updateProfile(
-            @jakarta.validation.Valid @org.springframework.web.bind.annotation.ModelAttribute("updateProfileRequest") io.github.ptus04.server.dto.request.UpdateProfileRequest request,
+            @jakarta.validation.Valid @org.springframework.web.bind.annotation.ModelAttribute("updateProfileRequest") io.github.ptus04.server.dto.request.UserProfileUpdateRequest request,
             org.springframework.validation.BindingResult bindingResult,
             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes,
             @AuthenticationPrincipal CustomUserDetails details) {
