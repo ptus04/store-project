@@ -1,9 +1,29 @@
 spring:
   application:
-    name: server
-  main:
-    lazy-initialization: true
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+    name: store-server
+  data:
+    redis:
+      repositories:
+        enabled: false
+  threads:
+    virtual:
+      enabled: true
+  web:
+    error:
+      include-exception: true
+server:
+  http2:
+    enabled: true
+management:
+  endpoint:
+    health:
+      roles: ADMIN
+      show-components: when_authorized
+      show-details: when_authorized
+custom:
+  security:
+    cors:
+      allowed-origins: ${ALLOWED_ORIGINS}
+      allowed-methods: ${ALLOWED_METHODS}
+      allowed-headers: ${ALLOWED_HEADERS}
+      allow-credentials: ${ALLOW_CREDENTIALS}

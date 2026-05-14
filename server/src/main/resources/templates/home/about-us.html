@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hệ thống cửa hàng | SLY</title>
+</head>
+<body>
+<main class="container mx-auto p-4">
+    <div class="flex flex-col items-center gap-2">
+        <h1 class="text-center text-3xl font-bold">Hệ thống cửa hàng</h1>
+
+        <hr class="self-stretch text-gray-300"/>
+        <p class="rounded-full border-2 border-gray-500 bg-white px-4 py-2">Cửa hàng</p>
+        <p>182/13 Lê Văn Sỹ, P10, Phú Nhuận, TP. HCM</p>
+        <a class="hover:text-red-500" href="mailto:cs@sly.vn">cs@sly.vn</a>
+
+        <p class="mt-4 rounded-full border-2 border-gray-500 bg-white px-4 py-2">Kho hàng</p>
+        <p>112/23B Bạch Đằng, Phường 2, Tân Bình, Thành Phố Hồ Chí Minh</p>
+        <p>09h00 đến 17h30 tất cả các ngày trong tuần</p>
+        <a class="hover:text-red-500" href="mailto:cs@sly.vn">cs@sly.vn</a>
+    </div>
+</main>
+</body>
+</html>
