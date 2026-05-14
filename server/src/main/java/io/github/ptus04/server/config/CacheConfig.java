@@ -12,7 +12,7 @@ import java.time.Duration;
 public class CacheConfig {
     @Bean
     public RedisCacheConfiguration cacheConfiguration() {
-        return RedisCacheConfiguration.defaultCacheConfig()
+        return RedisCacheConfiguration.defaultCacheConfig(Thread.currentThread().getContextClassLoader())
                 .entryTtl(Duration.ofMinutes(30))
                 .disableCachingNullValues();
     }
