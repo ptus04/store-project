@@ -15,8 +15,8 @@
     <div class="max-w-[50vw] wrap-break-word">
         <h1 class="text-center text-2xl font-bold" th:text="${error}">Bad Request</h1>
         <p>Path: <span th:text="${path}"></span></p>
-        <p th:if="${exception != null}">Exception: <span th:text="${exception}"></span></p>
-        <p>Message: <span th:text="${message}">Something went wrong</span></p>
+        <p th:unless="${exception == null}">Exception: <span th:text="${exception}"></span></p>
+        <p th:unless="${message == null}">Message: <span th:text="${message}"></span></p>
         <p>Timestamp: <span th:text="${timestamp}"></span></p>
         <hr>
         <p>

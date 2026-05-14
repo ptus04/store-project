@@ -30,8 +30,11 @@ public class SecurityConfig {
                 .securityMatcher("/api/**")
                 .csrf(CsrfConfigurer::spa)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/carousel").permitAll()
-                        .anyRequest().authenticated());
+                        .requestMatchers("/api/auth/login").anonymous()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/products/**"
+                        ).hasRole("EMPLOYEE")
+                        .anyRequest().hasRole("ADMIN"));
 
         return http.build();
     }

@@ -1,22 +1,24 @@
 spring:
+  web:
+    error:
+      include-exception: false
+  devtools:
+    add-properties: false
   datasource:
-    url: ${DATABASE_URL}
+    url: ${DATABASE_CONNECTION_STRING}
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
-      url: ${REDIS_URL}
+      url: ${REDIS_CONNECTION_STRING}
+  docker:
+    compose:
+      enabled: false
   cloud:
     azure:
       storage:
-        account-name: ${AZURE_STORAGE_ACCOUNT}
-        account-key: ${AZURE_STORAGE_KEY}
-        blob:
-          endpoint: ${AZURE_STORAGE_BLOB_ENDPOINT}
-  web:
-    error:
-      include-exception: false
+        connection-string: ${AZURE_STORAGE_CONNECTION_STRING}
 custom:
   twilio:
     account-sid: ${TWILIO_ACCOUNT_SID}
