@@ -1,6 +1,7 @@
 package io.github.ptus04.server.service.impl;
 
 import io.github.ptus04.server.dto.request.UserProfileUpdateRequest;
+import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.exception.PhoneExistedException;
 import io.github.ptus04.server.exception.UserNotFoundException;
@@ -23,7 +24,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateProfile(UUID id, UserProfileUpdateRequest request) {
+    public UserResponse updateProfile(UUID id, UserProfileUpdateRequest request) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
 
         if (StringUtils.hasText(request.phone())) {
@@ -38,6 +39,19 @@ public class UserServiceImpl implements UserService {
         user.setName(request.name());
         user.setEmail(StringUtils.hasText(request.email()) ? request.email() : null);
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return new UserResponse(
+                savedUser.getId(),
+                savedUser.getName(),
+                savedUser.getPhone(),
+                savedUser.getEmail(),
+                savedUser.getRole(),
+                savedUser.getGender(),
+                savedUser.getBirthDate(),
+                savedUser.getPhoneVerifiedAt(),
+                savedUser.getEmailVerifiedAt(),
+                savedUser.getCreatedAt(),
+                savedUser.getUpdatedAt()
+        );
     }
 }
