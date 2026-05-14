@@ -19,7 +19,6 @@ import java.util.UUID;
 @Table(name = "product_images")
 public class ProductImage {
     @Id
-    @Size(max = 16)
     @Column(name = "id", nullable = false, length = 16)
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

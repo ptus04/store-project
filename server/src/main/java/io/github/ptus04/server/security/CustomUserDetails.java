@@ -13,8 +13,6 @@ import java.util.*;
 public class CustomUserDetails implements UserDetails {
     private UUID id;
     private String name;
-    private String phone;
-    private String email;
     private String password;
     private Set<GrantedAuthority> authorities;
 

@@ -35,13 +35,13 @@
 
                     <!-- Info -->
                     <h2 class="mt-5 text-xl font-bold text-gray-900"
-                        th:text="${user.name()}">Tên người dùng</h2>
+                        th:text="${user.name}">Tên người dùng</h2>
 
                     <p class="mt-2 text-sm text-gray-500"
-                       th:text="${user.email() != null ? user.email() : 'Chưa cập nhật email'}"></p>
+                       th:text="${user.email != null ? user.email : 'Chưa cập nhật email'}"></p>
 
                     <p class="mt-1 text-sm text-gray-500"
-                       th:text="${user.phone() != null ? user.phone() : 'Chưa cập nhật số điện thoại'}"></p>
+                       th:text="${user.phone != null ? user.phone : 'Chưa cập nhật số điện thoại'}"></p>
                 </div>
 
                 <!-- ACTION -->
@@ -79,7 +79,7 @@
 
                     <!-- CTA -->
                     <div class="pt-4 flex justify-end">
-                        <a th:href="@{/danh-sach-san-pham}"
+                        <a th:href="@{/products}"
                            class="my-btn-tertiary inline-flex items-center justify-center">
                             Mua sắm ngay
                         </a>

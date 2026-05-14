@@ -51,7 +51,6 @@ public class Product {
     private Integer inStock;
 
     @NotNull
-    @ColumnDefault("0")
     @Column(name = "is_new", nullable = false)
     private Boolean isNew;
 
@@ -70,6 +69,9 @@ public class Product {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     @NonNull
     @BatchSize(size = 10)
     @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
@@ -78,5 +80,12 @@ public class Product {
     @NonNull
     @OneToMany(mappedBy = "product")
     private List<ProductSize> productSizes = new LinkedList<>();
+
+    @NonNull
+    @ManyToMany
+    @JoinTable(name = "category_product",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private List<Category> categories = new LinkedList<>();
 
 }

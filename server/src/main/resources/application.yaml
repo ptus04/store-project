@@ -1,9 +1,16 @@
 spring:
   application:
     name: store-server
+  data:
+    redis:
+      repositories:
+        enabled: false
   threads:
     virtual:
       enabled: true
+  web:
+    error:
+      include-exception: true
 server:
   http2:
     enabled: true

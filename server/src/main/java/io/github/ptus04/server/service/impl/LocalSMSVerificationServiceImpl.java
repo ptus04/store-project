@@ -46,8 +46,9 @@ public class LocalSMSVerificationServiceImpl implements SMSVerificationService {
                     .log();
             return false;
         }
-
-        return otp.equals(value);
+        boolean result = otp.equals(value);
+        if (result) redisTemplate.delete(key);
+        return result;
     }
 
 }

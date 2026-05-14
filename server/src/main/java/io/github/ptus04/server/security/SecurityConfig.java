@@ -30,8 +30,11 @@ public class SecurityConfig {
                 .securityMatcher("/api/**")
                 .csrf(CsrfConfigurer::spa)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/carousel").permitAll()
-                        .anyRequest().authenticated());
+                        .requestMatchers("/api/auth/login").anonymous()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/products/**"
+                        ).hasRole("EMPLOYEE")
+                        .anyRequest().hasRole("ADMIN"));
 
         return http.build();
     }
@@ -42,23 +45,33 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/img/**", "/favicon.png").permitAll()
-                        .requestMatchers("/", "/danh-sach-san-pham/**", "/gio-hang").permitAll()
-                        .requestMatchers("/dang-nhap/**", "/dang-ky/**").permitAll()
-                        .requestMatchers("/about-us", "/privacy-policy", "/refund-policy").permitAll()
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers(
+                                "/",
+                                "/about-us",
+                                "/privacy-policy",
+                                "/refund-policy",
+                                "/error",
+                                "/actuator/**",
+                                "/auth/**",
+                                "/products/**",
+                                "/cart/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
                 .formLogin(form -> form
-                        .loginPage("/dang-nhap")
-                        .loginProcessingUrl("/dang-nhap")
+                        .loginPage("/auth/login")
+                        .loginProcessingUrl("/auth/login")
+                        .defaultSuccessUrl("/")
                         .failureHandler(customAuthFailureHandler)
-                        .defaultSuccessUrl("/"))
+                )
                 .logout(logout -> logout
-                        .logoutUrl("/dang-xuat")
-                        .logoutSuccessUrl("/dang-nhap"))
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessUrl("/auth/login")
+                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                        .maximumSessions(1));
+                        .maximumSessions(1)
+                );
 
         return http.build();
     }

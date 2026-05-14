@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,21 +21,16 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
 
     @Override
-    public List<ProductResponse> getAllProducts() {
-        return productRepository
-                .findAll()
-                .stream()
+    public List<ProductResponse> getNewProducts() {
+        return productRepository.findByIsNew(true).stream()
                 .map(productMapper::toProductResponse)
                 .toList();
     }
 
     @Override
-    public List<ProductResponse> getNewProducts() {
-        return productRepository
-                .findByIsNew(true)
-                .stream()
-                .map(productMapper::toProductResponse)
-                .toList();
+    public ProductResponse getProductById(UUID id) {
+        Product product = productRepository.findById(id).orElse(null);
+        return productMapper.toProductResponse(product);
     }
 
     @Override
@@ -56,10 +52,32 @@ public class ProductServiceImpl implements ProductService {
                 PageRequest discountSort = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "discount"));
                 yield productRepository.findAll(discountSort);
             }
-            default -> {
+            default -> productRepository.findAll(pageRequest);
+        };
+
+        return productPage.map(productMapper::toProductResponse);
+    }
+
+    @Override
+    public Page<ProductResponse> getProductsPageWithSortAndCategory(int page, int size, String sortBy, String category) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        Page<Product> productPage = switch (sortBy) {
+            case "newest" -> {
                 PageRequest newest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-                yield productRepository.findAll(newest);
+                yield productRepository.findDistinctByCategories_NameIgnoreCase(category, newest);
             }
+            case "price_asc" -> productRepository.findAllByCategoryOrderByDiscountedPriceAsc(category, pageRequest);
+            case "price_desc" -> productRepository.findAllByCategoryOrderByDiscountedPriceDesc(category, pageRequest);
+            case "discount_asc" -> {
+                PageRequest discountSort = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "discount"));
+                yield productRepository.findDistinctByCategories_NameIgnoreCase(category, discountSort);
+            }
+            case "discount_desc" -> {
+                PageRequest discountSort = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "discount"));
+                yield productRepository.findDistinctByCategories_NameIgnoreCase(category, discountSort);
+            }
+            default -> productRepository.findDistinctByCategories_NameIgnoreCase(category, pageRequest);
         };
 
         return productPage.map(productMapper::toProductResponse);
