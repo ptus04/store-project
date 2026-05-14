@@ -1,7 +1,7 @@
 package io.github.ptus04.server.service.impl;
 
-import io.github.ptus04.server.dto.request.ChangePasswordRequest;
-import io.github.ptus04.server.dto.request.RegistrationRequest;
+import io.github.ptus04.server.dto.request.UserChangePasswordRequest;
+import io.github.ptus04.server.dto.request.UserRegistrationRequest;
 import io.github.ptus04.server.dto.response.PhoneVerificationResponse;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.enums.UserRoleEnum;
@@ -30,7 +30,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
 
     @Override
-    public Authentication register(RegistrationRequest request) {
+    public Authentication register(UserRegistrationRequest request) {
         if (userRepository.findByPhone(request.phone()).isPresent()) {
             throw new PhoneExistedException("Số điện thoại đang được sử dụng");
         }
@@ -79,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public boolean changePassword(ChangePasswordRequest request) {
+    public boolean changePassword(UserChangePasswordRequest request) {
         boolean result = smsVerificationService.verifyOtp(request.phone(), request.otp());
         if (!result) return false;
 

@@ -4,6 +4,12 @@ spring:
       include-exception: false
   devtools:
     add-properties: false
+  jpa:
+    open-in-view: true
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
   datasource:
     url: ${DATABASE_CONNECTION_STRING}
     username: ${DATABASE_USERNAME}

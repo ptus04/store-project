@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -15,10 +14,9 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "categories")
+@Table(name = "categories", schema = "storedb")
 public class Category {
     @Id
-    @ColumnDefault("(uuid_to_bin(uuid(), 1))")
     @Column(name = "id", nullable = false, length = 16)
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -35,6 +33,5 @@ public class Category {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
-
 
 }

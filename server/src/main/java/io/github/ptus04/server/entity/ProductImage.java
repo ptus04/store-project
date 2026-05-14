@@ -16,7 +16,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "product_images")
+@Table(name = "product_images", schema = "storedb")
 public class ProductImage {
     @Id
     @Column(name = "id", nullable = false, length = 16)
@@ -25,7 +25,6 @@ public class ProductImage {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
@@ -35,7 +34,6 @@ public class ProductImage {
     private String file;
 
     @CreationTimestamp
-    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 

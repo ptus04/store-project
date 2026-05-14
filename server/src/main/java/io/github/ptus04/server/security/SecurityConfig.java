@@ -37,7 +37,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,
                                 "/api/products/**"
                         ).hasRole("EMPLOYEE")
-                        .anyRequest().hasRole("ADMIN"));
+                        .requestMatchers(
+                                "/api/products/**"
+                        ).hasRole("ADMIN")
+                        .anyRequest().permitAll());
 
         return http.build();
     }

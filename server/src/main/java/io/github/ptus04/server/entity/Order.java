@@ -9,9 +9,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.jspecify.annotations.NonNull;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -71,6 +74,17 @@ public class Order {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    @NonNull
+    @OneToMany(mappedBy = "order")
+    private Set<OrderDetail> orderDetails = new LinkedHashSet<>();
+
+    @OneToOne(mappedBy = "order")
+    private OrderShippingAddress orderShippingAddress;
+
+    @NonNull
+    @OneToMany(mappedBy = "order")
+    private Set<Transaction> transactions = new LinkedHashSet<>();
 
 
 }

@@ -17,7 +17,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "users")
+@Table(name = "users", schema = "storedb")
 public class User {
     @Id
     @Column(name = "id", nullable = false, length = 16)

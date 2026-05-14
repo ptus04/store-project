@@ -1,7 +1,7 @@
 package io.github.ptus04.server.controller.advice;
 
 import com.azure.storage.blob.BlobServiceClient;
-import io.github.ptus04.server.entity.Category;
+import io.github.ptus04.server.dto.response.CategoryResponse;
 import io.github.ptus04.server.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,7 +16,7 @@ public class LayoutControllerAdvice {
     private final BlobServiceClient blobServiceClient;
 
     @ModelAttribute("categories")
-    public List<Category> getCategories() {
+    public List<CategoryResponse> getCategories() {
         return categoryService.getAllCategories();
     }
 

@@ -1,7 +1,7 @@
 package io.github.ptus04.server.exception;
 
+import lombok.experimental.StandardException;
+
+@StandardException
 public class PhoneExistedException extends RuntimeException {
-    public PhoneExistedException(String message) {
-        super(message);
-    }
 }

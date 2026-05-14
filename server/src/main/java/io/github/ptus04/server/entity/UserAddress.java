@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
@@ -14,36 +16,37 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "carousel", schema = "storedb")
-public class Carousel {
+@Table(name = "user_addresses", schema = "storedb")
+public class UserAddress {
     @Id
     @Column(name = "id", nullable = false, length = 16)
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Size(max = 32)
     @NotNull
-    @Column(name = "title", nullable = false, length = 32)
-    private String title;
+    @Column(name = "city", nullable = false, length = 32)
+    private String city;
+
+    @Size(max = 32)
+    @Column(name = "district", length = 32)
+    private String district;
+
+    @Size(max = 32)
+    @NotNull
+    @Column(name = "ward", nullable = false, length = 32)
+    private String ward;
 
     @Size(max = 64)
     @NotNull
-    @Column(name = "content", nullable = false, length = 64)
-    private String content;
-
-    @Size(max = 128)
-    @NotNull
-    @Column(name = "link", nullable = false, length = 128)
-    private String link;
-
-    @Size(max = 128)
-    @NotNull
-    @Column(name = "landscape_image", nullable = false, length = 128)
-    private String landscapeImage;
-
-    @Size(max = 128)
-    @Column(name = "portrait_image", length = 128)
-    private String portraitImage;
+    @Column(name = "address", nullable = false, length = 64)
+    private String address;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
@@ -52,4 +55,6 @@ public class Carousel {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+
 }

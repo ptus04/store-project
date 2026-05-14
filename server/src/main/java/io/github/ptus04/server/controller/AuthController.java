@@ -1,7 +1,7 @@
 package io.github.ptus04.server.controller;
 
-import io.github.ptus04.server.dto.request.ChangePasswordRequest;
-import io.github.ptus04.server.dto.request.RegistrationRequest;
+import io.github.ptus04.server.dto.request.UserChangePasswordRequest;
+import io.github.ptus04.server.dto.request.UserRegistrationRequest;
 import io.github.ptus04.server.dto.response.PhoneVerificationResponse;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.exception.PhoneExistedException;
@@ -47,12 +47,12 @@ public class AuthController {
     }
 
     @GetMapping("register")
-    public String getRegisterPage(@ModelAttribute("request") RegistrationRequest request) {
+    public String getRegisterPage(@ModelAttribute("request") UserRegistrationRequest request) {
         return "auth/register";
     }
 
     @PostMapping("register")
-    public String registerUser(@Valid @ModelAttribute("request") RegistrationRequest request,
+    public String registerUser(@Valid @ModelAttribute("request") UserRegistrationRequest request,
                                BindingResult bindingResult,
                                HttpServletRequest httpServletRequest,
                                HttpServletResponse httpServletResponse) {
@@ -109,13 +109,13 @@ public class AuthController {
         }
         long remainingTime = Optional.ofNullable(phone).map(authService::sendPhoneOtp).orElse(0L);
 
-        model.addAttribute("changePasswordRequest", new ChangePasswordRequest(phone, null, null));
+        model.addAttribute("changePasswordRequest", new UserChangePasswordRequest(phone, null, null));
         model.addAttribute("remainingTime", remainingTime);
         return "auth/change-password";
     }
 
     @PostMapping(value = "change-password")
-    public String changePassword(@Valid @ModelAttribute("changePasswordRequest") ChangePasswordRequest changePasswordRequest,
+    public String changePassword(@Valid @ModelAttribute("changePasswordRequest") UserChangePasswordRequest userChangePasswordRequest,
                                  BindingResult bindingResult,
                                  HttpServletResponse httpServletResponse) {
         if (bindingResult.hasErrors()) {
@@ -123,7 +123,7 @@ public class AuthController {
             return "auth/change-password";
         }
 
-        boolean result = authService.changePassword(changePasswordRequest);
+        boolean result = authService.changePassword(userChangePasswordRequest);
         if (!result) {
             bindingResult.rejectValue("otp", "otp.invalid", "Mã OTP không chính xác!");
             httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
