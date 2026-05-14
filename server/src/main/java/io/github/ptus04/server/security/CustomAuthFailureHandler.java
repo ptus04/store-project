@@ -1,4 +1,4 @@
-package io.github.ptus04.server.security.handlers;
+package io.github.ptus04.server.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
