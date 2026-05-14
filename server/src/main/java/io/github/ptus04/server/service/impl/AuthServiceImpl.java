@@ -1,7 +1,7 @@
 package io.github.ptus04.server.service.impl;
 
 import io.github.ptus04.server.dto.request.RegistrationRequest;
-import io.github.ptus04.server.dto.response.UserResponse;
+import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.exception.VerifiedUserPhoneException;
 import io.github.ptus04.server.service.AuthService;
 import io.github.ptus04.server.service.SMSVerificationService;
@@ -27,10 +27,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void register(HttpSession httpSession, RegistrationRequest registrationRequest) {
-        UserResponse user = userService.createUser(registrationRequest);
+        User user = userService.createUser(registrationRequest);
 
         UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(user.phone(), registrationRequest.password());
+                new UsernamePasswordAuthenticationToken(user.getPhone(), registrationRequest.password());
         Authentication auth = authenticationManager.authenticate(token);
         SecurityContext context = SecurityContextHolder.getContext();
         context.setAuthentication(auth);
@@ -42,27 +42,27 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public long sendPhoneOtp(UUID userId) {
-        UserResponse user = userService.getUserById(userId);
-        if (user.isPhoneVerified()) {
-            throw new VerifiedUserPhoneException(user.phone() + " is already verified");
+        User user = userService.getUserById(userId);
+        if (user.getVerifiedAt() != null) {
+            throw new VerifiedUserPhoneException(user.getPhone() + " is already verified");
         }
 
-        return smsVerificationService.sendOtp(user.phone());
+        return smsVerificationService.sendOtp(user.getPhone());
     }
 
     @Override
     public boolean verifyOtp(UUID userId, String otp) {
-        UserResponse user = userService.getUserById(userId);
-        if (user.isPhoneVerified()) {
-            throw new VerifiedUserPhoneException(user.phone() + " is already verified");
+        User user = userService.getUserById(userId);
+        if (user.getVerifiedAt() != null) {
+            throw new VerifiedUserPhoneException(user.getPhone() + " is already verified");
         }
 
-        boolean result = smsVerificationService.verifyOtp(user.phone(), otp);
+        boolean result = smsVerificationService.verifyOtp(user.getPhone(), otp);
         if (!result) {
             return false;
         }
 
         user = userService.updatePhoneVerificationState(userId, true);
-        return user.isPhoneVerified();
+        return user.getVerifiedAt() != null;
     }
 }

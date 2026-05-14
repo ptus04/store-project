@@ -2,16 +2,16 @@ package io.github.ptus04.server.service;
 
 import io.github.ptus04.server.dto.request.RegistrationRequest;
 import io.github.ptus04.server.dto.request.UpdateProfileRequest;
-import io.github.ptus04.server.dto.response.UserResponse;
+import io.github.ptus04.server.entity.User;
 
 import java.util.UUID;
 
 public interface UserService {
-    UserResponse createUser(RegistrationRequest request);
+    User createUser(RegistrationRequest request);
 
-    UserResponse getUserById(UUID id);
+    User getUserById(UUID id);
 
-    UserResponse updateProfile(UUID id, UpdateProfileRequest request);
+    User updateProfile(UUID id, UpdateProfileRequest request);
 
-    UserResponse updatePhoneVerificationState(UUID id, boolean isVerified);
+    User updatePhoneVerificationState(UUID id, boolean isVerified);
 }

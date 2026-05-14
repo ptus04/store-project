@@ -1,6 +1,6 @@
 package io.github.ptus04.server.filter;
 
-import io.github.ptus04.server.dto.response.UserResponse;
+import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.security.CustomUserDetails;
 import io.github.ptus04.server.service.UserService;
 import jakarta.servlet.FilterChain;
@@ -38,8 +38,8 @@ public class NotVerifiedRedirectFilter extends OncePerRequestFilter {
         if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
             CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
             if (customUserDetails != null) {
-                UserResponse user = userService.getUserById(customUserDetails.getId());
-                if (!user.isPhoneVerified()) {
+                User user = userService.getUserById(customUserDetails.getId());
+                if (user.getVerifiedAt() == null) {
                     response.sendRedirect("/xac-minh");
                     return;
                 }
