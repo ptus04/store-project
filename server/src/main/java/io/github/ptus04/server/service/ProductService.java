@@ -1,5 +1,6 @@
 package io.github.ptus04.server.service;
 
+import io.github.ptus04.server.dto.request.ProductCreateRequest;
 import io.github.ptus04.server.dto.response.ProductResponse;
 import org.springframework.data.domain.Page;
 
@@ -14,5 +15,11 @@ public interface ProductService {
     Page<ProductResponse> getProductsPageWithSort(int page, int size, String sortBy);
 
     Page<ProductResponse> getProductsPageWithSortAndCategory(int page, int size, String sortBy, String category);
+
+    ProductResponse createNewProduct(ProductCreateRequest createProductRequest);
+
+    ProductResponse updateProduct(ProductCreateRequest createProductRequest);
+
+    ProductResponse deleteProduct(UUID productId);
 
 }

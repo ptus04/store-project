@@ -18,8 +18,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryMapper categoryMapper;
 
     @Override
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    @Cacheable("categories")
     public List<CategoryResponse> getAllCategories() {
         return categoryRepository.findAll().stream()
                 .map(categoryMapper::toCategoryResponse)

@@ -5,6 +5,7 @@ import io.github.ptus04.server.mapper.CarouselMapper;
 import io.github.ptus04.server.repository.CarouselRepository;
 import io.github.ptus04.server.service.CarouselService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class CarouselServiceImpl implements CarouselService {
     private final CarouselMapper carouselMapper;
 
     @Override
+    @Cacheable("carousels")
     public List<CarouselResponse> getAllCarousels() {
         return carouselRepository.findAll().stream()
                 .map(carouselMapper::toCarouselResponse)
