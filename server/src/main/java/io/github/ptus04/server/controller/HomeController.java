@@ -1,11 +1,8 @@
 package io.github.ptus04.server.controller;
 
-import io.github.ptus04.server.security.CustomUserDetails;
 import io.github.ptus04.server.service.CarouselService;
 import io.github.ptus04.server.service.ProductService;
-import io.github.ptus04.server.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class HomeController {
     private final ProductService productService;
     private final CarouselService carouselService;
-    private final UserService userService;
 
     @GetMapping()
     public String getHomePage(Model model) {
@@ -40,7 +36,5 @@ public class HomeController {
     public String getRefundPolicyPage() {
         return "home/refund-policy";
     }
-
-
 
 }
