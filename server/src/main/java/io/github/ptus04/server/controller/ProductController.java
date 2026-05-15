@@ -18,7 +18,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
-    private final CategoryService categoryService;
 
     @GetMapping({"/products"})
     public String getListProductPage(
@@ -40,7 +39,6 @@ public class ProductController {
         model.addAttribute("currentPage", productPage.getNumber());
         model.addAttribute("totalPages", productPage.getTotalPages());
         model.addAttribute("sortBy", sortBy);
-        model.addAttribute("categories", categoryService.getAllCategories());
         model.addAttribute("activeCategory", activeCategory);
         return "product/index";
     }
