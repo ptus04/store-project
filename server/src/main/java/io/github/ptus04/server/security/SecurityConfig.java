@@ -36,11 +36,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login").anonymous()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/products/**"
-                        ).hasRole("EMPLOYEE")
+                        ).hasAnyRole("EMPLOYEE", "ADMIN")
                         .requestMatchers(
                                 "/api/products/**"
                         ).hasRole("ADMIN")
-                        .anyRequest().permitAll());
+                        .anyRequest().permitAll()
+                );
 
         return http.build();
     }
