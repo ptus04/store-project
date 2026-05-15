@@ -5,6 +5,7 @@ import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.exception.PhoneExistedException;
 import io.github.ptus04.server.exception.UserNotFoundException;
+import io.github.ptus04.server.mapper.UserMapper;
 import io.github.ptus04.server.repository.UserRepository;
 import io.github.ptus04.server.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -17,41 +18,32 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Override
-    public User getUserById(UUID id) {
-        return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+    public UserResponse getUserById(UUID id) {
+        return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(UserNotFoundException::new));
     }
 
     @Override
     public UserResponse updateProfile(UUID id, UserProfileUpdateRequest request) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
 
-        if (StringUtils.hasText(request.phone())) {
+        if (StringUtils.hasText(request.phone()) && !request.phone().equals(user.getPhone())) {
             userRepository.findByPhone(request.phone())
                     .filter(existed -> !existed.getId().equals(id))
                     .ifPresent(existed -> {
                         throw new PhoneExistedException("Số điện thoại đang được sử dụng");
                     });
             user.setPhone(request.phone());
+            user.setPhoneVerifiedAt(null);
         }
 
         user.setName(request.name());
         user.setEmail(StringUtils.hasText(request.email()) ? request.email() : null);
+        user.setGender(request.gender());
+        user.setBirthDate(request.birthDate());
 
-        User savedUser = userRepository.save(user);
-        return new UserResponse(
-                savedUser.getId(),
-                savedUser.getName(),
-                savedUser.getPhone(),
-                savedUser.getEmail(),
-                savedUser.getRole(),
-                savedUser.getGender(),
-                savedUser.getBirthDate(),
-                savedUser.getPhoneVerifiedAt(),
-                savedUser.getEmailVerifiedAt(),
-                savedUser.getCreatedAt(),
-                savedUser.getUpdatedAt()
-        );
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 }

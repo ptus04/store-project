@@ -1,8 +1,8 @@
 package io.github.ptus04.server.controller;
 
+import io.github.ptus04.server.dto.response.UserResponse;
+import io.github.ptus04.server.mapper.UserMapper;
 import io.github.ptus04.server.security.CustomUserDetails;
-import io.github.ptus04.server.service.CarouselService;
-import io.github.ptus04.server.service.ProductService;
 import io.github.ptus04.server.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @GetMapping
     public String getProfilePage(Model model, @AuthenticationPrincipal CustomUserDetails details) {
@@ -26,12 +27,8 @@ public class UserController {
     @GetMapping("/update")
     public String getUpdateProfilePage(Model model, @AuthenticationPrincipal CustomUserDetails details) {
         if (!model.containsAttribute("updateProfileRequest")) {
-            io.github.ptus04.server.entity.User user = userService.getUserById(details.getId());
-            model.addAttribute("updateProfileRequest", new io.github.ptus04.server.dto.request.UserProfileUpdateRequest(
-                    user.getPhone(),
-                    user.getName(),
-                    user.getEmail()
-            ));
+            UserResponse userResponse = userService.getUserById(details.getId());
+            model.addAttribute("updateProfileRequest", userMapper.toUserProfileUpdateRequest(userMapper.toEntity(userResponse)));
         }
         return "user/update";
     }

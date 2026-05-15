@@ -53,6 +53,29 @@
             <span th:errorclass="text-red-500" th:errors="*{email}"></span>
         </div>
 
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold">Giới tính</label>
+            <div class="flex gap-4">
+                <label class="flex items-center gap-2">
+                    <input type="radio" th:field="*{gender}" value="MALE" /> Nam
+                </label>
+                <label class="flex items-center gap-2">
+                    <input type="radio" th:field="*{gender}" value="FEMALE" /> Nữ
+                </label>
+            </div>
+            <span th:errorclass="text-red-500" th:errors="*{gender}"></span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold" for="birthDate">Ngày sinh</label>
+            <input class="my-input"
+                   type="date"
+                   id="birthDate"
+                   name="birthDate"
+                   th:value="${updateProfileRequest.birthDate != null ? #temporals.format(updateProfileRequest.birthDate, 'yyyy-MM-dd') : ''}"/>
+            <span th:errorclass="text-red-500" th:errors="*{birthDate}"></span>
+        </div>
+
         <button class="my-btn-primary" type="submit">LƯU THAY ĐỔI</button>
         <div class="text-center">
             <a class="hover:text-red-500" th:href="@{/profile}">HỦY BỎ</a>
