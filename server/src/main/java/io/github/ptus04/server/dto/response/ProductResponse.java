@@ -24,4 +24,10 @@ public record ProductResponse(UUID id,
                               List<ProductImageResponse> productImages,
                               List<ProductSizeResponse> productSizes
 ) implements Serializable {
+    public boolean isOutOfStock() {
+        if (productSizes == null || productSizes.isEmpty()) {
+            return inStock == null || inStock <= 0;
+        }
+        return productSizes.stream().allMatch(ProductSizeResponse::isOutOfStock);
+    }
 }
