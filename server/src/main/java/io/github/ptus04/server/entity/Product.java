@@ -13,7 +13,6 @@ import org.jspecify.annotations.NonNull;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -81,6 +80,7 @@ public class Product {
     @NonNull
     @OneToMany(mappedBy = "product")
     @Fetch(FetchMode.SUBSELECT)
+    @OrderBy("id ASC")
     private List<ProductImage> productImages = new ArrayList<>();
 
     @NonNull
@@ -93,6 +93,6 @@ public class Product {
     @JoinTable(name = "category_product",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id"))
-    private List<Category> categories = new LinkedList<>();
+    private List<Category> categories = new ArrayList<>();
 
 }
