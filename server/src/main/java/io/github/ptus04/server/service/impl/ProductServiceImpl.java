@@ -10,6 +10,7 @@ import io.github.ptus04.server.mapper.ProductSizeMapper;
 import io.github.ptus04.server.repository.ProductImageRepository;
 import io.github.ptus04.server.repository.ProductRepository;
 import io.github.ptus04.server.repository.ProductSizeRepository;
+import io.github.ptus04.server.repository.specification.ProductSpecifications;
 import io.github.ptus04.server.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -17,9 +18,11 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -62,6 +65,21 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponse> getProductsPageWithSortAndCategory(int page, int size, String sortBy, String category) {
         PageRequest pageRequest = createPageRequest(page, size, sortBy);
         return productRepository.findAllByCategories_NameContainingIgnoreCase(category, pageRequest)
+                .map(productMapper::toProductResponse);
+    }
+
+    @Override
+    @Cacheable(value = "products", key = "#category + '-' + #query + '-' + #minPrice + '-' + #maxPrice + '-' + #page + '-' + #size + '-' + #sortBy")
+    public Page<ProductResponse> getProductsPageWithFilters(int page,
+                                                            int size,
+                                                            String sortBy,
+                                                            String category,
+                                                            String query,
+                                                            BigDecimal minPrice,
+                                                            BigDecimal maxPrice) {
+        PageRequest pageRequest = createPageRequest(page, size, sortBy);
+        Specification<Product> specification = ProductSpecifications.withFilters(category, query, minPrice, maxPrice);
+        return productRepository.findAll(specification, pageRequest)
                 .map(productMapper::toProductResponse);
     }
 

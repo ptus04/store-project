@@ -12,4 +12,7 @@ public record ProductSizeResponse(UUID id,
                                   Integer inStock,
                                   Instant createdAt,
                                   Instant updatedAt) implements Serializable {
+    public boolean isOutOfStock() {
+        return inStock == null || inStock <= 0;
+    }
 }
