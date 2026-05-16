@@ -9,8 +9,6 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ProductSizeMapper {
-    ProductSize toEntity(ProductSizeResponse productSizeResponse);
-
     ProductSize toEntity(ProductSizeCreateRequest productSizeCreateRequest);
 
     ProductSizeResponse toProductSizeResponse(ProductSize productSize);

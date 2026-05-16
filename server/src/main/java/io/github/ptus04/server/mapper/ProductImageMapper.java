@@ -9,8 +9,6 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ProductImageMapper {
-    ProductImage toEntity(ProductImageResponse productImageResponse);
-
     ProductImage toEntity(ProductImageCreateRequest productImageCreateRequest);
 
     ProductImageResponse toProductImageResponse(ProductImage productImage);

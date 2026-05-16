@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
-    @EntityGraph("Product.withProductImages")
-    List<Product> findByIsNew(Boolean isNew);
+    @EntityGraph(attributePaths = "productImages")
+    List<Product> findTop10ByOrderByCreatedAtDesc();
 
-    @EntityGraph("Product.withProductImages")
+    @EntityGraph(attributePaths = {"productImages", "productSizes", "categories"})
     Page<Product> findAllByCategories_NameContainingIgnoreCase(String categoryName, Pageable pageable);
 }

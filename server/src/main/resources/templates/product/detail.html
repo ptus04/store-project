@@ -119,10 +119,6 @@
         </div>
 
         <div>
-            <p class="mb-2 inline-flex rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-700"
-               th:if="${product.isNew()}">
-                Sản phẩm mới
-            </p>
             <p class="mb-2 inline-flex rounded-full bg-red-500 px-3 py-1 text-sm font-semibold text-white"
                th:if="${product.discount() != 0}">
                 Giảm giá <span class="ml-1"
@@ -146,10 +142,10 @@
 
             <div class="mb-6 rounded border border-gray-200 bg-white p-4">
                 <p class="mb-1 font-semibold">Tình trạng</p>
-                <th:block th:if="${product.isOutOfStock()}">
+                <th:block th:if="${product.inStock() == 0}">
                     <p class="font-semibold text-red-600" data-product-stock-status>Hết hàng</p>
                 </th:block>
-                <th:block th:unless="${product.isOutOfStock()}">
+                <th:block th:unless="${product.inStock() == 0}">
                     <p class="text-gray-700" data-product-stock-status
                        th:if="${#lists.isEmpty(product.productSizes())}"
                        th:text="${'Còn ' + product.inStock() + ' sản phẩm'}"></p>
@@ -163,18 +159,18 @@
                 <p class="mb-2 font-semibold">Chọn kích cỡ</p>
                 <div class="flex flex-wrap gap-2">
                     <label class="cursor-pointer"
-                           th:classappend="${size.isOutOfStock()} ? ' opacity-50 cursor-not-allowed' : ''"
+                           th:classappend="${size.inStock() == 0} ? ' opacity-50 cursor-not-allowed' : ''"
                            th:each="size, sizeStat : ${product.productSizes()}">
                         <input class="peer sr-only"
                                name="size"
                                required
                                th:attr="data-size-stock=${size.inStock()}"
-                               th:checked="${sizeStat.index == 0 && !size.isOutOfStock()}"
-                               th:disabled="${size.isOutOfStock()}"
+                               th:checked="${sizeStat.index == 0 && size.inStock() != 0}"
+                               th:disabled="${size.inStock() == 0}"
                                th:value="${size.name()}"
                                type="radio">
                         <span class="block rounded border border-gray-300 px-4 py-2 font-semibold transition peer-checked:border-red-500 peer-checked:bg-red-500 peer-checked:text-white"
-                              th:classappend="${size.isOutOfStock()} ? ' bg-gray-100 text-gray-400' : ''"
+                              th:classappend="${size.inStock() == 0} ? ' bg-gray-100 text-gray-400' : ''"
                               th:text="${size.name()}">
                             M
                         </span>
@@ -198,8 +194,8 @@
                            name="quantity"
                            required
                            th:attr="max=${#lists.isEmpty(product.productSizes()) ? product.inStock() : 1}"
-                           th:disabled="${product.isOutOfStock()}"
-                           th:value="${product.isOutOfStock() ? 0 : 1}"
+                           th:disabled="${product.inStock() == 0}"
+                           th:value="${product.inStock() == 0 ? 0 : 1}"
                            type="number">
                     <button class="h-10 w-10 rounded border border-gray-300 text-xl font-bold hover:border-red-500 hover:text-red-500"
                             data-quantity-plus
@@ -231,7 +227,7 @@
             <div class="mt-6 flex flex-wrap gap-3">
                 <button class="rounded bg-red-500 px-5 py-3 font-semibold text-white hover:bg-red-400 disabled:cursor-not-allowed disabled:bg-gray-300"
                         data-add-to-cart-button
-                        th:disabled="${product.isOutOfStock()}"
+                        th:disabled="${product.inStock() == 0}"
                         title="Chức năng thêm giỏ hàng sẽ được bổ sung sau"
                         type="button">
                     Thêm giỏ hàng

@@ -1,31 +1,25 @@
 package io.github.ptus04.server.entity;
 
 import jakarta.persistence.*;
-import jakarta.persistence.NamedEntityGraph;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.*;
-import org.hibernate.generator.EventType;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.jspecify.annotations.NonNull;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "products", schema = "storedb")
-@NamedEntityGraph(
-        name = "Product.withProductImages",
-        attributeNodes = {
-                @NamedAttributeNode("productImages")
-        }
-)
 public class Product {
     @Id
     @Column(name = "id", nullable = false, length = 16)
@@ -54,15 +48,10 @@ public class Product {
     private Integer inStock;
 
     @NotNull
-    @Column(name = "is_new", nullable = false)
-    private Boolean isNew;
-
-    @NotNull
     @Column(name = "discount", nullable = false)
     private Float discount;
 
-    @NotNull
-    @Generated(event = {EventType.INSERT, EventType.UPDATE})
+    @Generated
     @Column(name = "price_discount", nullable = false, precision = 18, scale = 2, insertable = false, updatable = false)
     private BigDecimal priceDiscount;
 
@@ -78,21 +67,21 @@ public class Product {
     private Instant deletedAt;
 
     @NonNull
-    @OneToMany(mappedBy = "product")
-    @Fetch(FetchMode.SUBSELECT)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
-    private List<ProductImage> productImages = new ArrayList<>();
+    private Set<ProductImage> productImages = new LinkedHashSet<>();
 
     @NonNull
-    @OneToMany(mappedBy = "product")
-    @Fetch(FetchMode.SUBSELECT)
-    private List<ProductSize> productSizes = new ArrayList<>();
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
+    private Set<ProductSize> productSizes = new LinkedHashSet<>();
 
     @NonNull
     @ManyToMany
     @JoinTable(name = "category_product",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id"))
-    private List<Category> categories = new ArrayList<>();
+    @OrderBy("id ASC")
+    private Set<Category> categories = new LinkedHashSet<>();
 
 }

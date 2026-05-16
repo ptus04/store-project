@@ -24,7 +24,6 @@ public class NotVerifiedRedirectFilter extends OncePerRequestFilter {
     private final UserService userService;
     private final String[] excludePatterns = {"/auth/verify-phone", "/css.*", "/img.*", "/favicon.png", "/api.*"};
 
-    // TODO: Optimize this
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,

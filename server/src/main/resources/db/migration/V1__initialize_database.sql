@@ -26,7 +26,6 @@ create table products
     care_instructions text                                              null,
     price             decimal(18, 2) default 0.00                       not null,
     in_stock          int            default 0                          not null,
-    is_new            boolean        default true                       not null,
     discount          float          default 0                          not null,
     price_discount    decimal(18, 2) as (price * (1 - discount)) stored not null,
     created_at        timestamp      default CURRENT_TIMESTAMP          not null,

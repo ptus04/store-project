@@ -8,7 +8,5 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CategoryMapper {
-    Category toEntity(CategoryResponse categoryResponse);
-
     CategoryResponse toCategoryResponse(Category category);
 }

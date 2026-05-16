@@ -41,7 +41,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Cacheable(value = "new-products")
     public List<ProductResponse> getNewProducts() {
-        return productRepository.findByIsNew(true).stream()
+        return productRepository.findTop10ByOrderByCreatedAtDesc().stream()
                 .map(productMapper::toProductResponse)
                 .toList();
     }
