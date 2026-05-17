@@ -46,9 +46,6 @@ custom:
       allowed-headers: ${ALLOWED_HEADERS}
       allow-credentials: ${ALLOW_CREDENTIALS}
 
-app:
-  frontend-url: http://localhost:5173
-
 jwt:
-  secret: store-project-secret-key-2024-xyzabc
-  expiration-ms: 86400000
+  secret: ${JWT_SECRET}
+  expiration-ms: ${JWT_EXPIRATION_MS}

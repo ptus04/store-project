@@ -25,14 +25,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.web.bind.annotation.ResponseBody;
-import java.util.Map;
-
 import java.util.Optional;
 
 @Controller
@@ -41,7 +33,6 @@ import java.util.Optional;
 public class AuthController {
     private final AuthService authService;
     private final UserRepository userRepository;
-    private final AuthenticationManager authenticationManager;
 
     @GetMapping("login")
     public String getLoginPage(HttpSession httpSession, Model model) {

@@ -17,7 +17,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @EnableMethodSecurity
@@ -31,7 +30,7 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) {
         http
                 .securityMatcher("/api/**")
                 .cors(Customizer.withDefaults())
@@ -53,7 +52,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain filterChain(HttpSecurity http) {
         http
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth

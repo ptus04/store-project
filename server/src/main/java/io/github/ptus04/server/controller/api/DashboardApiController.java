@@ -1,6 +1,6 @@
 package io.github.ptus04.server.controller.api;
 
-import io.github.ptus04.server.dto.response.DailyOrderStatResponse;
+import io.github.ptus04.server.dto.response.OrderDailyStatResponse;
 import io.github.ptus04.server.enums.UserRoleEnum;
 import io.github.ptus04.server.repository.OrderRepository;
 import io.github.ptus04.server.service.UserService;
@@ -32,7 +32,7 @@ public class DashboardApiController {
     }
 
     @GetMapping("/order-stats")
-    public ResponseEntity<List<DailyOrderStatResponse>> getOrderStats(
+    public ResponseEntity<List<OrderDailyStatResponse>> getOrderStats(
             @RequestParam int month,
             @RequestParam int year
     ) {
@@ -56,11 +56,11 @@ public class DashboardApiController {
                         row -> ((Number) row[1]).longValue()
                 ));
 
-        List<DailyOrderStatResponse> result = new ArrayList<>();
+        List<OrderDailyStatResponse> result = new ArrayList<>();
 
         for (int day = 1; day <= yearMonth.lengthOfMonth(); day++) {
             String date = String.format("%02d", day);
-            result.add(new DailyOrderStatResponse(
+            result.add(new OrderDailyStatResponse(
                     date,
                     statsMap.getOrDefault(date, 0L)
             ));

@@ -1,6 +1,6 @@
 package io.github.ptus04.server.dto.response;
 
-public record DailyOrderStatResponse(
+public record OrderDailyStatResponse(
         String date,
         Long orders
 ) {

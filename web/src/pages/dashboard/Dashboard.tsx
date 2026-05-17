@@ -114,7 +114,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <OrderStatsChart/>
+        <OrderStatsChart />
       </div>
     </main>
   );

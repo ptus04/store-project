@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -16,18 +16,10 @@ export default function Login() {
     setError(""); // thêm state error vào component
 
     try {
-      // const response = await fetch("/auth/api-login", {
-      //   // <-- dòng bị thiếu
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      //   body: new URLSearchParams({ email, password }),
-      //   credentials: "include",
-      // });
-
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ email, password }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, password }),
       });
 
       const data = await response.json();
@@ -74,16 +66,16 @@ export default function Login() {
                 className="mb-2 block text-sm font-bold text-gray-900 uppercase"
                 htmlFor="email"
               >
-                Email Address
+                Phone
               </label>
               <input
                 className="w-full border-x-0 border-t-0 border-b border-gray-300 bg-transparent px-0 py-3 placeholder:text-gray-400 focus:border-gray-900 focus:ring-0 disabled:opacity-50"
                 id="email"
                 name="email"
                 placeholder="name@company.com"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 disabled={loading}
               />
             </div>
@@ -98,7 +90,7 @@ export default function Login() {
                 </label>
                 <a
                   className="text-sm text-gray-500 uppercase transition-colors hover:text-gray-900"
-                  href="#"
+                  href="/change-password"
                 >
                   Forgot Password?
                 </a>
