@@ -452,17 +452,16 @@ export default function OrderStatsChart() {
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const [data, setData] = useState<DailyOrderStat[]>([]);
   const [loading, setLoading] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL;
+  const token = localStorage.getItem("token");
 
   const fetchStats = useCallback(async () => {
     setLoading(true);
     try {
       const month = selectedMonth + 1; // API nhận 1-indexed
       const res = await fetch(
-        `/api/admin/dashboard/order-stats?month=${month}&year=${selectedYear}`,
-        {
-          method: "GET",
-          credentials: "include",
-        },
+        `${API_URL}/api/admin/dashboard/order-stats?month=${month}&year=${selectedYear}`,
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (!res.ok) throw new Error("Lỗi khi tải dữ liệu");
       const json: DailyOrderStat[] = await res.json();
@@ -487,7 +486,7 @@ export default function OrderStatsChart() {
           THỐNG KÊ ĐƠN HÀNG
         </h3>
 
-        <div className="gap-stack-sm flex w-full items-center md:w-auto gap-2">
+        <div className="gap-stack-sm flex w-full items-center gap-2 md:w-auto">
           {/* Chọn tháng */}
           <select
             value={selectedMonth}

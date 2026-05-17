@@ -18,15 +18,27 @@ import Dashboard from "@pages/dashboard/Dashboard";
 import MainLayouts from "@layouts/MainLayouts.tsx";
 
 // Kiểm tra user đã đăng nhập và có role ADMIN chưa
+// function isAuthenticated(): boolean {
+//     try {
+//         const raw = localStorage.getItem("user");
+//         if (!raw) return false;
+//         const user = JSON.parse(raw);
+//         return user?.role === "ADMIN";
+//     } catch {
+//         return false;
+//     }
+// }
+
 function isAuthenticated(): boolean {
-    try {
-        const raw = localStorage.getItem("user");
-        if (!raw) return false;
-        const user = JSON.parse(raw);
-        return user?.role === "ADMIN";
-    } catch {
-        return false;
-    }
+  try {
+    const token = localStorage.getItem("token");
+    const raw = localStorage.getItem("user");
+    if (!token || !raw) return false;
+    const user = JSON.parse(raw);
+    return user?.role === "ADMIN";
+  } catch {
+    return false;
+  }
 }
 
 // Bảo vệ route: chưa login → về /login

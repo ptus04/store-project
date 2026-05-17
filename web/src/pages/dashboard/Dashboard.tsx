@@ -12,13 +12,14 @@ export default function Dashboard() {
     totalEmployees: 0,
   });
   const [loading, setLoading] = useState(true);
+  const API_URL = import.meta.env.VITE_API_URL;
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     async function fetchStats() {
       try {
-        const response = await fetch("/api/admin/dashboard/stats", {
-          method: "GET",
-          credentials: "include",
+        const response = await fetch(`${API_URL}/api/admin/dashboard/stats`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!response.ok) {

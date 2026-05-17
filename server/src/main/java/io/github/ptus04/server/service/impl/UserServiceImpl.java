@@ -3,6 +3,7 @@ package io.github.ptus04.server.service.impl;
 import io.github.ptus04.server.dto.request.UserProfileUpdateRequest;
 import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.entity.User;
+import io.github.ptus04.server.enums.UserRoleEnum;
 import io.github.ptus04.server.exception.PhoneExistedException;
 import io.github.ptus04.server.exception.UserNotFoundException;
 import io.github.ptus04.server.mapper.UserMapper;
@@ -45,5 +46,10 @@ public class UserServiceImpl implements UserService {
         user.setBirthDate(request.birthDate());
 
         return userMapper.toUserResponse(userRepository.save(user));
+    }
+
+    @Override
+    public long countByRole(UserRoleEnum role) {
+        return userRepository.countByRole(role);
     }
 }

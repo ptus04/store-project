@@ -48,3 +48,7 @@ custom:
 
 app:
   frontend-url: http://localhost:5173
+
+jwt:
+  secret: store-project-secret-key-2024-xyzabc
+  expiration-ms: 86400000

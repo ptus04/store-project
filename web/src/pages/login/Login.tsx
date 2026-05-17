@@ -8,18 +8,26 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [error, setError] = useState("");
+  const API_URL = import.meta.env.VITE_API_URL;
+
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError(""); // thêm state error vào component
 
     try {
-      const response = await fetch("/auth/api-login", {
-        // <-- dòng bị thiếu
+      // const response = await fetch("/auth/api-login", {
+      //   // <-- dòng bị thiếu
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      //   body: new URLSearchParams({ email, password }),
+      //   credentials: "include",
+      // });
+
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({ email, password }),
-        credentials: "include",
       });
 
       const data = await response.json();
@@ -29,6 +37,7 @@ export default function Login() {
         return;
       }
 
+      localStorage.setItem("token", data.token);
       localStorage.setItem(
         "user",
         JSON.stringify({

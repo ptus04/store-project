@@ -18,6 +18,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 @EnableMethodSecurity
 @EnableWebSecurity
 @EnableConfigurationProperties(SecurityProperties.class)
@@ -25,15 +27,18 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
     private final CustomAuthFailureHandler customAuthFailureHandler;
+    private final JwtAuthFilter jwtAuthFilter;
 
     @Bean
     @Order(1)
-    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) {
+    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/api/**")
-                .csrf(CsrfConfigurer::spa)
+                .cors(Customizer.withDefaults())
+                .csrf(CsrfConfigurer::disable)
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login").anonymous()
+                        .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/products/**"
                         ).hasAnyRole("EMPLOYEE", "ADMIN")
@@ -41,7 +46,8 @@ public class SecurityConfig {
                                 "/api/products/**"
                         ).hasRole("ADMIN")
                         .anyRequest().permitAll()
-                );
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -50,9 +56,6 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http
                 .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/auth/api-login") // thêm dòng này
-                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/img/**", "/favicon.png").permitAll()
                         .requestMatchers(
