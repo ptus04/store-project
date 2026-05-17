@@ -25,6 +25,14 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.web.bind.annotation.ResponseBody;
+import java.util.Map;
+
 import java.util.Optional;
 
 @Controller
@@ -33,6 +41,7 @@ import java.util.Optional;
 public class AuthController {
     private final AuthService authService;
     private final UserRepository userRepository;
+    private final AuthenticationManager authenticationManager;
 
     @GetMapping("login")
     public String getLoginPage(HttpSession httpSession, Model model) {
@@ -131,5 +140,43 @@ public class AuthController {
         }
 
         return "redirect:/";
+    }
+
+    @PostMapping("api-login")
+    @ResponseBody
+    public ResponseEntity<?> apiLogin(@RequestParam String email,
+                                      @RequestParam String password,
+                                      HttpServletRequest request,
+                                      HttpServletResponse response) {
+        try {
+            Authentication auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, password)
+            );
+
+            boolean isAdmin = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+            if (!isAdmin) {
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("message", "Bạn không có quyền truy cập hệ thống quản trị"));
+            }
+
+            CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+
+            SecurityContext context = SecurityContextHolder.getContext();
+            context.setAuthentication(auth);
+            new HttpSessionSecurityContextRepository().saveContext(context, request, response);
+
+            return ResponseEntity.ok(Map.of(
+                    "name", userDetails.getName(),
+                    "role", "ADMIN"
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Email hoặc mật khẩu không đúng"));
+        }
     }
 }
