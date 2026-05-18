@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -30,9 +29,9 @@ public class OrderDetail {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_size_id")
-    private ProductSize productSize;
+    @Size(max = 4)
+    @Column(name = "product_size", length = 4)
+    private String productSize;
 
     @NotNull
     @Column(name = "quantity", nullable = false)
@@ -45,6 +44,5 @@ public class OrderDetail {
     @NotNull
     @Column(name = "subtotal", nullable = false, precision = 18, scale = 2)
     private BigDecimal subtotal;
-
 
 }

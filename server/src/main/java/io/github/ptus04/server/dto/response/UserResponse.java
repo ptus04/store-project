@@ -21,7 +21,8 @@ public record UserResponse(UUID id,
                            Instant phoneVerifiedAt,
                            Instant emailVerifiedAt,
                            Instant createdAt,
-                           Instant updatedAt) implements Serializable {
+                           Instant updatedAt,
+                           Instant disabledAt) implements Serializable {
     public boolean isPhoneVerified() {
         return phoneVerifiedAt != null;
     }
