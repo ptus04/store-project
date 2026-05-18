@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface UserAddressService {
     List<UserAddressResponse> getAddresses(UUID userId);
     void addAddress(UUID userId, UserAddressRequest request);
-    void updateAddress(UUID userId, UUID addressId, UserAddressRequest request);
+    void updateAddress(UUID addressId, UserAddressRequest request);
     void deleteAddress(UUID userId, UUID addressId);
     void setDefaultAddress(UUID userId, UUID addressId);
 }

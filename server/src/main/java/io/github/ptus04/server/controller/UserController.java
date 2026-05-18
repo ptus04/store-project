@@ -4,7 +4,6 @@ import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.mapper.UserMapper;
 import io.github.ptus04.server.security.CustomUserDetails;
 import io.github.ptus04.server.service.UserService;
-import io.github.ptus04.server.security.CustomUserDetails;
 import io.github.ptus04.server.dto.request.UserAddressRequest;
 import io.github.ptus04.server.service.UserAddressService;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,7 @@ public class UserController {
         model.addAttribute("user", userService.getUserById(details.getId()));
         model.addAttribute("addresses", userAddressService.getAddresses(details.getId()));
         if (!model.containsAttribute("addressRequest")) {
-            model.addAttribute("addressRequest", new UserAddressRequest());
+            model.addAttribute("addressRequest", UserAddressRequest.builder().build());
         }
         return "user/profile";
     }

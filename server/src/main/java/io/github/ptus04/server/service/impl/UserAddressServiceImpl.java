@@ -50,7 +50,7 @@ public class UserAddressServiceImpl implements UserAddressService {
         if (currentCount == 0) {
             address.setIsDefault(true);
         } else {
-            if (Boolean.TRUE.equals(request.getIsDefault())) {
+            if (Boolean.TRUE.equals(request.isDefault())) {
                 unsetCurrentDefault(userId);
                 address.setIsDefault(true);
             } else {
@@ -63,21 +63,17 @@ public class UserAddressServiceImpl implements UserAddressService {
 
     @Override
     @Transactional
-    public void updateAddress(UUID userId, UUID addressId, UserAddressRequest request) {
+    public void updateAddress(UUID addressId, UserAddressRequest request) {
         UserAddress address = userAddressRepository.findById(addressId)
                 .orElseThrow(() -> new RuntimeException("Address not found"));
-
-        if (!address.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Unauthorized");
-        }
 
         boolean wasDefault = address.getIsDefault();
         userAddressMapper.updateEntityFromRequest(request, address);
 
-        if (Boolean.TRUE.equals(request.getIsDefault()) && !wasDefault) {
-            unsetCurrentDefault(userId);
+        if (Boolean.TRUE.equals(request.isDefault()) && !wasDefault) {
+            unsetCurrentDefault(address.getUser().getId());
             address.setIsDefault(true);
-        } else if (wasDefault && Boolean.FALSE.equals(request.getIsDefault())) {
+        } else if (wasDefault && Boolean.FALSE.equals(request.isDefault())) {
             // Cannot unset default address directly without setting another one
             // We just keep it as default if it was the default
             address.setIsDefault(true);
