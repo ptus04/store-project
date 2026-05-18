@@ -1,6 +1,6 @@
 package io.github.ptus04.server.controller;
 
-import io.github.ptus04.server.dto.request.UserAddressRequest;
+import io.github.ptus04.server.dto.request.UserAddressUpdateRequest;
 import io.github.ptus04.server.security.CustomUserDetails;
 import io.github.ptus04.server.service.UserAddressService;
 import jakarta.validation.Valid;
@@ -27,7 +27,7 @@ public class UserAddressController {
 
     @PostMapping
     public String addAddress(
-            @Valid @ModelAttribute("addressRequest") UserAddressRequest request,
+            @Valid @ModelAttribute("addressRequest") UserAddressUpdateRequest request,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             @AuthenticationPrincipal CustomUserDetails details) {
@@ -50,19 +50,44 @@ public class UserAddressController {
         return "redirect:/profile";
     }
 
+    @PostMapping("/{id}/update")
+    public String updateAddress(
+            @PathVariable UUID id,
+            @Valid @ModelAttribute("addressRequest") UserAddressUpdateRequest request,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) {
+
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.addressRequest", bindingResult);
+            redirectAttributes.addFlashAttribute("addressRequest", request);
+            redirectAttributes.addFlashAttribute("showEditAddressModal", true);
+            redirectAttributes.addFlashAttribute("editAddressId", id);
+            return "redirect:/profile";
+        }
+
+        try {
+            userAddressService.updateAddress(id, request);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("addressError", e.getMessage());
+            redirectAttributes.addFlashAttribute("addressRequest", request);
+            redirectAttributes.addFlashAttribute("showEditAddressModal", true);
+            redirectAttributes.addFlashAttribute("editAddressId", id);
+        }
+
+        return "redirect:/profile";
+    }
+
     @PostMapping("/{id}/delete")
     public String deleteAddress(
-            @PathVariable UUID id,
-            @AuthenticationPrincipal CustomUserDetails details) {
-        userAddressService.deleteAddress(details.getId(), id);
+            @PathVariable UUID id) {
+        userAddressService.deleteAddress(id);
         return "redirect:/profile";
     }
 
     @PostMapping("/{id}/set-default")
     public String setDefaultAddress(
-            @PathVariable UUID id,
-            @AuthenticationPrincipal CustomUserDetails details) {
-        userAddressService.setDefaultAddress(details.getId(), id);
+            @PathVariable UUID id) {
+        userAddressService.setDefaultAddress(id);
         return "redirect:/profile";
     }
 }

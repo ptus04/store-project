@@ -4,7 +4,7 @@ import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.mapper.UserMapper;
 import io.github.ptus04.server.security.CustomUserDetails;
 import io.github.ptus04.server.service.UserService;
-import io.github.ptus04.server.dto.request.UserAddressRequest;
+import io.github.ptus04.server.dto.request.UserAddressUpdateRequest;
 import io.github.ptus04.server.service.UserAddressService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,7 +26,7 @@ public class UserController {
         model.addAttribute("user", userService.getUserById(details.getId()));
         model.addAttribute("addresses", userAddressService.getAddresses(details.getId()));
         if (!model.containsAttribute("addressRequest")) {
-            model.addAttribute("addressRequest", UserAddressRequest.builder().build());
+            model.addAttribute("addressRequest", UserAddressUpdateRequest.builder().build());
         }
         return "user/profile";
     }
@@ -37,7 +37,7 @@ public class UserController {
             UserResponse userResponse = userService.getUserById(details.getId());
             model.addAttribute("updateProfileRequest", userMapper.toUserProfileUpdateRequest(userMapper.toEntity(userResponse)));
         }
-        return "user/update";
+        return "user/profile-edit";
     }
 
     @org.springframework.web.bind.annotation.PostMapping("/update")

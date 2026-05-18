@@ -99,47 +99,72 @@
                          style="margin-left: 1cm; margin-right: 1cm;">
                         <div class="flex items-center gap-2">
                             <i class="fa fa-location-dot text-gray-500 text-xl"></i>
-                            <h3 class="text-xl font-bold text-gray-900">Địa chỉ (<span th:text="${addresses.size()}">0</span>/10)</h3>
+                            <h3 class="text-xl font-bold text-gray-900">Địa chỉ (<span
+                                    th:text="${addresses.size()}">0</span>/10)</h3>
                         </div>
-                        <button onclick="document.getElementById('addressModal').classList.remove('hidden')" 
+                        <button class="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold hover:bg-gray-50 transition text-gray-900"
+                                onclick="openAddModal()"
                                 th:if="${addresses.size() < 10}"
-                                class="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold hover:bg-gray-50 transition text-gray-900"
                                 type="button">
                             + Thêm mới
                         </button>
-                        <button th:if="${addresses.size() >= 10}" disabled title="Đã đạt giới hạn 10 địa chỉ"
-                                class="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold bg-gray-100 text-gray-400 cursor-not-allowed"
+                        <button class="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold bg-gray-100 text-gray-400 cursor-not-allowed" disabled th:if="${addresses.size() >= 10}"
+                                title="Đã đạt giới hạn 10 địa chỉ"
                                 type="button">
                             + Thêm mới
                         </button>
                     </div>
 
                     <!-- ADDRESS LIST (Scrollable) -->
-                    <div class="flex flex-1 flex-col gap-4 overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-[#f1f1f1] [&::-webkit-scrollbar-track]:rounded-[8px] [&::-webkit-scrollbar-thumb]:bg-[#d1d5db] [&::-webkit-scrollbar-thumb]:rounded-[8px] [&::-webkit-scrollbar-thumb:hover]:bg-[#9ca3af]">
+                    <div class="flex flex-1 flex-col gap-4 overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-[#f1f1f1] [&::-webkit-scrollbar-track]:rounded-lg [&::-webkit-scrollbar-thumb]:bg-[#d1d5db] [&::-webkit-scrollbar-thumb]:rounded-lg [&::-webkit-scrollbar-thumb:hover]:bg-[#9ca3af]">
                         <!-- Empty State -->
-                        <div th:if="${addresses.isEmpty()}"
-                                class="flex flex-1 flex-col items-center justify-center gap-2 text-gray-500 min-h-[150px]">
+                        <div class="flex flex-1 flex-col items-center justify-center gap-2 text-gray-500 min-h-37.5"
+                             th:if="${addresses.isEmpty()}">
                             <i class="fa fa-map-location-dot text-3xl mb-1"></i>
                             <span class="text-center">Bạn chưa có địa chỉ nào</span>
                         </div>
-                        
+
                         <!-- List -->
-                        <div th:each="addr : ${addresses}" class="rounded-2xl border border-gray-100 bg-white p-4 flex flex-col gap-3 shadow-sm hover:shadow-md transition">
+                        <div class="rounded-2xl border border-gray-100 bg-white p-4 flex flex-col gap-3 shadow-sm hover:shadow-md transition"
+                             th:each="addr : ${addresses}">
                             <div class="flex justify-between items-start">
                                 <div class="flex items-center gap-2">
-                                    <span th:if="${addr.isDefault}" class="rounded-md bg-red-100 px-2 py-1 text-xs font-semibold text-red-600 border border-red-200">Mặc định</span>
-                                    <span class="text-sm font-semibold text-gray-900" th:text="${addr.city}">Thành phố</span>
+                                    <span class="rounded-md bg-red-100 px-2 py-1 text-xs font-semibold text-red-600 border border-red-200"
+                                          th:if="${addr.isDefault}">Mặc định</span>
+                                    <span class="text-sm font-semibold text-gray-900"
+                                          th:text="${addr.city}">Thành phố</span>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <form th:if="${!addr.isDefault}" method="post" th:action="@{'/profile/addresses/' + ${addr.id} + '/set-default'}">
-                                        <button type="submit" class="text-xs font-semibold text-gray-500 hover:text-gray-900 underline underline-offset-2">Đặt mặc định</button>
+                                    <form method="post" th:action="@{'/profile/addresses/' + ${addr.id} + '/set-default'}"
+                                          th:if="${!addr.isDefault}">
+                                        <button class="text-xs font-semibold text-gray-500 hover:text-gray-900 underline underline-offset-2"
+                                                type="submit">
+                                            Đặt mặc định
+                                        </button>
                                     </form>
-                                    <form method="post" th:action="@{'/profile/addresses/' + ${addr.id} + '/delete'}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa địa chỉ này?');">
-                                        <button type="submit" class="text-xs font-semibold text-red-500 hover:text-red-700"><i class="fa fa-trash-can"></i> Xóa</button>
+                                    <button class="text-xs font-semibold text-blue-500 hover:text-blue-700"
+                                            onclick="openEditModalFromButton(this)"
+                                            th:data-address="${addr.address}"
+                                            th:data-city="${addr.city}"
+                                            th:data-default="${addr.isDefault}"
+                                            th:data-district="${addr.district != null ? addr.district : ''}"
+                                            th:data-id="${addr.id}"
+                                            th:data-ward="${addr.ward}"
+                                            type="button">
+                                        <i class="fa-regular fa-pen-to-square"></i> Sửa
+                                    </button>
+                                    <form method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa địa chỉ này?');"
+                                          th:action="@{'/profile/addresses/' + ${addr.id} + '/delete'}">
+                                        <button class="text-xs font-semibold text-red-500 hover:text-red-700"
+                                                type="submit"><i
+                                                class="fa fa-trash-can"></i> Xóa
+                                        </button>
                                     </form>
                                 </div>
                             </div>
-                            <p class="text-[15px] text-gray-600 leading-relaxed" th:text="${addr.address + ', ' + addr.ward + (addr.district != null and !addr.district.isEmpty() ? ', ' + addr.district : '') + ', ' + addr.city}">Chi tiết địa chỉ</p>
+                            <p class="text-[15px] text-gray-600 leading-relaxed"
+                               th:text="${addr.address + ', ' + addr.ward + (addr.district != null and !addr.district.isEmpty() ? ', ' + addr.district : '') + ', ' + addr.city}">
+                                Chi tiết địa chỉ</p>
                         </div>
                     </div>
                 </section>
@@ -148,7 +173,7 @@
 
             <!-- ROW 2: ĐƠN HÀNG -->
             <section
-                    class="mt-0 rounded-[28px] border border-gray-200 bg-white p-6 md:p-8 shadow-sm flex flex-col min-h-[500px]">
+                    class="mt-0 rounded-[28px] border border-gray-200 bg-white p-6 md:p-8 shadow-sm flex flex-col min-h-125">
                 <!-- Header -->
                 <div class="mb-6 flex items-center justify-between">
                     <div class="flex items-center gap-2">
@@ -163,30 +188,30 @@
 
                 <!-- Order Status Tabs -->
                 <div
-                        class="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4 overflow-x-auto [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-[#f1f1f1] [&::-webkit-scrollbar-track]:rounded-[8px] [&::-webkit-scrollbar-thumb]:bg-[#d1d5db] [&::-webkit-scrollbar-thumb]:rounded-[8px] [&::-webkit-scrollbar-thumb:hover]:bg-[#9ca3af]">
+                        class="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4 overflow-x-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-[#f1f1f1] [&::-webkit-scrollbar-track]:rounded-lg [&::-webkit-scrollbar-thumb]:bg-[#d1d5db] [&::-webkit-scrollbar-thumb]:rounded-lg [&::-webkit-scrollbar-thumb:hover]:bg-[#9ca3af]">
                     <button
-                            class="shrink-0 rounded-[12px] bg-gray-900 px-6 py-2.5 text-[15px] font-semibold text-white shadow-sm transition hover:bg-black">
+                            class="shrink-0 rounded-xl bg-gray-900 px-6 py-2.5 text-[15px] font-semibold text-white shadow-sm transition hover:bg-black">
                         Tất cả
                     </button>
                     <button
-                            class="shrink-0 rounded-[12px] border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition">
+                            class="shrink-0 rounded-xl border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition">
                         Đang giao
                     </button>
                     <button
-                            class="shrink-0 rounded-[12px] border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition">
+                            class="shrink-0 rounded-xl border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition">
                         Hoàn thành
                     </button>
                     <button
-                            class="shrink-0 rounded-[12px] border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition">
+                            class="shrink-0 rounded-xl border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition">
                         Đã hủy
                     </button>
                 </div>
 
                 <!-- ORDER LIST (Scrollable) -->
                 <div
-                        class="flex flex-1 flex-col gap-4 overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-[#f1f1f1] [&::-webkit-scrollbar-track]:rounded-[8px] [&::-webkit-scrollbar-thumb]:bg-[#d1d5db] [&::-webkit-scrollbar-thumb]:rounded-[8px] [&::-webkit-scrollbar-thumb:hover]:bg-[#9ca3af] bg-gray-50/50 rounded-2xl p-6 border border-gray-100">
+                        class="flex flex-1 flex-col gap-4 overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-[#f1f1f1] [&::-webkit-scrollbar-track]:rounded-lg [&::-webkit-scrollbar-thumb]:bg-[#d1d5db] [&::-webkit-scrollbar-thumb]:rounded-lg [&::-webkit-scrollbar-thumb:hover]:bg-[#9ca3af] bg-gray-50/50 rounded-2xl p-6 border border-gray-100">
                     <!-- Empty State -->
-                    <div class="flex flex-1 flex-col items-center justify-center gap-3 text-gray-500 min-h-[200px]">
+                    <div class="flex flex-1 flex-col items-center justify-center gap-3 text-gray-500 min-h-50">
                         <div class="h-20 w-20 rounded-full bg-white flex items-center justify-center shadow-sm">
                             <i class="fa fa-box-open text-3xl text-gray-400"></i>
                         </div>
@@ -196,54 +221,152 @@
             </section>
 
         </div>
+    </div>
     <!-- ADDRESS MODAL -->
-    <div id="addressModal" th:classappend="${showAddressModal == true} ? '' : 'hidden'" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm transition-opacity">
-        <div class="w-full max-w-md rounded-[24px] bg-white p-6 md:p-8 shadow-2xl transform transition-transform">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold text-gray-900">Thêm địa chỉ mới</h3>
-                <button onclick="document.getElementById('addressModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 transition p-2"><i class="fa fa-xmark text-xl"></i></button>
-            </div>
-            
-            <form method="post" th:action="@{/profile/addresses}" th:object="${addressRequest}" class="flex flex-col gap-4">
-                <div th:if="${addressError}" class="rounded-xl bg-red-50 p-3 border border-red-100 flex items-start gap-2 text-sm text-red-600 mb-2">
-                    <i class="fa fa-circle-exclamation mt-0.5"></i>
-                    <span th:text="${addressError}"></span>
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm transition-opacity"
+             id="addressModal"
+             th:classappend="${showAddressModal == true or showEditAddressModal == true} ? '' : 'hidden'">
+            <div class="w-full max-w-md rounded-3xl bg-white p-6 md:p-8 shadow-2xl transform transition-transform">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-gray-900" id="modalTitle">Thêm địa chỉ mới</h3>
+                    <button class="text-gray-400 hover:text-gray-600 transition p-2"
+                            onclick="document.getElementById('addressModal').classList.add('hidden')"><i class="fa fa-xmark text-xl"></i>
+                    </button>
                 </div>
-            
-                <div>
-                    <label class="mb-1.5 block text-sm font-semibold text-gray-700">Tỉnh/Thành phố *</label>
-                    <input type="text" th:field="*{city}" required maxlength="32" class="w-full rounded-xl border border-gray-300 px-4 py-3 text-[15px] focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition" placeholder="VD: TP. Hồ Chí Minh">
-                    <p th:if="${#fields.hasErrors('city')}" th:errors="*{city}" class="mt-1.5 text-xs font-medium text-red-500"></p>
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-sm font-semibold text-gray-700">Quận/Huyện</label>
-                    <input type="text" th:field="*{district}" maxlength="32" class="w-full rounded-xl border border-gray-300 px-4 py-3 text-[15px] focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition" placeholder="VD: Quận 1">
-                    <p th:if="${#fields.hasErrors('district')}" th:errors="*{district}" class="mt-1.5 text-xs font-medium text-red-500"></p>
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-sm font-semibold text-gray-700">Phường/Xã *</label>
-                    <input type="text" th:field="*{ward}" required maxlength="32" class="w-full rounded-xl border border-gray-300 px-4 py-3 text-[15px] focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition" placeholder="VD: Phường Bến Nghé">
-                    <p th:if="${#fields.hasErrors('ward')}" th:errors="*{ward}" class="mt-1.5 text-xs font-medium text-red-500"></p>
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-sm font-semibold text-gray-700">Địa chỉ chi tiết (Số nhà, đường) *</label>
-                    <input type="text" th:field="*{address}" required maxlength="64" class="w-full rounded-xl border border-gray-300 px-4 py-3 text-[15px] focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition" placeholder="VD: Số 1 Lê Duẩn">
-                    <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="mt-1.5 text-xs font-medium text-red-500"></p>
-                </div>
-                
-                <div class="flex items-center gap-3 mt-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <input type="checkbox" th:field="*{isDefault}" id="isDefault" class="h-4.5 w-4.5 rounded border-gray-300 text-red-600 focus:ring-red-600">
-                    <label for="isDefault" class="text-[15px] font-medium text-gray-700 cursor-pointer select-none">Đặt làm địa chỉ mặc định</label>
-                </div>
-                
-                <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
-                    <button type="button" onclick="document.getElementById('addressModal').classList.add('hidden')" class="rounded-xl border border-gray-200 bg-white px-6 py-3 text-[15px] font-semibold text-gray-700 hover:bg-gray-50 transition">Hủy</button>
-                    <button type="submit" class="rounded-xl bg-red-500 px-6 py-3 text-[15px] font-semibold text-white shadow-sm hover:bg-red-600 transition hover:shadow-md">Lưu địa chỉ</button>
-                </div>
-            </form>
-        </div>
-</main>
 
+                <form class="flex flex-col gap-4" id="addressForm" method="post" th:action="@{/profile/addresses}"
+                      th:object="${addressRequest}">
+                    <div class="rounded-xl bg-red-50 p-3 border border-red-100 flex items-start gap-2 text-sm text-red-600 mb-2"
+                         th:if="${addressError}">
+                        <i class="fa fa-circle-exclamation mt-0.5"></i>
+                        <span th:text="${addressError}"></span>
+                    </div>
+
+                    <div>
+                        <label class="mb-1.5 block text-sm font-semibold text-gray-700" for="city">Tỉnh/Thành phố *</label>
+                        <input class="w-full rounded-xl border border-gray-300 px-4 py-3 text-[15px] focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition" id="city" maxlength="32" placeholder="VD: TP. Hồ Chí Minh" required
+                               th:field="*{city}"
+                               type="text">
+                        <p class="mt-1.5 text-xs font-medium text-red-500" th:errors="*{city}"
+                           th:if="${#fields.hasErrors('city')}"></p>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-semibold text-gray-700" for="district">Quận/Huyện</label>
+                        <input class="w-full rounded-xl border border-gray-300 px-4 py-3 text-[15px] focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition" id="district" maxlength="32" placeholder="VD: Quận 1"
+                               th:field="*{district}"
+                               type="text">
+                        <p class="mt-1.5 text-xs font-medium text-red-500" th:errors="*{district}"
+                           th:if="${#fields.hasErrors('district')}"></p>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-semibold text-gray-700" for="ward">Phường/Xã *</label>
+                        <input class="w-full rounded-xl border border-gray-300 px-4 py-3 text-[15px] focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition" id="ward" maxlength="32" placeholder="VD: Phường Bến Nghé" required
+                               th:field="*{ward}"
+                               type="text">
+                        <p class="mt-1.5 text-xs font-medium text-red-500" th:errors="*{ward}"
+                           th:if="${#fields.hasErrors('ward')}"></p>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-semibold text-gray-700" for="address">Địa chỉ chi tiết (Số nhà, đường) *</label>
+                        <input class="w-full rounded-xl border border-gray-300 px-4 py-3 text-[15px] focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition" id="address" maxlength="64" placeholder="VD: Số 1 Lê Duẩn" required
+                               th:field="*{address}"
+                               type="text">
+                        <p class="mt-1.5 text-xs font-medium text-red-500" th:errors="*{address}"
+                           th:if="${#fields.hasErrors('address')}"></p>
+                    </div>
+
+                    <div class="flex items-center gap-3 mt-3 bg-gray-50 p-3 rounded-xl border border-gray-100"
+                         id="isDefaultContainer">
+                        <input class="h-4.5 w-4.5 rounded border-gray-300 text-red-600 focus:ring-red-600" id="isDefault" th:field="*{isDefault}"
+                               type="checkbox">
+                        <label class="text-[15px] font-medium text-gray-700 cursor-pointer select-none" for="isDefault">Đặt
+                            làm địa chỉ mặc định</label>
+                    </div>
+
+                    <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                        <button class="rounded-xl border border-gray-200 bg-white px-6 py-3 text-[15px] font-semibold text-gray-700 hover:bg-gray-50 transition" onclick="document.getElementById('addressModal').classList.add('hidden')"
+                                type="button">
+                            Hủy
+                        </button>
+                        <button class="rounded-xl bg-red-500 px-6 py-3 text-[15px] font-semibold text-white shadow-sm hover:bg-red-600 transition hover:shadow-md"
+                                type="submit">
+                            Lưu địa chỉ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            function openAddModal() {
+                const modal = document.getElementById('addressModal');
+                const title = document.getElementById('modalTitle');
+                const form = document.getElementById('addressForm');
+
+                title.textContent = 'Thêm địa chỉ mới';
+                form.action = '/profile/addresses';
+
+                document.getElementById('city').value = '';
+                document.getElementById('district').value = '';
+                document.getElementById('ward').value = '';
+                document.getElementById('address').value = '';
+                document.getElementById('isDefault').checked = false;
+                document.getElementById('isDefaultContainer').classList.remove('hidden');
+
+                modal.classList.remove('hidden');
+            }
+
+            function openEditModalFromButton(button) {
+                const id = button.getAttribute('data-id');
+                const city = button.getAttribute('data-city');
+                const district = button.getAttribute('data-district');
+                const ward = button.getAttribute('data-ward');
+                const address = button.getAttribute('data-address');
+                const isDefault = button.getAttribute('data-default') === 'true';
+
+                openEditModal(id, city, district, ward, address, isDefault);
+            }
+
+            function openEditModal(id, city, district, ward, address, isDefault) {
+                const modal = document.getElementById('addressModal');
+                const title = document.getElementById('modalTitle');
+                const form = document.getElementById('addressForm');
+
+                title.textContent = 'Chỉnh sửa địa chỉ';
+                form.action = '/profile/addresses/' + id + '/update';
+
+                document.getElementById('city').value = city || '';
+                document.getElementById('district').value = district || '';
+                document.getElementById('ward').value = ward || '';
+                document.getElementById('address').value = address || '';
+                document.getElementById('isDefault').checked = !!isDefault;
+
+                if (isDefault) {
+                    document.getElementById('isDefaultContainer').classList.add('hidden');
+                } else {
+                    document.getElementById('isDefaultContainer').classList.remove('hidden');
+                }
+
+                modal.classList.remove('hidden');
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const showEdit = /*[[${showEditAddressModal}]]*/ false;
+                const editId = /*[[${editAddressId}]]*/ null;
+                if (showEdit && editId) {
+                    const city = /*[[${addressRequest?.city}]]*/ '';
+                    const district = /*[[${addressRequest?.district}]]*/ '';
+                    const ward = /*[[${addressRequest?.ward}]]*/ '';
+                    const address = /*[[${addressRequest?.address}]]*/ '';
+                    const isDefault = /*[[${addressRequest?.isDefault}]]*/ false;
+
+                    openEditModal(editId, city, district, ward, address, isDefault);
+                }
+            });
+            /*]]>*/
+        </script>
+</main>
 
 
 </body>

@@ -1,6 +1,5 @@
 package io.github.ptus04.server.mapper;
 
-import io.github.ptus04.server.dto.request.UserAddressRequest;
 import io.github.ptus04.server.dto.request.UserAddressUpdateRequest;
 import io.github.ptus04.server.dto.response.UserAddressResponse;
 import io.github.ptus04.server.entity.UserAddress;
@@ -10,7 +9,7 @@ import org.mapstruct.*;
 public interface UserAddressMapper {
     UserAddressResponse toResponse(UserAddress userAddress);
 
-    UserAddress toEntity(UserAddressRequest request);
+    UserAddress toEntity(UserAddressUpdateRequest request);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void partialUpdate(UserAddressUpdateRequest request, @MappingTarget UserAddress userAddress);
