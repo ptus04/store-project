@@ -1,6 +1,5 @@
 package io.github.ptus04.server.service.impl;
 
-import io.github.ptus04.server.dto.request.UserAddressRequest;
 import io.github.ptus04.server.dto.request.UserAddressUpdateRequest;
 import io.github.ptus04.server.dto.response.UserAddressResponse;
 import io.github.ptus04.server.entity.User;
@@ -36,7 +35,7 @@ public class UserAddressServiceImpl implements UserAddressService {
 
     @Override
     @Transactional
-    public void addAddress(UUID userId, UserAddressRequest request) {
+    public void addAddress(UUID userId, UserAddressUpdateRequest request) {
         long currentCount = userAddressRepository.countByUser_Id(userId);
         if (currentCount >= 10) {
             throw new RuntimeException("Bạn chỉ có thể lưu tối đa 10 địa chỉ.");
@@ -85,14 +84,11 @@ public class UserAddressServiceImpl implements UserAddressService {
 
     @Override
     @Transactional
-    public void deleteAddress(UUID userId, UUID addressId) {
+    public void deleteAddress(UUID addressId) {
         UserAddress address = userAddressRepository.findById(addressId)
                 .orElseThrow(() -> new RuntimeException("Address not found"));
 
-        if (!address.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Unauthorized");
-        }
-
+        UUID userId = address.getUser().getId();
         boolean isDefault = address.getIsDefault();
         userAddressRepository.delete(address);
 
@@ -100,7 +96,7 @@ public class UserAddressServiceImpl implements UserAddressService {
             // Set the most recent address as default if there is any
             List<UserAddress> remaining = userAddressRepository.findAllByUser_IdOrderByIsDefaultDescCreatedAtDesc(userId);
             if (!remaining.isEmpty()) {
-                UserAddress newDefault = remaining.get(0);
+                UserAddress newDefault = remaining.getFirst();
                 newDefault.setIsDefault(true);
                 userAddressRepository.save(newDefault);
             }
@@ -109,14 +105,11 @@ public class UserAddressServiceImpl implements UserAddressService {
 
     @Override
     @Transactional
-    public void setDefaultAddress(UUID userId, UUID addressId) {
+    public void setDefaultAddress(UUID addressId) {
         UserAddress address = userAddressRepository.findById(addressId)
                 .orElseThrow(() -> new RuntimeException("Address not found"));
 
-        if (!address.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Unauthorized");
-        }
-
+        UUID userId = address.getUser().getId();
         unsetCurrentDefault(userId);
         address.setIsDefault(true);
         userAddressRepository.save(address);
