@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import Login from "@pages/login/Login";
 import Dashboard from "@pages/dashboard/Dashboard";
+import CategoryList from "@pages/category/CategoryList";
 import MainLayouts from "@layouts/MainLayouts.tsx";
 
 // Kiểm tra user đã đăng nhập và có role ADMIN chưa
@@ -47,6 +48,7 @@ const App = () => {
       >
         <Route index element={<Dashboard />} />
         <Route path="/" element={<Dashboard />} />
+        <Route path="/categories" element={<CategoryList />} />
       </Route>
 
       {/* Mọi route không tồn tại → về trang chủ */}

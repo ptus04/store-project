@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 // Đọc thông tin user từ localStorage
 function getUserInfo() {
@@ -17,6 +17,7 @@ function getUserInfo() {
 
 export default function SideNavBar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const user = getUserInfo();
 
   function handleLogout() {
@@ -67,37 +68,43 @@ export default function SideNavBar() {
 
       {/* Navigation Links */}
       <div className="flex flex-1 flex-col gap-1 px-2">
-        {/* Active Item: Dashboard */}
-        <a
-          className="bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary flex items-center gap-3 border-l-4 px-4 py-3"
-          href="#"
+        <button
+          onClick={() => navigate("/")}
+          className={`${location.pathname === "/" || location.pathname === "/dashboard" ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4" : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"} flex items-center gap-3 px-4 py-3 transition-colors duration-200 w-full text-left`}
         >
           <span className="material-symbols-outlined" data-icon="dashboard">
             dashboard
           </span>
           <span className="text-label-sm font-label-sm">Dashboard</span>
-        </a>
+        </button>
 
-        {/* Inactive Items */}
-        <a
-          className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex items-center gap-3 px-4 py-3 transition-colors duration-200"
-          href="#"
+        <button
+          onClick={() => navigate("/categories")}
+          className={`${location.pathname === "/categories" ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4" : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"} flex items-center gap-3 px-4 py-3 transition-colors duration-200 w-full text-left`}
+        >
+          <span className="material-symbols-outlined" data-icon="category">
+            category
+          </span>
+          <span className="text-label-sm font-label-sm">Danh mục</span>
+        </button>
+
+        <button
+          className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex items-center gap-3 px-4 py-3 transition-colors duration-200 w-full text-left"
         >
           <span className="material-symbols-outlined" data-icon="badge">
             badge
           </span>
           <span className="text-label-sm font-label-sm">Nhân Viên</span>
-        </a>
+        </button>
 
-        <a
-          className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex items-center gap-3 px-4 py-3 transition-colors duration-200"
-          href="#"
+        <button
+          className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex items-center gap-3 px-4 py-3 transition-colors duration-200 w-full text-left"
         >
           <span className="material-symbols-outlined" data-icon="group">
             group
           </span>
           <span className="text-label-sm font-label-sm">Khách hàng</span>
-        </a>
+        </button>
       </div>
 
       {/* Settings & Logout */}
