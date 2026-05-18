@@ -56,5 +56,9 @@ public class UserAddress {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @NotNull
+    @Column(name = "is_default", nullable = false)
+    private Boolean isDefault = false;
+
 
 }

@@ -4,6 +4,9 @@ import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.mapper.UserMapper;
 import io.github.ptus04.server.security.CustomUserDetails;
 import io.github.ptus04.server.service.UserService;
+import io.github.ptus04.server.security.CustomUserDetails;
+import io.github.ptus04.server.dto.request.UserAddressRequest;
+import io.github.ptus04.server.service.UserAddressService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -17,10 +20,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
+    private final UserAddressService userAddressService;
 
     @GetMapping
     public String getProfilePage(Model model, @AuthenticationPrincipal CustomUserDetails details) {
         model.addAttribute("user", userService.getUserById(details.getId()));
+        model.addAttribute("addresses", userAddressService.getAddresses(details.getId()));
+        if (!model.containsAttribute("addressRequest")) {
+            model.addAttribute("addressRequest", new UserAddressRequest());
+        }
         return "user/profile";
     }
 
