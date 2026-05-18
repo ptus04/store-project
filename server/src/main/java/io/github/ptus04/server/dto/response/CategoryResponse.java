@@ -9,8 +9,5 @@ import java.util.UUID;
 /**
  * DTO for {@link Category}
  */
-public record CategoryResponse(UUID id,
-                               String name,
-                               Instant createdAt,
-                               Instant updatedAt) implements Serializable {
+public record CategoryResponse(UUID id, String name, Instant createdAt, Instant updatedAt) implements Serializable {
 }
