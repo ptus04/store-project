@@ -6,15 +6,15 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Builder(toBuilder = true)
 public class CustomUserDetails implements UserDetails {
     private UUID id;
     private String name;
-    private String phone;
-    private String email;
     private String password;
     private Set<GrantedAuthority> authorities;
 

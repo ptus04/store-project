@@ -22,14 +22,14 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class NotVerifiedRedirectFilter extends OncePerRequestFilter {
     private final UserService userService;
-    private final String[] excludePatterns = {"/xac-minh", "/css", "/img", "/favicon.png"};
+    private final String[] excludePatterns = {"/auth/verify-phone", "/css.*", "/img.*", "/favicon.png", "/api.*"};
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         String path = request.getRequestURI();
-        if (Arrays.stream(excludePatterns).anyMatch(path::startsWith)) {
+        if (Arrays.stream(excludePatterns).anyMatch(path::matches)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -40,7 +40,7 @@ public class NotVerifiedRedirectFilter extends OncePerRequestFilter {
             if (customUserDetails != null) {
                 UserResponse user = userService.getUserById(customUserDetails.getId());
                 if (!user.isPhoneVerified()) {
-                    response.sendRedirect("/xac-minh");
+                    response.sendRedirect("/auth/verify-phone");
                     return;
                 }
             }

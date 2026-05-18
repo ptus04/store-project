@@ -15,9 +15,47 @@ public record ProductResponse(UUID id,
                               String careInstructions,
                               BigDecimal price,
                               Integer inStock,
-                              Boolean isNew,
                               Float discount,
+                              BigDecimal priceDiscount,
                               Instant createdAt,
                               Instant updatedAt,
-                              List<ProductImageResponse> productImages) implements Serializable {
+                              Instant deletedAt,
+                              List<ProductImageResponse> productImages,
+                              List<ProductSizeResponse> productSizes,
+                              List<CategoryResponse> categories) implements Serializable {
+    public boolean isOutOfStock() {
+        if (productSizes == null || productSizes.isEmpty()) {
+            return safeStock(inStock) <= 0;
+        }
+
+        return productSizes.stream().allMatch(size -> size.inStock() == null || size.inStock() <= 0);
+    }
+
+    public UUID firstAvailableSizeId() {
+        if (productSizes == null) {
+            return null;
+        }
+
+        return productSizes.stream()
+                .filter(size -> size.inStock() != null && size.inStock() > 0)
+                .map(ProductSizeResponse::id)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public int firstAvailableStock() {
+        if (productSizes == null || productSizes.isEmpty()) {
+            return safeStock(inStock);
+        }
+
+        return productSizes.stream()
+                .filter(size -> size.inStock() != null && size.inStock() > 0)
+                .map(ProductSizeResponse::inStock)
+                .findFirst()
+                .orElse(0);
+    }
+
+    private static int safeStock(Integer stock) {
+        return stock == null ? 0 : stock;
+    }
 }

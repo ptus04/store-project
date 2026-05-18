@@ -18,11 +18,12 @@ public record UserResponse(UUID id,
                            UserRoleEnum role,
                            UserGenderEnum gender,
                            LocalDate birthDate,
+                           Instant phoneVerifiedAt,
+                           Instant emailVerifiedAt,
                            Instant createdAt,
                            Instant updatedAt,
-                           Instant verifiedAt,
-                           String avatar) implements Serializable {
+                           Instant disabledAt) implements Serializable {
     public boolean isPhoneVerified() {
-        return verifiedAt != null;
+        return phoneVerifiedAt != null;
     }
 }

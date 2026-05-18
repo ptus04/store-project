@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -18,7 +17,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "users")
+@Table(name = "users", schema = "storedb")
 public class User {
     @Id
     @Column(name = "id", nullable = false, length = 16)
@@ -45,31 +44,36 @@ public class User {
     private String password;
 
     @NotNull
-    @ColumnDefault("0")
     @Column(name = "role", nullable = false)
+    @Enumerated(EnumType.STRING)
     private UserRoleEnum role;
 
     @Column(name = "gender")
+    @Enumerated(EnumType.STRING)
     private UserGenderEnum gender;
 
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
+    @Column(name = "phone_verified_at")
+    private Instant phoneVerifiedAt;
+
+    @Column(name = "email_verified_at")
+    private Instant emailVerifiedAt;
+
     @CreationTimestamp
-    @ColumnDefault("(now())")
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
     @UpdateTimestamp
-    @ColumnDefault("(now())")
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @Column(name = "verified_at")
-    private Instant verifiedAt;
+    @Column(name = "disabled_at", nullable = false)
+    private Instant disabledAt;
 
-    @Size(max = 128)
-    @Column(name = "avatar", length = 128)
-    private String avatar;
+    public boolean isPhoneVerified() {
+        return phoneVerifiedAt != null;
+    }
 
 }

@@ -5,22 +5,22 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.generator.EventType;
 import org.jspecify.annotations.NonNull;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "products")
+@Table(name = "products", schema = "storedb")
 public class Product {
     @Id
     @Column(name = "id", nullable = false, length = 16)
@@ -41,42 +41,48 @@ public class Product {
     private String careInstructions;
 
     @NotNull
-    @ColumnDefault("0.00")
     @Column(name = "price", nullable = false, precision = 18, scale = 2)
     private BigDecimal price;
 
     @NotNull
-    @ColumnDefault("0")
     @Column(name = "in_stock", nullable = false)
     private Integer inStock;
 
     @NotNull
-    @ColumnDefault("0")
-    @Column(name = "is_new", nullable = false)
-    private Boolean isNew;
-
-    @NotNull
-    @ColumnDefault("0")
     @Column(name = "discount", nullable = false)
     private Float discount;
 
+    @Generated(event = {EventType.INSERT, EventType.UPDATE})
+    @Column(name = "price_discount", nullable = false, precision = 18, scale = 2)
+    private BigDecimal priceDiscount;
+
     @CreationTimestamp
-    @ColumnDefault("(now())")
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
     @UpdateTimestamp
-    @ColumnDefault("(now())")
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @NonNull
-    @BatchSize(size = 10)
-    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
-    private List<ProductImage> productImages = new LinkedList<>();
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 
     @NonNull
-    @OneToMany(mappedBy = "product")
-    private List<ProductSize> productSizes = new LinkedList<>();
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
+    private Set<ProductImage> productImages = new LinkedHashSet<>();
+
+    @NonNull
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
+    private Set<ProductSize> productSizes = new LinkedHashSet<>();
+
+    @NonNull
+    @ManyToMany
+    @JoinTable(name = "category_product",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @OrderBy("id ASC")
+    private Set<Category> categories = new LinkedHashSet<>();
 
 }
