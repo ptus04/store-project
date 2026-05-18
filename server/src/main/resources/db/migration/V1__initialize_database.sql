@@ -74,27 +74,8 @@ create table users
     phone_verified_at timestamp                                   null,
     email_verified_at timestamp                                   null,
     created_at        timestamp  default CURRENT_TIMESTAMP        not null,
-    updated_at        timestamp  default CURRENT_TIMESTAMP        not null on update CURRENT_TIMESTAMP
-);
-
-create table carts
-(
-    id         binary(16) default (uuid_to_bin(uuid(), 1)) primary key,
-    user_id    binary(16)                           not null unique references users (id),
-    created_at timestamp  default CURRENT_TIMESTAMP not null,
-    updated_at timestamp  default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP
-);
-
-create table cart_items
-(
-    id              binary(16) default (uuid_to_bin(uuid(), 1)) primary key,
-    cart_id         binary(16)                           not null references carts (id) on delete cascade,
-    product_id      binary(16)                           not null references products (id),
-    product_size_id binary(16)                           null references product_sizes (id),
-    quantity        int                                  not null,
-    created_at      timestamp  default CURRENT_TIMESTAMP not null,
-    updated_at      timestamp  default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
-    unique key (cart_id, product_id, product_size_id)
+    updated_at        timestamp  default CURRENT_TIMESTAMP        not null on update CURRENT_TIMESTAMP,
+    disabled_at       timestamp                                   null
 );
 
 create table orders
@@ -122,14 +103,14 @@ create table orders
 
 create table order_details
 (
-    id              binary(16) default (uuid_to_bin(uuid(), 1)) not null primary key,
-    order_id        binary(16)                                  not null references orders (id),
-    product_id      binary(16)                                  not null references products (id),
-    product_size_id binary(16)                                  null references product_sizes (id),
-    quantity        int        default 1                        not null,
-    price           decimal(18, 2)                              not null,
-    subtotal        decimal(18, 2)                              not null,
-    unique key (order_id, product_id, product_size_id)
+    id           binary(16) default (uuid_to_bin(uuid(), 1)) not null primary key,
+    order_id     binary(16)                                  not null references orders (id),
+    product_id   binary(16)                                  not null references products (id),
+    product_size varchar(4)                                  null,
+    quantity     int        default 1                        not null,
+    price        decimal(18, 2)                              not null,
+    subtotal     decimal(18, 2)                              not null,
+    unique key (order_id, product_id, product_size)
 );
 
 create table order_shipping_addresses
@@ -151,6 +132,7 @@ create table user_addresses
     district   varchar(32)                                 null,
     ward       varchar(32)                                 not null,
     address    varchar(64)                                 not null,
+    is_default boolean    default false                    not null,
     created_at timestamp  default CURRENT_TIMESTAMP        not null,
     updated_at timestamp  default CURRENT_TIMESTAMP        not null on update CURRENT_TIMESTAMP
 );

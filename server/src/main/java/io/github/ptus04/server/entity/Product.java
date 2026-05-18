@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.generator.EventType;
 import org.jspecify.annotations.NonNull;
 
 import java.math.BigDecimal;
@@ -51,8 +52,8 @@ public class Product {
     @Column(name = "discount", nullable = false)
     private Float discount;
 
-    @Generated
-    @Column(name = "price_discount", nullable = false, precision = 18, scale = 2, insertable = false, updatable = false)
+    @Generated(event = {EventType.INSERT, EventType.UPDATE})
+    @Column(name = "price_discount", nullable = false, precision = 18, scale = 2)
     private BigDecimal priceDiscount;
 
     @CreationTimestamp

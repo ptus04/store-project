@@ -48,6 +48,10 @@ public class UserAddress {
     @Column(name = "address", nullable = false, length = 64)
     private String address;
 
+    @NotNull
+    @Column(name = "is_default", nullable = false)
+    private Boolean isDefault;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
@@ -55,6 +59,5 @@ public class UserAddress {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
-
 
 }
