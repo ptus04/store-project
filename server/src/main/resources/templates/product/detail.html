@@ -140,236 +140,225 @@
                 </p>
             </div>
 
+            <div class="mb-6 rounded border border-green-200 bg-green-50 p-4 text-green-700" th:if="${success}">
+                <p th:text="${success}">Đã thêm sản phẩm vào giỏ hàng</p>
+            </div>
+            <div class="mb-6 rounded border border-red-200 bg-red-50 p-4 text-red-700" th:if="${error}">
+                <p th:text="${error}">Không thể thêm sản phẩm vào giỏ hàng</p>
+            </div>
+
             <div class="mb-6 rounded border border-gray-200 bg-white p-4">
                 <p class="mb-1 font-semibold">Tình trạng</p>
-                <th:block th:if="${product.inStock() == 0}">
-                    <p class="font-semibold text-red-600" data-product-stock-status>Hết hàng</p>
-                </th:block>
-                <th:block th:unless="${product.inStock() == 0}">
-                    <p class="text-gray-700" data-product-stock-status
-                       th:if="${#lists.isEmpty(product.productSizes())}"
-                       th:text="${'Còn ' + product.inStock() + ' sản phẩm'}"></p>
-                    <p class="text-gray-700" data-product-stock-status
-                       th:if="${!#lists.isEmpty(product.productSizes())}">Còn hàng</p>
-                </th:block>
+                <p class="text-gray-700" th:if="${!product.isOutOfStock()}"
+                   th:text="${'Còn ' + product.inStock() + ' sản phẩm'}">
+                    Còn hàng
+                </p>
+                <p class="font-semibold text-red-600" data-product-stock-status th:if="${product.isOutOfStock()}">
+                    Hết hàng
+                </p>
             </div>
 
-            <div class="mb-6 rounded border border-gray-200 bg-white p-4"
-                 th:if="${!#lists.isEmpty(product.productSizes())}">
-                <p class="mb-2 font-semibold">Chọn kích cỡ</p>
-                <div class="flex flex-wrap gap-2">
-                    <label class="cursor-pointer"
-                           th:classappend="${size.inStock() == 0} ? ' opacity-50 cursor-not-allowed' : ''"
-                           th:each="size, sizeStat : ${product.productSizes()}">
-                        <input class="peer sr-only"
-                               name="size"
-                               required
-                               th:attr="data-size-stock=${size.inStock()}"
-                               th:checked="${sizeStat.index == 0 && size.inStock() != 0}"
-                               th:disabled="${size.inStock() == 0}"
-                               th:value="${size.name()}"
-                               type="radio">
-                        <span class="block rounded border border-gray-300 px-4 py-2 font-semibold transition peer-checked:border-red-500 peer-checked:bg-red-500 peer-checked:text-white"
-                              th:classappend="${size.inStock() == 0} ? ' bg-gray-100 text-gray-400' : ''"
-                              th:text="${size.name()}">
+            <form method="post" th:action="@{/cart/items}">
+                <div class="mb-6 rounded border border-gray-200 bg-white p-4">
+                    <p class="mb-2 font-semibold">Chọn kích cỡ</p>
+                    <div class="flex flex-wrap gap-2" th:if="${!#lists.isEmpty(product.productSizes())}">
+                        <label class="cursor-pointer"
+                               th:classappend="${size.inStock() == null || size.inStock() <= 0} ? ' opacity-50 cursor-not-allowed' : ''"
+                               th:each="size, sizeStat : ${product.productSizes()}">
+                            <input class="peer sr-only"
+                                   data-size-input
+                                   name="productSizeId"
+                                   required
+                                   th:attr="data-size-stock=${size.inStock()}"
+                                   th:checked="${size.id() == product.firstAvailableSizeId()}"
+                                   th:disabled="${size.inStock() == null || size.inStock() <= 0}"
+                                   th:value="${size.id()}"
+                                   type="radio">
+                            <span class="block rounded border border-gray-300 px-4 py-2 font-semibold transition peer-checked:border-red-500 peer-checked:bg-red-500 peer-checked:text-white"
+                                  th:classappend="${size.inStock() == null || size.inStock() <= 0} ? ' bg-gray-100 text-gray-400' : ''"
+                                  th:text="${size.name()}">
                             M
                         </span>
-                    </label>
+                        </label>
+                    </div>
+                    <p class="text-gray-500" th:unless="${!#lists.isEmpty(product.productSizes())}">
+                        Chưa cập nhật kích cỡ cho sản phẩm này.
+                    </p>
                 </div>
-            </div>
 
-            <div class="mb-6 rounded border border-gray-200 bg-white p-4">
-                <p class="mb-2 font-semibold">Số lượng</p>
-                <label class="hidden" for="product-quantity">Số lượng sản phẩm</label>
-                <div class="flex items-center gap-2">
-                    <button class="h-10 w-10 rounded border border-gray-300 text-xl font-bold hover:border-red-500 hover:text-red-500"
-                            data-quantity-minus
-                            type="button">
-                        −
-                    </button>
-                    <input class="h-10 w-20 rounded border border-gray-300 text-center focus:outline-red-500"
-                           data-quantity-input
-                           id="product-quantity"
-                           min="1"
-                           name="quantity"
-                           required
-                           th:attr="max=${#lists.isEmpty(product.productSizes()) ? product.inStock() : 1}"
-                           th:disabled="${product.inStock() == 0}"
-                           th:value="${product.inStock() == 0 ? 0 : 1}"
-                           type="number">
-                    <button class="h-10 w-10 rounded border border-gray-300 text-xl font-bold hover:border-red-500 hover:text-red-500"
-                            data-quantity-plus
-                            type="button">
-                        +
-                    </button>
+                <div class="mb-6 rounded border border-gray-200 bg-white p-4">
+                    <p class="mb-2 font-semibold">Số lượng</p>
+                    <label class="hidden" for="product-quantity">Số lượng sản phẩm</label>
+                    <div class="flex items-center gap-2">
+                        <button class="h-10 w-10 rounded border border-gray-300 text-xl font-bold hover:border-red-500 hover:text-red-500"
+                                type="button"
+                                data-quantity-minus
+                                th:disabled="${product.isOutOfStock() || #lists.isEmpty(product.productSizes())}">
+                            −
+                        </button>
+                        <input class="h-10 w-20 rounded border border-gray-300 text-center focus:outline-red-500"
+                               data-quantity-input
+                               id="product-quantity"
+                               min="1"
+                               name="quantity"
+                               required
+                               th:max="${product.firstAvailableStock() > 0 ? product.firstAvailableStock() : 1}"
+                               th:disabled="${product.isOutOfStock() || #lists.isEmpty(product.productSizes())}"
+                               th:value="${1}"
+                               type="number">
+                        <button class="h-10 w-10 rounded border border-gray-300 text-xl font-bold hover:border-red-500 hover:text-red-500"
+                                type="button"
+                                data-quantity-plus
+                                th:disabled="${product.isOutOfStock() || #lists.isEmpty(product.productSizes())}">
+                            +
+                        </button>
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500">
+                        Vui lòng chọn size và số lượng trước khi thêm vào giỏ hàng.
+                        <span th:if="${!product.isOutOfStock() && !#lists.isEmpty(product.productSizes())}">
+                        Còn <span data-selected-stock th:text="${product.firstAvailableStock()}">0</span> sản phẩm cho size đang chọn.
+                    </span>
+                    </p>
                 </div>
-                <p class="mt-2 text-sm text-gray-500" th:if="${!#lists.isEmpty(product.productSizes())}">
-                    Vui lòng chọn size và số lượng trước khi thêm vào giỏ hàng.
-                </p>
-            </div>
 
-            <div class="mb-6 rounded border border-gray-200 bg-white p-4">
-                <p class="mb-2 font-semibold">Mô tả</p>
-                <p class="whitespace-pre-line text-gray-700"
-                   th:text="${product.description() ?: 'Chưa có mô tả cho sản phẩm này.'}">
-                    Mô tả sản phẩm
-                </p>
-            </div>
+                <div class="mb-6 rounded border border-gray-200 bg-white p-4">
+                    <p class="mb-2 font-semibold">Mô tả</p>
+                    <p class="whitespace-pre-line text-gray-700"
+                       th:text="${product.description() ?: 'Chưa có mô tả cho sản phẩm này.'}">
+                        Mô tả sản phẩm
+                    </p>
+                </div>
 
-            <div class="rounded border border-gray-200 bg-white p-4">
-                <p class="mb-2 font-semibold">Hướng dẫn bảo quản</p>
-                <p class="whitespace-pre-line text-gray-700"
-                   th:text="${product.careInstructions() ?: 'Chưa có hướng dẫn bảo quản.'}">
-                    Hướng dẫn bảo quản
-                </p>
-            </div>
+                <div class="rounded border border-gray-200 bg-white p-4">
+                    <p class="mb-2 font-semibold">Hướng dẫn bảo quản</p>
+                    <p class="whitespace-pre-line text-gray-700"
+                       th:text="${product.careInstructions() ?: 'Chưa có hướng dẫn bảo quản.'}">
+                        Hướng dẫn bảo quản
+                    </p>
+                </div>
 
-            <div class="mt-6 flex flex-wrap gap-3">
-                <button class="rounded bg-red-500 px-5 py-3 font-semibold text-white hover:bg-red-400 disabled:cursor-not-allowed disabled:bg-gray-300"
-                        data-add-to-cart-button
-                        th:disabled="${product.inStock() == 0}"
-                        title="Chức năng thêm giỏ hàng sẽ được bổ sung sau"
-                        type="button">
-                    Thêm giỏ hàng
-                </button>
-                <a class="rounded border border-gray-300 px-5 py-3 font-semibold hover:border-red-500 hover:text-red-500"
-                   href="/products">
-                    Quay lại danh sách
-                </a>
-            </div>
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <button class="rounded bg-red-500 px-5 py-3 font-semibold text-white hover:bg-red-400 disabled:cursor-not-allowed disabled:bg-gray-300"
+                            type="submit"
+                            title="Thêm sản phẩm vào giỏ hàng"
+                            data-add-cart-button
+                            th:disabled="${product.isOutOfStock() || #lists.isEmpty(product.productSizes())}">
+                        Thêm giỏ hàng
+                    </button>
+                    <a class="rounded border border-gray-300 px-5 py-3 font-semibold hover:border-red-500 hover:text-red-500"
+                       href="/products">
+                        Quay lại danh sách
+                    </a>
+                </div>
+            </form>
 
             <script>
-                (() => {
-                    const sizeOptions = Array.from(document.querySelectorAll("input[name='size']"));
-                    const input = document.querySelector("[data-quantity-input]");
-                    const minus = document.querySelector("[data-quantity-minus]");
-                    const plus = document.querySelector("[data-quantity-plus]");
-                    const addToCartButton = document.querySelector("[data-add-to-cart-button]");
-                    const stockStatus = document.querySelector("[data-product-stock-status]");
+                document.addEventListener("DOMContentLoaded", () => {
+                    const sizeInputs = Array.from(document.querySelectorAll("[data-size-input]"));
+                    const quantityInput = document.querySelector("[data-quantity-input]");
+                    const minusButton = document.querySelector("[data-quantity-minus]");
+                    const plusButton = document.querySelector("[data-quantity-plus]");
+                    const addButton = document.querySelector("[data-add-cart-button]");
+                    const stockLabel = document.querySelector("[data-selected-stock]");
                     const quantityBySize = new Map();
-                    let currentSizeName = null;
-                    const hasSize = sizeOptions.length > 0;
+                    let currentSizeId = null;
 
-                    if (!(input instanceof HTMLInputElement) || !minus || !plus) return;
+                    if (!(quantityInput instanceof HTMLInputElement)
+                        || !(minusButton instanceof HTMLButtonElement)
+                        || !(plusButton instanceof HTMLButtonElement)) {
+                        return;
+                    }
+
+                    const parseQuantity = () => {
+                        const quantity = Number.parseInt(quantityInput.value || "1", 10);
+                        return Number.isFinite(quantity) ? quantity : 1;
+                    };
+
+                    const parseStock = (sizeInput) => {
+                        const stock = Number.parseInt(sizeInput?.dataset.sizeStock || "0", 10);
+                        return Number.isFinite(stock) && stock > 0 ? stock : 0;
+                    };
 
                     const getSelectedSize = () => {
-                        return sizeOptions.find((option) => option instanceof HTMLInputElement && option.checked && !option.disabled);
+                        return sizeInputs.find((sizeInput) => sizeInput instanceof HTMLInputElement
+                            && sizeInput.checked
+                            && !sizeInput.disabled);
                     };
 
                     const getFirstAvailableSize = () => {
-                        return sizeOptions.find((option) => option instanceof HTMLInputElement && !option.disabled);
+                        return sizeInputs.find((sizeInput) => sizeInput instanceof HTMLInputElement && !sizeInput.disabled);
                     };
 
-                    const getSelectedSizeStock = () => {
-                        const selected = getSelectedSize();
-                        if (!selected) return 0;
-
-                        const stock = Number.parseInt(selected.dataset.sizeStock || "0", 10);
-                        return Number.isFinite(stock) && stock > 0 ? stock : 0;
+                    const clampQuantity = (quantity, stock) => {
+                        return Math.min(Math.max(quantity, 1), Math.max(stock, 1));
                     };
 
-                    const getProductStock = () => {
-                        const stock = Number.parseInt(input.getAttribute("max") || "0", 10);
-                        return Number.isFinite(stock) && stock > 0 ? stock : 0;
+                    const setQuantity = (quantity, stock) => {
+                        quantityInput.max = String(Math.max(stock, 1));
+                        quantityInput.value = String(clampQuantity(quantity, stock));
                     };
-
-                    const getBounds = () => ({
-                        min: Number.parseInt(input.min || "1", 10),
-                        max: Number.parseInt(input.max || "1", 10),
-                    });
-
-                    const clamp = (value) => {
-                        const {min, max} = getBounds();
-                        return Math.min(max, Math.max(min, value));
-                    };
-
-                    const sync = (value) => {
-                        input.value = String(clamp(value));
-                    };
-
-                    const getCurrentQuantity = () => Number.parseInt(input.value || "1", 10);
 
                     const persistCurrentQuantity = () => {
-                        if (!currentSizeName) return;
-                        quantityBySize.set(currentSizeName, getCurrentQuantity());
+                        if (currentSizeId) {
+                            quantityBySize.set(currentSizeId, parseQuantity());
+                        }
                     };
 
-                    const restoreQuantityForSize = (sizeName, maxStock) => {
-                        const saved = quantityBySize.get(sizeName);
-                        const nextQuantity = Number.isFinite(saved) ? saved : 1;
-                        input.max = String(Math.max(1, maxStock));
-                        sync(nextQuantity);
-                    };
+                    const syncSelectedSize = () => {
+                        persistCurrentQuantity();
 
-                    const syncBySelectedSize = () => {
-                        if (sizeOptions.length > 0 && !getSelectedSize()) {
-                            const available = getFirstAvailableSize();
-                            if (available) {
-                                available.checked = true;
+                        let selectedSize = getSelectedSize();
+                        if (!selectedSize) {
+                            selectedSize = getFirstAvailableSize();
+                            if (selectedSize instanceof HTMLInputElement) {
+                                selectedSize.checked = true;
                             }
                         }
 
-                        const selected = getSelectedSize();
-                        const selectedStock = getSelectedSizeStock();
-                        const isOutOfStock = selectedStock <= 0;
-                        const selectedName = selected?.value || null;
+                        currentSizeId = selectedSize?.value || null;
+                        const stock = selectedSize ? parseStock(selectedSize) : 0;
+                        const hasStock = stock > 0;
+                        const restoredQuantity = currentSizeId ? quantityBySize.get(currentSizeId) : undefined;
 
-                        if (selectedName && selectedName !== currentSizeName) {
-                            persistCurrentQuantity();
-                            currentSizeName = selectedName;
-                        } else if (!currentSizeName && selectedName) {
-                            currentSizeName = selectedName;
+                        quantityInput.disabled = !hasStock;
+                        minusButton.disabled = !hasStock;
+                        plusButton.disabled = !hasStock;
+
+                        if (addButton instanceof HTMLButtonElement) {
+                            addButton.disabled = !hasStock;
                         }
 
-                        input.disabled = isOutOfStock;
-                        minus.toggleAttribute("disabled", isOutOfStock);
-                        plus.toggleAttribute("disabled", isOutOfStock);
-
-                        if (addToCartButton) {
-                            addToCartButton.toggleAttribute("disabled", isOutOfStock);
+                        if (stockLabel) {
+                            stockLabel.textContent = String(stock);
                         }
 
-                        if (stockStatus) {
-                            stockStatus.textContent = isOutOfStock ? "Hết hàng" : "Còn hàng";
-                        }
-
-                        if (isOutOfStock) {
-                            input.value = "1";
-                        } else {
-                            restoreQuantityForSize(currentSizeName, selectedStock);
-                        }
+                        setQuantity(Number.isFinite(restoredQuantity) ? restoredQuantity : 1, stock);
                     };
 
-                    minus.addEventListener("click", () => {
-                        sync(getCurrentQuantity() - 1);
-                        if (hasSize) persistCurrentQuantity();
-                    });
-                    plus.addEventListener("click", () => {
-                        sync(getCurrentQuantity() + 1);
-                        if (hasSize) persistCurrentQuantity();
-                    });
-                    input.addEventListener("change", () => {
-                        sync(getCurrentQuantity());
-                        if (hasSize) persistCurrentQuantity();
+                    minusButton.addEventListener("click", () => {
+                        const stock = parseStock(getSelectedSize());
+                        setQuantity(parseQuantity() - 1, stock);
+                        persistCurrentQuantity();
                     });
 
-                    sizeOptions.forEach((option) => {
-                        option.addEventListener("change", () => syncBySelectedSize());
+                    plusButton.addEventListener("click", () => {
+                        const stock = parseStock(getSelectedSize());
+                        setQuantity(parseQuantity() + 1, stock);
+                        persistCurrentQuantity();
                     });
 
-                    if (hasSize) {
-                        syncBySelectedSize();
-                    } else {
-                        const stock = getProductStock();
-                        const isOutOfStock = stock <= 0;
-                        input.disabled = isOutOfStock;
-                        minus.toggleAttribute("disabled", isOutOfStock);
-                        plus.toggleAttribute("disabled", isOutOfStock);
-                        if (addToCartButton) {
-                            addToCartButton.toggleAttribute("disabled", isOutOfStock);
-                        }
-                    }
-                })();
+                    quantityInput.addEventListener("change", () => {
+                        const stock = parseStock(getSelectedSize());
+                        setQuantity(parseQuantity(), stock);
+                        persistCurrentQuantity();
+                    });
+
+                    sizeInputs.forEach((sizeInput) => {
+                        sizeInput.addEventListener("change", syncSelectedSize);
+                    });
+
+                    syncSelectedSize();
+                });
             </script>
         </div>
     </section>
