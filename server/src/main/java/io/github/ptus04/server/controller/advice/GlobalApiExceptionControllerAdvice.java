@@ -1,8 +1,9 @@
 package io.github.ptus04.server.controller.advice;
 
 import io.github.ptus04.server.dto.response.ApiErrorResponse;
-import io.github.ptus04.server.exception.BaseNotFoundException;
-import io.github.ptus04.server.exception.ProductAlreadyExistsException;
+import io.github.ptus04.server.exception.BusinessConstraintViolationException;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +24,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice(annotations = RestController.class)
 public class GlobalApiExceptionControllerAdvice {
-    @ExceptionHandler({BaseNotFoundException.class})
-    public ResponseEntity<ApiErrorResponse<?>> handleBaseNotFoundException(RuntimeException ex, WebRequest request) {
+    @ExceptionHandler({EntityNotFoundException.class})
+    public ResponseEntity<ApiErrorResponse<?>> handleEntityNotFoundException(EntityNotFoundException ex,
+                                                                             WebRequest request) {
         HttpStatus status = HttpStatus.NOT_FOUND;
         String message = ex.getMessage();
         String path = getRequestPath(request);
@@ -80,14 +82,14 @@ public class GlobalApiExceptionControllerAdvice {
                 .body(new ApiErrorResponse<>(status, message, path, errorCode, fieldErrors));
     }
 
-    @ExceptionHandler(ProductAlreadyExistsException.class)
-    public ResponseEntity<ApiErrorResponse<?>> handleProductAlreadyExistsException(
-            ProductAlreadyExistsException ex,
+    @ExceptionHandler(EntityExistsException.class)
+    public ResponseEntity<ApiErrorResponse<?>> handleEntityExistsException(
+            EntityExistsException ex,
             WebRequest request) {
         HttpStatus status = HttpStatus.CONFLICT;
         String message = ex.getMessage();
         String path = getRequestPath(request);
-        String errorCode = "PRODUCT_ALREADY_EXISTS";
+        String errorCode = "ENTITY_ALREADY_EXISTS";
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(new ApiErrorResponse<>(status, message, path, errorCode));
@@ -129,6 +131,18 @@ public class GlobalApiExceptionControllerAdvice {
         log.atError().setMessage("An unexpected error occurred: {}").addArgument(ex::getMessage).log();
         return ResponseEntity
                 .internalServerError()
+                .body(new ApiErrorResponse<>(status, message, path, errorCode));
+    }
+
+    @ExceptionHandler(value = BusinessConstraintViolationException.class)
+    public ResponseEntity<ApiErrorResponse<?>> handleException(BusinessConstraintViolationException ex,
+                                                               WebRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        String message = ex.getMessage();
+        String path = getRequestPath(request);
+        String errorCode = "BUSINESS_CONSTRAINT_VIOLATION";
+        return ResponseEntity
+                .badRequest()
                 .body(new ApiErrorResponse<>(status, message, path, errorCode));
     }
 

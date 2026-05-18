@@ -12,6 +12,8 @@ import io.github.ptus04.server.repository.ProductRepository;
 import io.github.ptus04.server.repository.ProductSizeRepository;
 import io.github.ptus04.server.repository.specification.ProductSpecifications;
 import io.github.ptus04.server.service.ProductService;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -123,7 +125,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductResponse deleteProduct(UUID productId) {
-        Product product = productRepository.findById(productId).orElseThrow(ProductNotFoundException::new);
+        Product product = productRepository.findById(productId).orElseThrow(EntityNotFoundException::new);
         product.setDeletedAt(Instant.now());
         return productMapper.toProductResponse(productRepository.save(product));
     }

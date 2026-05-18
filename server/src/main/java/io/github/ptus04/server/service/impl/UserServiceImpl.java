@@ -5,10 +5,10 @@ import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.enums.UserRoleEnum;
 import io.github.ptus04.server.exception.PhoneExistedException;
-import io.github.ptus04.server.exception.UserNotFoundException;
 import io.github.ptus04.server.mapper.UserMapper;
 import io.github.ptus04.server.repository.UserRepository;
 import io.github.ptus04.server.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -23,12 +23,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getUserById(UUID id) {
-        return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(UserNotFoundException::new));
+        return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(EntityNotFoundException::new));
     }
 
     @Override
     public UserResponse updateProfile(UUID id, UserProfileUpdateRequest request) {
-        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
 
         if (StringUtils.hasText(request.phone()) && !request.phone().equals(user.getPhone())) {
             userRepository.findByPhone(request.phone())

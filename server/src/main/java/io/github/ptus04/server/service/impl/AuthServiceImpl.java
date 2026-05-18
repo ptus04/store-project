@@ -6,11 +6,11 @@ import io.github.ptus04.server.dto.response.PhoneVerificationResponse;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.enums.UserRoleEnum;
 import io.github.ptus04.server.exception.PhoneExistedException;
-import io.github.ptus04.server.exception.UserNotFoundException;
 import io.github.ptus04.server.exception.UserPhoneVerifiedException;
 import io.github.ptus04.server.repository.UserRepository;
 import io.github.ptus04.server.service.AuthService;
 import io.github.ptus04.server.service.SMSVerificationService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -48,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public PhoneVerificationResponse sendPhoneVerification(UUID userId) {
-        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         if (user.isPhoneVerified()) {
             throw new UserPhoneVerifiedException(user.getPhone() + " is already verified");
         }
@@ -60,13 +60,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public long sendPhoneOtp(String phone) {
-        User user = userRepository.findByPhone(phone).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByPhone(phone).orElseThrow(EntityNotFoundException::new);
         return smsVerificationService.sendOtp(user.getPhone());
     }
 
     @Override
     public boolean verifyOtp(UUID userId, String otp) {
-        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         boolean isSuccess = smsVerificationService.verifyOtp(user.getPhone(), otp);
         if (!isSuccess) {
             return false;
@@ -83,7 +83,7 @@ public class AuthServiceImpl implements AuthService {
         boolean result = smsVerificationService.verifyOtp(request.phone(), request.otp());
         if (!result) return false;
 
-        User user = userRepository.findByPhone(request.phone()).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByPhone(request.phone()).orElseThrow(EntityNotFoundException::new);
         user.setPassword(passwordEncoder.encode(request.password()));
         userRepository.save(user);
 
