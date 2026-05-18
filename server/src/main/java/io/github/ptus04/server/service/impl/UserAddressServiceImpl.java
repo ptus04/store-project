@@ -1,6 +1,7 @@
 package io.github.ptus04.server.service.impl;
 
 import io.github.ptus04.server.dto.request.UserAddressRequest;
+import io.github.ptus04.server.dto.request.UserAddressUpdateRequest;
 import io.github.ptus04.server.dto.response.UserAddressResponse;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.entity.UserAddress;
@@ -63,12 +64,12 @@ public class UserAddressServiceImpl implements UserAddressService {
 
     @Override
     @Transactional
-    public void updateAddress(UUID addressId, UserAddressRequest request) {
+    public void updateAddress(UUID addressId, UserAddressUpdateRequest request) {
         UserAddress address = userAddressRepository.findById(addressId)
                 .orElseThrow(() -> new RuntimeException("Address not found"));
 
         boolean wasDefault = address.getIsDefault();
-        userAddressMapper.updateEntityFromRequest(request, address);
+        userAddressMapper.partialUpdate(request, address);
 
         if (Boolean.TRUE.equals(request.isDefault()) && !wasDefault) {
             unsetCurrentDefault(address.getUser().getId());
