@@ -37,7 +37,10 @@ export default function SideNavBar() {
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3Ug5Cspk24gYZjhxUTV-eG8Gko9CGFpdXFN4GYMuLY3iV3Duq0ztpyQNJvbbVPwSYlDx5s4C6w04HZmHk6ZiKnBbNT1RZpECrgkS5OXgfsZlBT_rts2ec-xTIczahVkg-hXhGSMDefdGKO1qP2Bet7Ok0XZm3yXyr77JzyDrrQu9am82mf-xUit3HnW-LGmw-4vvHXWfQMJEFx8I-uKaYtGrRw_7AeFlbd3NQSLyUF800Pdaimvx9PIBSPEpCYYd9_Xp0NdXSjPI"
         />
 
-        <div className="flex items-center gap-3">
+        <div
+          onClick={() => navigate("/profile")}
+          className="hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex w-full cursor-pointer items-center gap-3 rounded p-2 transition-all duration-200"
+        >
           <div className="bg-surface-container-high border-outline-variant flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border">
             {user.avatar ? (
               <img
@@ -120,15 +123,19 @@ export default function SideNavBar() {
 
       {/* Settings & Logout */}
       <div className="border-outline-variant mt-auto border-t p-4">
-        <a
-          className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex items-center gap-3 px-4 py-3 transition-colors duration-200"
-          href="#"
+        <button
+          onClick={() => navigate("/profile")}
+          className={`flex w-full items-center gap-3 px-4 py-3 transition-colors duration-200 ${
+            isActive("/profile")
+              ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4"
+              : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"
+          }`}
         >
           <span className="material-symbols-outlined" data-icon="settings">
             settings
           </span>
-          <span className="text-label-sm font-label-sm">Settings</span>
-        </a>
+          <span className="text-label-sm font-label-sm">Cài đặt</span>
+        </button>
 
         {/* Nút Đăng xuất - luôn hiển thị */}
         <button

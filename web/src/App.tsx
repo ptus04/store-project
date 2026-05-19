@@ -4,6 +4,7 @@ import Dashboard from "@pages/dashboard/Dashboard";
 import Employees from "@pages/employees/Employees";
 import CategoryList from "@pages/category/CategoryList";
 import MainLayouts from "@layouts/MainLayouts.tsx";
+import Profile from "@pages/profile/Profile";
 
 // Kiểm tra user đã đăng nhập và có role ADMIN chưa
 function isAuthenticated(): boolean {
@@ -51,6 +52,7 @@ const App = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/categories" element={<CategoryList />} />
         <Route path="/employees" element={<Employees />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
 
       {/* Mọi route không tồn tại → về trang chủ */}
