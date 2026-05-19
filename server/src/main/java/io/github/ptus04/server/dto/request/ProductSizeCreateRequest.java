@@ -12,13 +12,7 @@ import java.io.Serializable;
  * DTO for {@link ProductSize}
  */
 public record ProductSizeCreateRequest(
-        @NotNull
-        @Size(max = 4)
-        @NotBlank(message = "Tên kích cỡ không được để trống")
-        String name,
-        @NotNull
-        @Min(message = "Số lượng tồn kho của kích cỡ không được là số âm",
-                value = 0)
-        Integer inStock
+        @NotNull @Size(max = 4) @NotBlank(message = "Tên kích cỡ không được để trống") String name,
+        @Min(message = "Số lượng tồn kho của kích cỡ không được là số âm", value = 0) int inStock
 ) implements Serializable {
 }

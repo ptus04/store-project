@@ -6,13 +6,13 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -21,8 +21,8 @@ import java.util.Map;
 public class Transaction implements Serializable {
     @Id
     @Column(name = "id", nullable = false, length = 16)
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    private UUID id;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -39,11 +39,6 @@ public class Transaction implements Serializable {
     @Column(name = "reference_code", nullable = false, length = 32)
     private String referenceCode;
 
-    @NotNull
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "raw_payload", nullable = false)
-    private Map<String, Object> rawPayload;
-
     @Size(max = 32)
     @NotNull
     @Column(name = "gateway_name", nullable = false, length = 32)
@@ -59,10 +54,10 @@ public class Transaction implements Serializable {
     private BigDecimal amount;
 
     @Column(name = "transaction_date", nullable = false)
-    private Instant transactionDate;
+    private LocalDateTime transactionDate;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
 

@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -21,7 +22,7 @@ import java.util.UUID;
 public class User {
     @Id
     @Column(name = "id", nullable = false, length = 16)
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
     private UUID id;
 
     @Size(max = 128)
@@ -62,14 +63,14 @@ public class User {
     private Instant emailVerifiedAt;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @Column(name = "disabled_at", nullable = false)
+    @Column(name = "disabled_at")
     private Instant disabledAt;
 
     public boolean isPhoneVerified() {

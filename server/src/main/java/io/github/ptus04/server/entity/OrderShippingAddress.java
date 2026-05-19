@@ -15,7 +15,6 @@ import java.util.UUID;
 public class OrderShippingAddress {
     @Id
     @Column(name = "order_id", nullable = false, length = 16)
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID orderId;
 
     @MapsId
@@ -53,5 +52,12 @@ public class OrderShippingAddress {
     @Column(name = "address", nullable = false, length = 128)
     private String address;
 
+    public String toAddressString() {
+        if (district == null || district.isBlank()) {
+            return address + ", " + ward + ", " + city;
+        } else {
+            return address + ", " + ward + ", " + district + ", " + city;
+        }
+    }
 
 }

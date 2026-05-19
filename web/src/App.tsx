@@ -1,7 +1,8 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import Login from "@pages/login/Login";
 import Dashboard from "@pages/dashboard/Dashboard";
-import ChatSupport from "@pages/chat/ChatSupport";
+import Employees from "@pages/employees/Employees";
+import CategoryList from "@pages/category/CategoryList";
 import MainLayouts from "@layouts/MainLayouts.tsx";
 
 // Kiểm tra user đã đăng nhập và có role ADMIN chưa
@@ -11,7 +12,7 @@ function isAuthenticated(): boolean {
     const raw = localStorage.getItem("user");
     if (!token || !raw) return false;
     const user = JSON.parse(raw);
-    return user?.role === "ADMIN";
+    return user?.role === "ADMIN" || user?.role === "EMPLOYEE";
   } catch {
     return false;
   }
@@ -48,7 +49,8 @@ const App = () => {
       >
         <Route index element={<Dashboard />} />
         <Route path="/" element={<Dashboard />} />
-        <Route path="/chat" element={<ChatSupport />} />
+        <Route path="/categories" element={<CategoryList />} />
+        <Route path="/employees" element={<Employees />} />
       </Route>
 
       {/* Mọi route không tồn tại → về trang chủ */}

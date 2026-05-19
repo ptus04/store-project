@@ -1,4 +1,4 @@
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // Đọc thông tin user từ localStorage
 function getUserInfo() {
@@ -19,12 +19,13 @@ export default function SideNavBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const user = getUserInfo();
-  const currentPath = location.pathname;
 
   function handleLogout() {
     localStorage.removeItem("user");
     navigate("/login");
   }
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <nav className="py-unit border-outline-variant bg-surface dark:bg-surface-container-lowest fixed top-0 left-0 z-50 hidden h-screen w-64 flex-col border-r md:flex">
@@ -69,76 +70,70 @@ export default function SideNavBar() {
 
       {/* Navigation Links */}
       <div className="flex flex-1 flex-col gap-1 px-2">
-        {/* Active Item: Dashboard */}
-        <Link
-          to="/"
-          className={`flex items-center gap-3 border-l-4 px-4 py-3 transition-colors duration-200 ${
-            currentPath === "/" ||
-            currentPath === "" ||
-            currentPath === "/dashboard"
-              ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary font-medium"
-              : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest border-transparent"
+        {/* Dashboard */}
+        <button
+          onClick={() => navigate("/")}
+          className={`flex w-full items-center gap-3 px-4 py-3 transition-colors duration-200 ${
+            isActive("/")
+              ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4"
+              : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"
           }`}
         >
           <span className="material-symbols-outlined" data-icon="dashboard">
             dashboard
           </span>
           <span className="text-label-sm font-label-sm">Dashboard</span>
-        </Link>
+        </button>
 
-        {/* Chat Hỗ Trợ */}
-        <Link
-          to="/chat"
-          className={`flex items-center gap-3 border-l-4 px-4 py-3 transition-colors duration-200 ${
-            currentPath === "/chat"
-              ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary font-medium"
-              : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest border-transparent"
-          }`}
+        <button
+          onClick={() => navigate("/categories")}
+          className={`${location.pathname === "/categories" ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4" : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"} flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200`}
         >
-          <span className="material-symbols-outlined" data-icon="chat">
-            chat
+          <span className="material-symbols-outlined" data-icon="category">
+            category
           </span>
-          <span className="text-label-sm font-label-sm">Chat Hỗ Trợ</span>
-        </Link>
+          <span className="text-label-sm font-label-sm">Danh mục</span>
+        </button>
 
-        {/* Inactive Items */}
-        <Link
-          to="#"
-          className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex items-center gap-3 border-l-4 border-transparent px-4 py-3 transition-colors duration-200"
+        {/* Employees */}
+        <button
+          onClick={() => navigate("/employees")}
+          className={`flex w-full items-center gap-3 px-4 py-3 transition-colors duration-200 ${
+            isActive("/employees")
+              ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4"
+              : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"
+          }`}
         >
           <span className="material-symbols-outlined" data-icon="badge">
             badge
           </span>
           <span className="text-label-sm font-label-sm">Nhân Viên</span>
-        </Link>
+        </button>
 
-        <Link
-          to="#"
-          className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex items-center gap-3 border-l-4 border-transparent px-4 py-3 transition-colors duration-200"
-        >
+        <button className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200">
           <span className="material-symbols-outlined" data-icon="group">
             group
           </span>
           <span className="text-label-sm font-label-sm">Khách hàng</span>
-        </Link>
+        </button>
       </div>
 
       {/* Settings & Logout */}
       <div className="border-outline-variant mt-auto border-t p-4">
-        <Link
-          to="#"
-          className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex items-center gap-3 border-l-4 border-transparent px-4 py-3 transition-colors duration-200"
+        <a
+          className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex items-center gap-3 px-4 py-3 transition-colors duration-200"
+          href="#"
         >
           <span className="material-symbols-outlined" data-icon="settings">
             settings
           </span>
           <span className="text-label-sm font-label-sm">Settings</span>
-        </Link>
+        </a>
 
         {/* Nút Đăng xuất - luôn hiển thị */}
         <button
           onClick={handleLogout}
-          className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-red-500 transition-colors duration-200 hover:bg-red-50 dark:hover:bg-red-950/20"
+          className="flex w-full items-center gap-3 px-4 py-3 text-red-500 transition-colors duration-200 hover:bg-red-50 dark:hover:bg-red-950/20"
         >
           <span className="material-symbols-outlined text-[20px]">logout</span>
           <span className="text-label-sm font-label-sm">Đăng xuất</span>

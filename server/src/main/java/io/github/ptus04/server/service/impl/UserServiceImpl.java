@@ -4,15 +4,21 @@ import io.github.ptus04.server.dto.request.UserProfileUpdateRequest;
 import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.enums.UserRoleEnum;
+import io.github.ptus04.server.exception.BusinessConstraintViolationException;
 import io.github.ptus04.server.exception.PhoneExistedException;
-import io.github.ptus04.server.exception.UserNotFoundException;
 import io.github.ptus04.server.mapper.UserMapper;
 import io.github.ptus04.server.repository.UserRepository;
 import io.github.ptus04.server.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -23,12 +29,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getUserById(UUID id) {
-        return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(UserNotFoundException::new));
+        return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(EntityNotFoundException::new));
     }
 
     @Override
     public UserResponse updateProfile(UUID id, UserProfileUpdateRequest request) {
-        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
 
         if (StringUtils.hasText(request.phone()) && !request.phone().equals(user.getPhone())) {
             userRepository.findByPhone(request.phone())
@@ -52,4 +58,51 @@ public class UserServiceImpl implements UserService {
     public long countByRole(UserRoleEnum role) {
         return userRepository.countByRole(role);
     }
+
+    @Override
+    public List<UserResponse> getUsersByRole(UserRoleEnum role) {
+        return userRepository.findByRole(role).stream()
+                .map(userMapper::toUserResponse)
+                .toList();
+    }
+
+    @Override
+    public Page<UserResponse> getUsersByRolePaged(UserRoleEnum role, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findByRole(role, pageable)
+                .map(userMapper::toUserResponse);
+    }
+
+    @Override
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toUserResponse)
+                .toList();
+    }
+
+    @Override
+    public Page<UserResponse> getAllUsersPaged(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findAll(pageable)
+                .map(userMapper::toUserResponse);
+    }
+
+    @Override
+    public UserResponse updateEmployeeAccountStatus(UUID actorId, UUID targetId, boolean disabled) {
+        User actor = userRepository.findById(actorId).orElseThrow(EntityNotFoundException::new);
+        if (actor.getRole() != UserRoleEnum.ADMIN) {
+            throw new BusinessConstraintViolationException("Bạn không có quyền vô hiệu hóa tài khoản");
+        }
+
+        User target = userRepository.findById(targetId).orElseThrow(EntityNotFoundException::new);
+        if (actorId.equals(targetId)) {
+            throw new BusinessConstraintViolationException("Không thể tự vô hiệu hóa tài khoản của chính mình");
+        }
+
+
+        target.setDisabledAt(disabled ? Instant.now() : null);
+        User savedUser = userRepository.save(target);
+        return userMapper.toUserResponse(savedUser);
+    }
 }
+

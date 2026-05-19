@@ -9,7 +9,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const API_URL = import.meta.env.VITE_API_URL;
-
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
@@ -25,7 +25,13 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || "Đăng nhập thất bại");
+        // setError(data.message || "Đăng nhập thất bại");
+        if (data.fieldErrors && Object.keys(data.fieldErrors).length > 0) {
+          setFieldErrors(data.fieldErrors);
+          setError(""); // clear error chung
+        } else {
+          setError(data.message || "Đăng nhập thất bại");
+        }
         return;
       }
 
@@ -72,12 +78,15 @@ export default function Login() {
                 className="w-full border-x-0 border-t-0 border-b border-gray-300 bg-transparent px-0 py-3 placeholder:text-gray-400 focus:border-gray-900 focus:ring-0 disabled:opacity-50"
                 id="email"
                 name="email"
-                placeholder="name@company.com"
+                placeholder="0901033555"
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 disabled={loading}
               />
+              {fieldErrors.phone && (
+                <p className="mt-1 text-sm text-red-600">{fieldErrors.phone}</p>
+              )}
             </div>
 
             <div className="relative">
@@ -117,6 +126,11 @@ export default function Login() {
                   </span>
                 </button>
               </div>
+              {fieldErrors.password && (
+                <p className="mt-1 text-sm text-red-600">
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
 
             <div className="pt-4">

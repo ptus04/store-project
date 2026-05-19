@@ -12,4 +12,7 @@ public interface UserMapper {
     UserResponse toUserResponse(User user);
 
     UserProfileUpdateRequest toUserProfileUpdateRequest(User user);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    User partialUpdate(UserResponse userResponse, @MappingTarget User user);
 }

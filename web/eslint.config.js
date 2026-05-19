@@ -21,6 +21,12 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      "linebreak-style": [
+        "error",
+        process.platform === "win32" ? "windows" : "unix",
+      ],
+    },
   },
   eslintPluginPrettierRecommended,
 ]);

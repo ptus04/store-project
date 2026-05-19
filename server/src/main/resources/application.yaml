@@ -40,6 +40,7 @@ management:
       roles: ADMIN
       show-components: when_authorized
       show-details: when_authorized
+
 custom:
   security:
     cors:
@@ -47,6 +48,12 @@ custom:
       allowed-methods: ${ALLOWED_METHODS}
       allowed-headers: ${ALLOWED_HEADERS}
       allow-credentials: ${ALLOW_CREDENTIALS}
+  sepay:
+    account-name: ${SEPAY_ACCOUNT_NAME}
+    account-number: ${SEPAY_ACCOUNT_NUMBER}
+    bank: ${SEPAY_BANK}
+    username: ${SEPAY_USERNAME}
+    password: ${SEPAY_PASSWORD}
 
 jwt:
   secret: ${JWT_SECRET}
