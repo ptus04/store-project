@@ -285,7 +285,7 @@ export default function Employees() {
       (currentUser.id && targetEmployee.id === currentUser.id) ||
       (currentUser.phone && targetEmployee.phone === currentUser.phone);
 
-    // Admin có thể vô hiệu hóa bất kỳ tài khoản nào trừ chính mình
+    // Admin mới có quyền vô hiệu hóa và không được tự khóa chính mình
     const canToggle = isCurrentUserAdmin && !isSelfAccount;
 
     if (!canToggle) return;
@@ -306,7 +306,7 @@ export default function Employees() {
       });
 
       if (!response.ok) {
-        setError("Không thể cập nhật trạng thái tài khoản của chính mình");
+        setError("Không thể cập nhật trạng thái tài khoản");
         return;
       }
 
@@ -370,23 +370,30 @@ export default function Employees() {
                 </span>
               </div>
 
-              <button
-                onClick={() => openCreateModal("EMPLOYEE")}
-                className="from-primary to-primary/80 text-on-primary hover:from-primary/90 hover:to-primary flex items-center gap-2 rounded-lg bg-linear-to-r px-5 py-3 font-semibold shadow-md transition-all hover:shadow-lg active:scale-95"
-              >
-                <span className="material-symbols-outlined">person_add</span>
-                Tạo nhân viên
-              </button>
+              {/* CHỈ ADMIN MỚI THẤY NÚT TẠO TÀI KHOẢN */}
+              {isCurrentUserAdmin && (
+                <>
+                  <button
+                    onClick={() => openCreateModal("EMPLOYEE")}
+                    className="from-primary to-primary/80 text-on-primary hover:from-primary/90 hover:to-primary flex items-center gap-2 rounded-lg bg-linear-to-r px-5 py-3 font-semibold shadow-md transition-all hover:shadow-lg active:scale-95"
+                  >
+                    <span className="material-symbols-outlined">
+                      person_add
+                    </span>
+                    Tạo nhân viên
+                  </button>
 
-              <button
-                onClick={() => openCreateModal("ADMIN")}
-                className="border-primary/30 text-primary hover:bg-primary/5 flex items-center gap-2 rounded-lg border bg-white px-5 py-3 font-semibold shadow-md transition-all hover:shadow-lg active:scale-95"
-              >
-                <span className="material-symbols-outlined">
-                  admin_panel_settings
-                </span>
-                Tạo admin
-              </button>
+                  <button
+                    onClick={() => openCreateModal("ADMIN")}
+                    className="border-primary/30 text-primary hover:bg-primary/5 flex items-center gap-2 rounded-lg border bg-white px-5 py-3 font-semibold shadow-md transition-all hover:shadow-lg active:scale-95"
+                  >
+                    <span className="material-symbols-outlined">
+                      admin_panel_settings
+                    </span>
+                    Tạo admin
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
@@ -589,16 +596,18 @@ export default function Employees() {
                                   }`}
                                   title={toggleTitle}
                                 >
-                                  {isDisabled ? "Vô hiệu" : "Hoạt động"}
+                                  {isDisabled ? "Đã vô hiệu" : "Đang hoạt động"}
                                 </span>
                               )}
-                              <span
-                                className={`text-xs font-semibold ${isDisabled ? "text-rose-700" : "text-emerald-700"}`}
-                              >
-                                {isDisabled
-                                  ? "Đã vô hiệu hóa"
-                                  : "Đang hoạt động"}
-                              </span>
+                              {isCurrentUserAdmin && (
+                                <span
+                                  className={`text-xs font-semibold ${isDisabled ? "text-rose-700" : "text-emerald-700"}`}
+                                >
+                                  {isDisabled
+                                    ? "Đã vô hiệu hóa"
+                                    : "Đang hoạt động"}
+                                </span>
+                              )}
                             </div>
                             <span className="text-secondary text-xs">
                               Cập nhật: {formatDate(employee.updatedAt)}
@@ -616,15 +625,19 @@ export default function Employees() {
                                 visibility
                               </span>
                             </button>
-                            <button
-                              onClick={() => openEditModal(employee)}
-                              className="bg-primary/10 text-primary hover:bg-primary/20 rounded-lg p-2 transition-all hover:scale-110 active:scale-95"
-                              title="Cập nhật tài khoản"
-                            >
-                              <span className="material-symbols-outlined text-lg">
-                                edit
-                              </span>
-                            </button>
+
+                            {/* CHỈ ADMIN MỚI THẤY NÚT SỬA TÀI KHOẢN TRÊN DÒNG */}
+                            {isCurrentUserAdmin && (
+                              <button
+                                onClick={() => openEditModal(employee)}
+                                className="bg-primary/10 text-primary hover:bg-primary/20 rounded-lg p-2 transition-all hover:scale-110 active:scale-95"
+                                title="Cập nhật tài khoản"
+                              >
+                                <span className="material-symbols-outlined text-lg">
+                                  edit
+                                </span>
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -716,18 +729,21 @@ export default function Employees() {
             </div>
 
             <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  const employeeToEdit = selectedEmployee;
-                  closeDetail();
-                  if (employeeToEdit) {
-                    openEditModal(employeeToEdit);
-                  }
-                }}
-                className="bg-primary text-on-primary hover:bg-primary/90 rounded-lg px-5 py-3 font-semibold transition-all"
-              >
-                Cập nhật
-              </button>
+              {/* CHỈ ADMIN MỚI THẤY NÚT CẬP NHẬT TRONG CHI TIẾT */}
+              {isCurrentUserAdmin && (
+                <button
+                  onClick={() => {
+                    const employeeToEdit = selectedEmployee;
+                    closeDetail();
+                    if (employeeToEdit) {
+                      openEditModal(employeeToEdit);
+                    }
+                  }}
+                  className="bg-primary text-on-primary hover:bg-primary/90 rounded-lg px-5 py-3 font-semibold transition-all"
+                >
+                  Cập nhật
+                </button>
+              )}
               <button
                 onClick={closeDetail}
                 className="border-outline/20 text-secondary rounded-lg border px-5 py-3 font-semibold transition-all hover:bg-slate-50"
