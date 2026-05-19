@@ -10,9 +10,13 @@ import io.github.ptus04.server.mapper.UserMapper;
 import io.github.ptus04.server.repository.UserRepository;
 import io.github.ptus04.server.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -52,4 +56,33 @@ public class UserServiceImpl implements UserService {
     public long countByRole(UserRoleEnum role) {
         return userRepository.countByRole(role);
     }
+
+    @Override
+    public List<UserResponse> getUsersByRole(UserRoleEnum role) {
+        return userRepository.findByRole(role).stream()
+                .map(userMapper::toUserResponse)
+                .toList();
+    }
+
+    @Override
+    public Page<UserResponse> getUsersByRolePaged(UserRoleEnum role, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findByRole(role, pageable)
+                .map(userMapper::toUserResponse);
+    }
+
+    @Override
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toUserResponse)
+                .toList();
+    }
+
+    @Override
+    public Page<UserResponse> getAllUsersPaged(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findAll(pageable)
+                .map(userMapper::toUserResponse);
+    }
 }
+
