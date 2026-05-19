@@ -9,8 +9,8 @@ interface Employee {
   role: string;
   gender: string;
   birthDate: string;
-  phoneVerifiedAt: string;
-  emailVerifiedAt: string;
+  phoneVerifiedAt: string | null;
+  emailVerifiedAt: string | null;
   createdAt: string;
   updatedAt: string;
   disabledAt: string | null;
@@ -40,6 +40,76 @@ const EMPTY_FORM: AccountFormState = {
   birthDate: "",
 };
 
+const ROLE_LABELS: Record<string, string> = {
+  ADMIN: "Quản trị viên",
+  EMPLOYEE: "Nhân viên",
+};
+
+const ROLE_BADGE_COLORS: Record<string, string> = {
+  ADMIN: "bg-red-100 text-red-800 border border-red-300",
+  EMPLOYEE: "bg-blue-100 text-blue-800 border border-blue-300",
+};
+
+function parseJwtPayload(token: string | null): Record<string, unknown> {
+  if (!token) return {};
+
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return {};
+
+    const payloadBase64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = payloadBase64.padEnd(
+      payloadBase64.length + ((4 - (payloadBase64.length % 4)) % 4),
+      "=",
+    );
+
+    return JSON.parse(window.atob(padded)) as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+}
+
+function readCurrentUser(token: string | null) {
+  const payload = parseJwtPayload(token);
+  const storedUser = localStorage.getItem("user");
+  const parsedStoredUser = (() => {
+    if (!storedUser) return {};
+
+    try {
+      return JSON.parse(storedUser) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  })();
+
+  const storedRole =
+    typeof parsedStoredUser.role === "string" ? parsedStoredUser.role : "";
+  const payloadRole = typeof payload.role === "string" ? payload.role : "";
+  const normalizedRole = (storedRole || payloadRole || "").toUpperCase();
+
+  const payloadPhone = typeof payload.phone === "string" ? payload.phone : "";
+  const payloadSub = typeof payload.sub === "string" ? payload.sub : "";
+  const currentUserPhone =
+    payloadPhone || (/^\d{9,15}$/.test(payloadSub) ? payloadSub : "");
+
+  const payloadId =
+    typeof payload.userId === "string"
+      ? payload.userId
+      : typeof payload.id === "string"
+        ? payload.id
+        : /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+              payloadSub,
+            )
+          ? payloadSub
+          : "";
+
+  return {
+    role: normalizedRole,
+    id: payloadId,
+    phone: currentUserPhone,
+  };
+}
+
 export default function Employees() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,9 +121,14 @@ export default function Employees() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formMode, setFormMode] = useState<FormMode>("create");
   const [formState, setFormState] = useState<AccountFormState>(EMPTY_FORM);
+  const [updatingAccountIds, setUpdatingAccountIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   const API_URL = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("token");
+  const currentUser = useMemo(() => readCurrentUser(token), [token]);
+  const isCurrentUserAdmin = currentUser.role === "ADMIN";
 
   useEffect(() => {
     fetchEmployees();
@@ -73,7 +148,9 @@ export default function Employees() {
       });
 
       if (!response.ok) {
-        throw new Error("Không thể tải danh sách tài khoản");
+        setError("Không thể tải danh sách tài khoản");
+        setEmployees([]);
+        return;
       }
 
       const data: Employee[] = await response.json();
@@ -103,27 +180,14 @@ export default function Employees() {
   };
 
   const getRoleLabel = (role: string) => {
-    const roleMap: { [key: string]: string } = {
-      ADMIN: "Quản trị viên",
-      EMPLOYEE: "Nhân viên",
-    };
-    return roleMap[role] || role;
+    return ROLE_LABELS[role] || role;
   };
 
   const getRoleBadgeColor = (role: string) => {
-    const colorMap: { [key: string]: string } = {
-      ADMIN: "bg-red-100 text-red-800 border border-red-300",
-      EMPLOYEE: "bg-blue-100 text-blue-800 border border-blue-300",
-    };
-    return colorMap[role] || "bg-gray-100 text-gray-800 border border-gray-300";
-  };
-
-  const getRoleIcon = (role: string) => {
-    const iconMap: { [key: string]: string } = {
-      ADMIN: "admin_panel_settings",
-      EMPLOYEE: "badge",
-    };
-    return iconMap[role] || "person";
+    return (
+      ROLE_BADGE_COLORS[role] ||
+      "bg-gray-100 text-gray-800 border border-gray-300"
+    );
   };
 
   const activeCount = useMemo(
@@ -180,8 +244,8 @@ export default function Employees() {
         role: formState.role,
         gender: formState.gender,
         birthDate: formState.birthDate,
-        phoneVerifiedAt: null as unknown as string,
-        emailVerifiedAt: null as unknown as string,
+        phoneVerifiedAt: null,
+        emailVerifiedAt: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         disabledAt: null,
@@ -213,25 +277,63 @@ export default function Employees() {
     }
   }
 
-  function toggleDisableAccount(id: string) {
-    setEmployees((current) =>
-      current.map((employee) =>
-        employee.id === id
-          ? {
-              ...employee,
-              disabledAt: employee.disabledAt ? null : new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            }
-          : employee,
-      ),
-    );
+  async function toggleDisableAccount(targetEmployee: Employee) {
+    const id = targetEmployee.id;
+    if (updatingAccountIds.has(id)) return;
+
+    const isSelfAccount =
+      (currentUser.id && targetEmployee.id === currentUser.id) ||
+      (currentUser.phone && targetEmployee.phone === currentUser.phone);
+
+    // Admin có thể vô hiệu hóa bất kỳ tài khoản nào trừ chính mình
+    const canToggle = isCurrentUserAdmin && !isSelfAccount;
+
+    if (!canToggle) return;
+
+    const isCurrentlyDisabled = targetEmployee.disabledAt !== null;
+    const disabledAt = isCurrentlyDisabled ? null : new Date().toISOString();
+
+    try {
+      setUpdatingAccountIds((current) => new Set(current).add(id));
+
+      const response = await fetch(`${API_URL}/api/employees/${id}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ disabledAt }),
+      });
+
+      if (!response.ok) {
+        setError("Không thể cập nhật trạng thái tài khoản của chính mình");
+        return;
+      }
+
+      const updatedEmployee: Employee = await response.json();
+      setEmployees((current) =>
+        current.map((employee) =>
+          employee.id === updatedEmployee.id ? updatedEmployee : employee,
+        ),
+      );
+      setError("");
+    } catch (err) {
+      console.error("Error updating account status:", err);
+      setError("Không thể cập nhật trạng thái tài khoản");
+    } finally {
+      setUpdatingAccountIds((current) => {
+        const next = new Set(current);
+        next.delete(id);
+        return next;
+      });
+    }
   }
 
   return (
-    <div className="from-surface via-surface to-surface-container flex-1 overflow-auto bg-gradient-to-br">
+    <div className="from-surface via-surface to-surface-container flex-1 overflow-auto bg-linear-to-br">
       <div className="space-y-6 p-6">
         {/* Header Section */}
-        <div className="border-primary/20 from-primary/10 to-primary/5 rounded-2xl border bg-gradient-to-r p-8 shadow-lg transition-shadow hover:shadow-xl">
+        <div className="border-primary/20 from-primary/10 to-primary/5 rounded-2xl border bg-linear-to-r p-8 shadow-lg transition-shadow hover:shadow-xl">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
@@ -259,9 +361,9 @@ export default function Employees() {
                   onChange={(e) => setRoleFilter(e.target.value as RoleFilter)}
                   className="border-primary/30 text-body-base text-on-surface hover:border-primary focus:border-primary focus:ring-primary/30 appearance-none rounded-lg border-2 bg-white px-4 py-3 pr-10 shadow-md transition-all outline-none focus:ring-2"
                 >
-                  <option value="ALL">👥 Tất cả tài khoản</option>
-                  <option value="ADMIN">🔑 Quản trị viên</option>
-                  <option value="EMPLOYEE">👔 Nhân viên</option>
+                  <option value="ALL">Tất cả tài khoản</option>
+                  <option value="ADMIN">Quản trị viên</option>
+                  <option value="EMPLOYEE">Nhân viên</option>
                 </select>
                 <span className="material-symbols-outlined text-secondary pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
                   expand_more
@@ -270,7 +372,7 @@ export default function Employees() {
 
               <button
                 onClick={() => openCreateModal("EMPLOYEE")}
-                className="from-primary to-primary/80 text-on-primary hover:from-primary/90 hover:to-primary flex items-center gap-2 rounded-lg bg-gradient-to-r px-5 py-3 font-semibold shadow-md transition-all hover:shadow-lg active:scale-95"
+                className="from-primary to-primary/80 text-on-primary hover:from-primary/90 hover:to-primary flex items-center gap-2 rounded-lg bg-linear-to-r px-5 py-3 font-semibold shadow-md transition-all hover:shadow-lg active:scale-95"
               >
                 <span className="material-symbols-outlined">person_add</span>
                 Tạo nhân viên
@@ -330,7 +432,7 @@ export default function Employees() {
 
           {error && !loading && (
             <div className="m-6 flex items-start gap-3 rounded-lg border-2 border-red-300 bg-red-50 p-4">
-              <span className="material-symbols-outlined flex-shrink-0 text-red-600">
+              <span className="material-symbols-outlined shrink-0 text-red-600">
                 error
               </span>
               <div>
@@ -362,7 +464,7 @@ export default function Employees() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-primary/20 from-primary/5 to-primary/10 border-b-2 bg-gradient-to-r">
+                  <tr className="border-primary/20 from-primary/5 to-primary/10 border-b-2 bg-linear-to-r">
                     <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
                       Họ Tên
                     </th>
@@ -386,6 +488,27 @@ export default function Employees() {
                 <tbody className="divide-outline/10 divide-y">
                   {employees.map((employee) => {
                     const isDisabled = Boolean(employee.disabledAt);
+                    const isUpdatingAccount = updatingAccountIds.has(
+                      employee.id,
+                    );
+                    const isSelfAccount =
+                      (currentUser.id && employee.id === currentUser.id) ||
+                      (currentUser.phone &&
+                        employee.phone === currentUser.phone);
+                    const canToggleAccount =
+                      isCurrentUserAdmin &&
+                      !isSelfAccount &&
+                      !isUpdatingAccount;
+                    const toggleTitle = !isCurrentUserAdmin
+                      ? "Nhân viên không có quyền vô hiệu hóa tài khoản"
+                      : isUpdatingAccount
+                        ? "Đang cập nhật trạng thái tài khoản"
+                        : isSelfAccount
+                          ? "Không thể tự vô hiệu hóa tài khoản của chính mình"
+                          : isDisabled
+                            ? "Kích hoạt tài khoản"
+                            : "Vô hiệu hóa tài khoản";
+
                     return (
                       <tr
                         key={employee.id}
@@ -395,7 +518,7 @@ export default function Employees() {
                       >
                         <td className="text-on-surface px-6 py-4 text-sm font-semibold">
                           <div className="flex items-center gap-3">
-                            <div className="from-primary/30 to-primary/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br">
+                            <div className="from-primary/30 to-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br">
                               <span className="text-primary text-xs font-bold">
                                 {employee.name.charAt(0).toUpperCase()}
                               </span>
@@ -403,11 +526,6 @@ export default function Employees() {
                             <div>
                               <div className="flex items-center gap-2">
                                 <span>{employee.name}</span>
-                                {isDisabled && (
-                                  <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold tracking-widest text-rose-700 uppercase">
-                                    Vô hiệu hóa
-                                  </span>
-                                )}
                               </div>
                               <p className="text-secondary mt-1 text-xs">
                                 {employee.id}
@@ -423,11 +541,8 @@ export default function Employees() {
                         </td>
                         <td className="px-6 py-4 text-sm">
                           <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-secondary text-sm">
-                              {getRoleIcon(employee.role)}
-                            </span>
                             <span
-                              className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${getRoleBadgeColor(
+                              className={`inline-block rounded-full px-3 py-1 text-xs font-bold whitespace-nowrap ${getRoleBadgeColor(
                                 employee.role,
                               )}`}
                             >
@@ -438,31 +553,45 @@ export default function Employees() {
                         <td className="px-6 py-4 text-sm">
                           <div className="flex flex-col gap-2">
                             <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  toggleDisableAccount(employee.id)
-                                }
-                                className={`focus:ring-primary/30 relative inline-flex h-6 w-11 items-center rounded-full border transition-all focus:ring-2 focus:outline-none ${
-                                  isDisabled
-                                    ? "border-rose-300 bg-rose-500"
-                                    : "border-emerald-300 bg-emerald-500"
-                                }`}
-                                aria-pressed={isDisabled}
-                                title={
-                                  isDisabled
-                                    ? "Kích hoạt tài khoản"
-                                    : "Vô hiệu hóa tài khoản"
-                                }
-                              >
-                                <span
-                                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                              {isCurrentUserAdmin ? (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    void toggleDisableAccount(employee)
+                                  }
+                                  disabled={!canToggleAccount}
+                                  className={`focus:ring-primary/30 relative inline-flex h-6 w-11 items-center rounded-full border transition-all focus:ring-2 focus:outline-none ${
                                     isDisabled
-                                      ? "translate-x-1"
-                                      : "translate-x-5"
+                                      ? "border-rose-300 bg-rose-500"
+                                      : "border-emerald-300 bg-emerald-500"
+                                  } ${
+                                    canToggleAccount
+                                      ? "cursor-pointer"
+                                      : "cursor-not-allowed opacity-50"
                                   }`}
-                                />
-                              </button>
+                                  aria-pressed={isDisabled}
+                                  title={toggleTitle}
+                                >
+                                  <span
+                                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                                      isDisabled
+                                        ? "translate-x-1"
+                                        : "translate-x-5"
+                                    }`}
+                                  />
+                                </button>
+                              ) : (
+                                <span
+                                  className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                                    isDisabled
+                                      ? "bg-rose-100 text-rose-700"
+                                      : "bg-emerald-100 text-emerald-700"
+                                  }`}
+                                  title={toggleTitle}
+                                >
+                                  {isDisabled ? "Vô hiệu" : "Hoạt động"}
+                                </span>
+                              )}
                               <span
                                 className={`text-xs font-semibold ${isDisabled ? "text-rose-700" : "text-emerald-700"}`}
                               >
@@ -496,23 +625,6 @@ export default function Employees() {
                                 edit
                               </span>
                             </button>
-                            <button
-                              onClick={() => toggleDisableAccount(employee.id)}
-                              className={`rounded-lg p-2 transition-all hover:scale-110 active:scale-95 ${
-                                isDisabled
-                                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                                  : "bg-rose-100 text-rose-700 hover:bg-rose-200"
-                              }`}
-                              title={
-                                isDisabled
-                                  ? "Kích hoạt tài khoản"
-                                  : "Vô hiệu hóa tài khoản"
-                              }
-                            >
-                              <span className="material-symbols-outlined text-lg">
-                                {isDisabled ? "toggle_on" : "toggle_off"}
-                              </span>
-                            </button>
                           </div>
                         </td>
                       </tr>
@@ -524,7 +636,7 @@ export default function Employees() {
           )}
 
           {!loading && employees.length > 0 && (
-            <div className="border-primary/20 from-primary/5 to-primary/10 flex items-center justify-between border-t-2 bg-gradient-to-r px-6 py-4">
+            <div className="border-primary/20 from-primary/5 to-primary/10 flex items-center justify-between border-t-2 bg-linear-to-r px-6 py-4">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">
                   info
@@ -537,9 +649,6 @@ export default function Employees() {
                   tài khoản
                 </p>
               </div>
-              <p className="text-secondary text-xs">
-                Giao diện mẫu: chi tiết, tạo mới, cập nhật và vô hiệu hóa
-              </p>
             </div>
           )}
         </div>
@@ -738,7 +847,7 @@ export default function Employees() {
               </button>
               <button
                 type="submit"
-                className="from-primary to-primary/80 text-on-primary hover:from-primary/90 hover:to-primary rounded-lg bg-gradient-to-r px-5 py-3 font-semibold transition-all"
+                className="from-primary to-primary/80 text-on-primary hover:from-primary/90 hover:to-primary rounded-lg bg-linear-to-r px-5 py-3 font-semibold transition-all"
               >
                 {formMode === "create" ? "Tạo tài khoản" : "Lưu thay đổi"}
               </button>
