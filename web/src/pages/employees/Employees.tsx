@@ -330,10 +330,10 @@ export default function Employees() {
   }
 
   return (
-    <div className="from-surface via-surface to-surface-container flex-1 overflow-auto bg-gradient-to-br">
+    <div className="from-surface via-surface to-surface-container flex-1 overflow-auto bg-linear-to-br">
       <div className="space-y-6 p-6">
         {/* Header Section */}
-        <div className="border-primary/20 from-primary/10 to-primary/5 rounded-2xl border bg-gradient-to-r p-8 shadow-lg transition-shadow hover:shadow-xl">
+        <div className="border-primary/20 from-primary/10 to-primary/5 rounded-2xl border bg-linear-to-r p-8 shadow-lg transition-shadow hover:shadow-xl">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
@@ -372,7 +372,7 @@ export default function Employees() {
 
               <button
                 onClick={() => openCreateModal("EMPLOYEE")}
-                className="from-primary to-primary/80 text-on-primary hover:from-primary/90 hover:to-primary flex items-center gap-2 rounded-lg bg-gradient-to-r px-5 py-3 font-semibold shadow-md transition-all hover:shadow-lg active:scale-95"
+                className="from-primary to-primary/80 text-on-primary hover:from-primary/90 hover:to-primary flex items-center gap-2 rounded-lg bg-linear-to-r px-5 py-3 font-semibold shadow-md transition-all hover:shadow-lg active:scale-95"
               >
                 <span className="material-symbols-outlined">person_add</span>
                 Tạo nhân viên
@@ -432,7 +432,7 @@ export default function Employees() {
 
           {error && !loading && (
             <div className="m-6 flex items-start gap-3 rounded-lg border-2 border-red-300 bg-red-50 p-4">
-              <span className="material-symbols-outlined flex-shrink-0 text-red-600">
+              <span className="material-symbols-outlined shrink-0 text-red-600">
                 error
               </span>
               <div>
@@ -464,7 +464,7 @@ export default function Employees() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-primary/20 from-primary/5 to-primary/10 border-b-2 bg-gradient-to-r">
+                  <tr className="border-primary/20 from-primary/5 to-primary/10 border-b-2 bg-linear-to-r">
                     <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
                       Họ Tên
                     </th>
@@ -518,7 +518,7 @@ export default function Employees() {
                       >
                         <td className="text-on-surface px-6 py-4 text-sm font-semibold">
                           <div className="flex items-center gap-3">
-                            <div className="from-primary/30 to-primary/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br">
+                            <div className="from-primary/30 to-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br">
                               <span className="text-primary text-xs font-bold">
                                 {employee.name.charAt(0).toUpperCase()}
                               </span>
@@ -636,7 +636,7 @@ export default function Employees() {
           )}
 
           {!loading && employees.length > 0 && (
-            <div className="border-primary/20 from-primary/5 to-primary/10 flex items-center justify-between border-t-2 bg-gradient-to-r px-6 py-4">
+            <div className="border-primary/20 from-primary/5 to-primary/10 flex items-center justify-between border-t-2 bg-linear-to-r px-6 py-4">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">
                   info
@@ -649,9 +649,6 @@ export default function Employees() {
                   tài khoản
                 </p>
               </div>
-              <p className="text-secondary text-xs">
-                Giao diện mẫu: chi tiết, tạo mới, cập nhật và vô hiệu hóa
-              </p>
             </div>
           )}
         </div>
@@ -850,7 +847,7 @@ export default function Employees() {
               </button>
               <button
                 type="submit"
-                className="from-primary to-primary/80 text-on-primary hover:from-primary/90 hover:to-primary rounded-lg bg-gradient-to-r px-5 py-3 font-semibold transition-all"
+                className="from-primary to-primary/80 text-on-primary hover:from-primary/90 hover:to-primary rounded-lg bg-linear-to-r px-5 py-3 font-semibold transition-all"
               >
                 {formMode === "create" ? "Tạo tài khoản" : "Lưu thay đổi"}
               </button>
