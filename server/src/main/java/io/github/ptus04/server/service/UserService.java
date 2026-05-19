@@ -22,4 +22,6 @@ public interface UserService {
     List<UserResponse> getAllUsers();
 
     Page<UserResponse> getAllUsersPaged(int page, int size);
+
+    UserResponse updateEmployeeAccountStatus(UUID actorId, UUID targetId, boolean disabled);
 }

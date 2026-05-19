@@ -70,7 +70,7 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @Column(name = "disabled_at", nullable = false)
+    @Column(name = "disabled_at")
     private Instant disabledAt;
 
     public boolean isPhoneVerified() {

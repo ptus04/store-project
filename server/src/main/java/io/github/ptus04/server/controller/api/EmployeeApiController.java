@@ -1,16 +1,21 @@
 package io.github.ptus04.server.controller.api;
 
+import io.github.ptus04.server.dto.request.EmployeeAccountStatusUpdateRequest;
 import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.enums.UserRoleEnum;
+import io.github.ptus04.server.security.CustomUserDetails;
 import io.github.ptus04.server.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/employees")
@@ -45,6 +50,21 @@ public class EmployeeApiController {
             employees = userService.getAllUsersPaged(page, size);
         }
         return ResponseEntity.ok(employees);
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<UserResponse> updateAccountStatus(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable UUID id,
+            @Valid @RequestBody EmployeeAccountStatusUpdateRequest request
+    ) {
+        boolean isDisabling = request.disabledAt() != null;
+        UserResponse updatedUser = userService.updateEmployeeAccountStatus(
+                currentUser.getId(),
+                id,
+                isDisabling
+        );
+        return ResponseEntity.ok(updatedUser);
     }
 }
 

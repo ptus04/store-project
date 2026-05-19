@@ -4,6 +4,7 @@ import io.github.ptus04.server.dto.request.UserProfileUpdateRequest;
 import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.enums.UserRoleEnum;
+import io.github.ptus04.server.exception.BusinessConstraintViolationException;
 import io.github.ptus04.server.exception.PhoneExistedException;
 import io.github.ptus04.server.mapper.UserMapper;
 import io.github.ptus04.server.repository.UserRepository;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -83,6 +85,24 @@ public class UserServiceImpl implements UserService {
         Pageable pageable = PageRequest.of(page, size);
         return userRepository.findAll(pageable)
                 .map(userMapper::toUserResponse);
+    }
+
+    @Override
+    public UserResponse updateEmployeeAccountStatus(UUID actorId, UUID targetId, boolean disabled) {
+        User actor = userRepository.findById(actorId).orElseThrow(EntityNotFoundException::new);
+        if (actor.getRole() != UserRoleEnum.ADMIN) {
+            throw new BusinessConstraintViolationException("Bạn không có quyền vô hiệu hóa tài khoản");
+        }
+
+        User target = userRepository.findById(targetId).orElseThrow(EntityNotFoundException::new);
+        if (actorId.equals(targetId)) {
+            throw new BusinessConstraintViolationException("Không thể tự vô hiệu hóa tài khoản của chính mình");
+        }
+
+
+        target.setDisabledAt(disabled ? Instant.now() : null);
+        User savedUser = userRepository.save(target);
+        return userMapper.toUserResponse(savedUser);
     }
 }
 
