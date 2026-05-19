@@ -1,6 +1,6 @@
 package io.github.ptus04.server.controller;
 
-import io.github.ptus04.server.sepay.SePayProperties;
+import io.github.ptus04.server.sepay.config.SePayProperties;
 import io.github.ptus04.server.dto.internal.Cart;
 import io.github.ptus04.server.dto.request.OrderCreateRequest;
 import io.github.ptus04.server.dto.request.OrderDetailCreateRequest;

@@ -9,15 +9,16 @@ import io.github.ptus04.server.enums.OrderStatusEnum;
 import io.github.ptus04.server.mapper.TransactionMapper;
 import io.github.ptus04.server.repository.OrderRepository;
 import io.github.ptus04.server.repository.TransactionRepository;
+import io.github.ptus04.server.sepay.SePayService;
 import io.github.ptus04.server.service.EmailService;
 import io.github.ptus04.server.service.TransactionService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
@@ -25,6 +26,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final OrderRepository orderRepository;
     private final TransactionMapper transactionMapper;
     private final EmailService emailService;
+    private final SePayService sePayService;
 
     @Override
     @Transactional
@@ -35,24 +37,33 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = transactionMapper.toEntity(transactionCreateRequest);
         transaction.setOrder(order);
 
-        TransactionResponse transactionResponse = transactionMapper.toTransactionResponse(
-                transactionRepository.saveAndFlush(transaction)
-        );
 
         if (!order.getStatus().equals(OrderStatusEnum.UNPAID) ||
                 order.getTotal().compareTo(transactionCreateRequest.transferAmount()) != 0) {
+            TransactionResponse transactionResponse = transactionMapper.toTransactionResponse(
+                    transactionRepository.saveAndFlush(transaction)
+            );
             return new TransactionCreateResponse(false, transactionResponse);
         }
 
         order.setStatus(OrderStatusEnum.PAID);
 
         String email = order.getUser().getEmail();
-        if(email != null) {
-            String contextPath = ServletUriComponentsBuilder.fromCurrentContextPath().path("/").toUriString();
-
-            emailService.sendOrderEmail(email, order.getOrderCode(), "");
+        if (email != null) {
+            sePayService.createInvoice(order)
+                    .thenCompose(invoice -> sePayService.checkInvoice(invoice.getData().getTrackingCode()))
+                    .thenAccept(check -> {
+                        emailService.sendOrderEmail(email, order.getOrderCode(), check.getData().getInvoice().getPdfUrl());
+                    })
+                    .exceptionally(ex -> {
+                        log.atWarn().setMessage("Failed to create invoice or check invoice for order code " + order.getOrderCode()).setCause(ex).log();
+                        return null;
+                    });
         }
 
+        TransactionResponse transactionResponse = transactionMapper.toTransactionResponse(
+                transactionRepository.saveAndFlush(transaction)
+        );
         return new TransactionCreateResponse(true, transactionResponse);
     }
 
