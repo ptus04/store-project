@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
@@ -53,5 +52,12 @@ public class OrderShippingAddress {
     @Column(name = "address", nullable = false, length = 128)
     private String address;
 
+    public String toAddressString() {
+        if (district == null || district.isBlank()) {
+            return address + ", " + ward + ", " + city;
+        } else {
+            return address + ", " + ward + ", " + district + ", " + city;
+        }
+    }
 
 }
