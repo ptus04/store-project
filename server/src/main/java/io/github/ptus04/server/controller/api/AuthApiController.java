@@ -32,21 +32,28 @@ public class AuthApiController {
                         userLoginRequest.phone(), userLoginRequest.password())
         );
 
-        boolean isAdmin = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isAdminOrEmployee = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")
+                        || a.getAuthority().equals("ROLE_EMPLOYEE"));
 
-        if (!isAdmin) {
+        if (!isAdminOrEmployee) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("message", "Bạn không có quyền truy cập hệ thống quản trị"));
         }
 
+        String role = auth.getAuthorities().stream()
+                .map(a -> a.getAuthority().replace("ROLE_", ""))
+                .filter(r -> r.equals("ADMIN") || r.equals("EMPLOYEE"))
+                .findFirst()
+                .orElse("EMPLOYEE");
+
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-        String token = jwtUtil.generateToken(userDetails.getId(), userDetails.getName(), "ADMIN");
+        String token = jwtUtil.generateToken(userDetails.getId(), userDetails.getName(), role);
 
         return ResponseEntity.ok(Map.of(
                 "token", token,
                 "name", userDetails.getName(),
-                "role", "ADMIN"
+                "role", role
         ));
 
 
