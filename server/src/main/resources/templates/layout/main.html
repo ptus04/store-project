@@ -61,7 +61,7 @@
                 <span class="hidden md:inline"> Giỏ hàng</span>
                 <span class="absolute -top-3/10 left-2 w-4 rounded-full bg-red-500 text-center text-xs text-white"
                       th:if="${session.cart != null && session.cart.items.size() > 0}"
-                      th:text="${session.cart.items.size()}">
+                      th:text="${session.cart.totalQuantity}">
                 </span>
             </a>
 
@@ -72,27 +72,33 @@
                 </p>
 
                 <th:block th:if="${session.cart != null && session.cart.items.size() > 0}">
-                    <div class="flex items-center p-1" th:each="i : ${session.cart.items}">
-                        <a th:href="@{/products/{id}(id=${product.productId})}">
-                            <img class="h-14"
+                    <div class="flex items-center p-1" th:each="item : ${session.cart.items}">
+                        <a class="flex h-14 w-14 items-center justify-center bg-gray-50"
+                           th:href="@{/products/{id}(id=${item.productId})}">
+                            <img class="h-14 w-14 object-contain"
                                  loading="lazy"
-                                 th:src="@{${imageContainerUrl} + ${product.productImages().get(0).file()}}"
-                                 th:alt="${product.name}"/>
+                                 th:if="${item.imageFile != null}"
+                                 th:src="@{${imageContainerUrl} + ${item.imageFile}}"
+                                 th:alt="${item.productName}"/>
+                            <span class="text-xs text-gray-400" th:unless="${item.imageFile != null}">SLY</span>
                         </a>
                         <div class="ms-2 overflow-hidden">
-                            <a th:href="@{/products/{id}(id=${product.productId})}"
-                               th:text="${product.name + ' ' + product.size ? product.size : ''}">
+                            <a th:href="@{/products/{id}(id=${item.productId})}"
+                               th:text="${item.productName + ' ' + item.sizeName}">
                             </a>
                             <p>
-                                <span th:text="${product.quantity}"></span> &times;
+                                <span th:text="${item.quantity}"></span> &times;
                                 <span class="font-bold"
-                                      th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                                      th:text="${#numbers.formatDecimal(item.unitPrice, 0, 'POINT', 0, 'COMMA') + ' ₫'}">
                             </span>
                             </p>
                         </div>
-                        <button class="ms-auto cursor-pointer" type="button" title="Xóa sản phẩm">
-                            <i class="fa fa-remove"></i>
-                        </button>
+                        <form class="ms-auto" method="post"
+                              th:action="@{/cart/items/{id}/remove(id=${item.productSizeId})}">
+                            <button class="cursor-pointer" type="submit" title="Xóa sản phẩm">
+                                <i class="fa fa-remove"></i>
+                            </button>
+                        </form>
                     </div>
                 </th:block>
 
@@ -101,7 +107,7 @@
                 <div class="flex justify-between p-1 text-sm">
                     <p class="font-bold">Tạm tính:</p>
                     <p class="text-end font-bold"
-                       th:text="${#numbers.formatDecimal((subtotal ?: 0), 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                       th:text="${#numbers.formatDecimal(session.cart != null ? session.cart.subtotal : 0, 0, 'POINT', 0, 'COMMA') + ' ₫'}">
                     </p>
                 </div>
             </div>

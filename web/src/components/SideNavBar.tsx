@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // Đọc thông tin user từ localStorage
 function getUserInfo() {
@@ -85,6 +85,16 @@ export default function SideNavBar() {
           <span className="text-label-sm font-label-sm">Dashboard</span>
         </button>
 
+        <button
+          onClick={() => navigate("/categories")}
+          className={`${location.pathname === "/categories" ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4" : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"} flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200`}
+        >
+          <span className="material-symbols-outlined" data-icon="category">
+            category
+          </span>
+          <span className="text-label-sm font-label-sm">Danh mục</span>
+        </button>
+
         {/* Employees */}
         <button
           onClick={() => navigate("/employees")}
@@ -100,15 +110,12 @@ export default function SideNavBar() {
           <span className="text-label-sm font-label-sm">Nhân Viên</span>
         </button>
 
-        <a
-          className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex items-center gap-3 px-4 py-3 transition-colors duration-200"
-          href="#"
-        >
+        <button className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200">
           <span className="material-symbols-outlined" data-icon="group">
             group
           </span>
           <span className="text-label-sm font-label-sm">Khách hàng</span>
-        </a>
+        </button>
       </div>
 
       {/* Settings & Logout */}

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi"
+      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
+      xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Giỏ hàng | SLY</title>
+</head>
+<body>
+<main class="container mx-auto px-3 pt-5 pb-8">
+    <nav class="mb-4 text-sm text-gray-500">
+        <a class="hover:text-red-500" href="/">Trang chủ</a>
+        <span class="mx-1">/</span>
+        <span>Giỏ hàng</span>
+    </nav>
+
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 class="text-2xl font-bold">Giỏ hàng</h1>
+        <a class="rounded border border-gray-300 px-4 py-2 font-semibold hover:border-red-500 hover:text-red-500"
+           href="/products">
+            Tiếp tục mua sắm
+        </a>
+    </div>
+
+    <div class="mb-6 rounded border border-green-200 bg-green-50 p-4 text-green-700" th:if="${success}">
+        <p th:text="${success}">Đã cập nhật giỏ hàng</p>
+    </div>
+    <div class="mb-6 rounded border border-red-200 bg-red-50 p-4 text-red-700" th:if="${error}">
+        <p th:text="${error}">Không thể cập nhật giỏ hàng</p>
+    </div>
+
+    <section class="rounded border border-gray-200 bg-white p-6 text-center" th:if="${cart.isEmpty()}">
+        <p class="mb-4 text-gray-600">Chưa có sản phẩm trong giỏ hàng.</p>
+        <a class="inline-flex rounded bg-red-500 px-5 py-3 font-semibold text-white hover:bg-red-400"
+           href="/products">
+            Xem sản phẩm
+        </a>
+    </section>
+
+    <section class="grid gap-6 lg:grid-cols-[1fr_22rem]" th:unless="${cart.empty}">
+        <div class="space-y-4">
+            <article class="rounded border border-gray-200 bg-white p-4"
+                     th:each="item : ${cart.items}">
+                <div class="grid gap-4 md:grid-cols-[7rem_1fr_auto] md:items-center">
+                    <a class="block overflow-hidden rounded bg-gray-50"
+                       th:href="@{/products/{id}(id=${item.productId})}">
+                        <img class="h-28 w-full object-contain"
+                             loading="lazy"
+                             th:if="${item.imageFile != null}"
+                             th:src="@{${imageContainerUrl} + ${item.imageFile}}"
+                             th:alt="${item.productName}"/>
+                        <div class="flex h-28 items-center justify-center text-sm text-gray-400"
+                             th:unless="${item.imageFile != null}">
+                            SLY
+                        </div>
+                    </a>
+
+                    <div>
+                        <a class="font-semibold hover:text-red-500"
+                           th:href="@{/products/{id}(id=${item.productId})}"
+                           th:text="${item.productName}">
+                            Tên sản phẩm
+                        </a>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Size <span th:text="${item.sizeName}">M</span>
+                            <span class="mx-1">·</span>
+                            Còn <span th:text="${item.inStock}">0</span> sản phẩm
+                        </p>
+                        <p class="mt-2 font-bold text-red-600"
+                           th:text="${#numbers.formatDecimal(item.unitPrice, 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                            0 ₫
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 md:justify-end">
+                        <form class="flex items-center gap-2"
+                              method="post"
+                              th:action="@{/cart/items/{id}/update(id=${item.productSizeId})}">
+                            <label class="hidden" th:for="${'cart-quantity-' + item.productSizeId}">Số lượng</label>
+                            <input class="h-10 w-20 rounded border border-gray-300 text-center focus:outline-red-500"
+                                   min="1"
+                                   name="quantity"
+                                   th:id="${'cart-quantity-' + item.productSizeId}"
+                                   th:max="${item.inStock > 0 ? item.inStock : 1}"
+                                   th:value="${item.quantity}"
+                                   type="number"
+                                   th:disabled="${item.inStock <= 0}"
+                                   required>
+                            <button class="rounded border border-gray-300 px-3 py-2 font-semibold hover:border-red-500 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                    type="submit"
+                                    th:disabled="${item.inStock <= 0}">
+                                Cập nhật
+                            </button>
+                        </form>
+
+                        <form method="post"
+                              th:action="@{/cart/items/{id}/remove(id=${item.productSizeId})}">
+                            <button class="rounded px-3 py-2 text-red-600 hover:bg-red-50"
+                                    title="Xóa sản phẩm khỏi giỏ hàng"
+                                    type="submit">
+                                <i class="fa fa-trash"></i>
+                                <span class="hidden">Xóa</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <aside class="h-fit rounded border border-gray-200 bg-white p-4">
+            <h2 class="mb-4 font-bold">Tóm tắt đơn hàng</h2>
+            <div class="mb-3 flex justify-between gap-3">
+                <span>Số lượng</span>
+                <span class="font-semibold" th:text="${cart.totalQuantity}">0</span>
+            </div>
+            <div class="mb-4 flex justify-between gap-3 text-lg font-bold">
+                <span>Tạm tính</span>
+                <span class="text-red-600"
+                      th:text="${#numbers.formatDecimal(cart.subtotal, 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                    0 ₫
+                </span>
+            </div>
+            <a class="block rounded bg-red-500 px-5 py-3 text-center font-semibold text-white hover:bg-red-400"
+               href="/orders/checkout">
+                Tiến hành đặt hàng
+            </a>
+        </aside>
+    </section>
+</main>
+</body>
+</html>

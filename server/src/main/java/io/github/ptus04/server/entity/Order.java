@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
 import org.jspecify.annotations.NonNull;
 
 import java.math.BigDecimal;
@@ -24,7 +25,7 @@ import java.util.UUID;
 public class Order {
     @Id
     @Column(name = "id", nullable = false, length = 16)
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
     private UUID id;
 
     @Size(max = 20)
@@ -37,8 +38,8 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @NotNull
-    @Column(name = "order_date", nullable = false)
+    @CreationTimestamp
+    @Column(name = "order_date", nullable = false, updatable = false)
     private Instant orderDate;
 
     @NotNull
@@ -68,7 +69,7 @@ public class Order {
     private String cancellationReason;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @UpdateTimestamp
@@ -76,14 +77,15 @@ public class Order {
     private Instant updatedAt;
 
     @NonNull
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderDetail> orderDetails = new LinkedHashSet<>();
 
-    @OneToOne(mappedBy = "order")
+    @NonNull
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private OrderShippingAddress orderShippingAddress;
 
     @NonNull
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Transaction> transactions = new LinkedHashSet<>();
 
 

@@ -61,7 +61,7 @@ create table product_sizes
 create table users
 (
     id                binary(16) default (uuid_to_bin(uuid(), 1)) not null primary key,
-    name              varchar(128)                                not null unique,
+    name              varchar(128)                                not null,
     phone             varchar(10)                                 not null unique,
     email             varchar(64)                                 null unique,
     password          varchar(255)                                not null,
@@ -85,7 +85,7 @@ create table orders
     user_id             binary(16)                                      not null references users (id),
     order_date          datetime       default CURRENT_TIMESTAMP        not null,
     shipping_date       datetime                                        not null,
-    payment_method      enum ('SePay') default 'SePay'                  not null,
+    payment_method      enum ('SEPAY') default 'SEPAY'                  not null,
     status              enum (
         'UNPAID',
         'PAID',
@@ -143,7 +143,6 @@ create table transactions
     order_id         binary(16)                                  not null references orders (id),
     transaction_code varchar(14)                                 not null,
     reference_code   varchar(32)                                 not null,
-    raw_payload      json                                        not null,
     gateway_name     varchar(32)                                 not null,
     content          text                                        not null,
     amount           decimal(18, 2)                              not null,

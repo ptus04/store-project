@@ -5,10 +5,10 @@ import io.github.ptus04.server.dto.request.UserRegistrationRequest;
 import io.github.ptus04.server.dto.response.PhoneVerificationResponse;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.exception.PhoneExistedException;
-import io.github.ptus04.server.exception.UserNotFoundException;
 import io.github.ptus04.server.repository.UserRepository;
 import io.github.ptus04.server.security.CustomUserDetails;
 import io.github.ptus04.server.service.AuthService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -104,7 +104,7 @@ public class AuthController {
                                         @AuthenticationPrincipal CustomUserDetails details,
                                         Model model) {
         if (details != null) {
-            User user = userRepository.findById(details.getId()).orElseThrow(UserNotFoundException::new);
+            User user = userRepository.findById(details.getId()).orElseThrow(EntityNotFoundException::new);
             phone = user.getPhone();
         }
         long remainingTime = Optional.ofNullable(phone).map(authService::sendPhoneOtp).orElse(0L);

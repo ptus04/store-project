@@ -4,18 +4,19 @@ import io.github.ptus04.server.entity.Category;
 import io.github.ptus04.server.entity.Product;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ProductSpecifications {
-    private ProductSpecifications() {
-    }
-
     public static Specification<Product> withFilters(String category,
                                                      String query,
                                                      BigDecimal minPrice,
-                                                     BigDecimal maxPrice) {
+                                                     BigDecimal maxPrice,
+                                                     Boolean onlyDeleted) {
         Specification<Product> specification = (root, criteriaQuery, builder) -> builder.conjunction();
         Specification<Product> categorySpec = hasCategory(category);
         if (categorySpec != null) {
@@ -33,6 +34,8 @@ public final class ProductSpecifications {
         if (maxPriceSpec != null) {
             specification = specification.and(maxPriceSpec);
         }
+        Specification<Product> onlyDeletedSpec = onlyDeleted(onlyDeleted);
+        specification = specification.and(onlyDeletedSpec);
         return specification;
     }
 
@@ -68,5 +71,9 @@ public final class ProductSpecifications {
             return null;
         }
         return (root, query, builder) -> builder.lessThanOrEqualTo(root.get("priceDiscount"), maxPrice);
+    }
+
+    public static Specification<Product> onlyDeleted(boolean onlyDeleted) {
+        return (root, query, builder) -> builder.equal(root.get("deletedAt").isNotNull(), onlyDeleted);
     }
 }
