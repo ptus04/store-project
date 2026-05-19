@@ -25,6 +25,8 @@ export default function SideNavBar() {
     navigate("/login");
   }
 
+  const isActive = (path: string) => location.pathname === path;
+
   return (
     <nav className="py-unit border-outline-variant bg-surface dark:bg-surface-container-lowest fixed top-0 left-0 z-50 hidden h-screen w-64 flex-col border-r md:flex">
       {/* Brand/Header Area */}
@@ -68,9 +70,14 @@ export default function SideNavBar() {
 
       {/* Navigation Links */}
       <div className="flex flex-1 flex-col gap-1 px-2">
+        {/* Dashboard */}
         <button
           onClick={() => navigate("/")}
-          className={`${location.pathname === "/" || location.pathname === "/dashboard" ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4" : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"} flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200`}
+          className={`flex w-full items-center gap-3 px-4 py-3 transition-colors duration-200 ${
+            isActive("/")
+              ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4"
+              : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"
+          }`}
         >
           <span className="material-symbols-outlined" data-icon="dashboard">
             dashboard
@@ -88,7 +95,15 @@ export default function SideNavBar() {
           <span className="text-label-sm font-label-sm">Danh mục</span>
         </button>
 
-        <button className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200">
+        {/* Employees */}
+        <button
+          onClick={() => navigate("/employees")}
+          className={`flex w-full items-center gap-3 px-4 py-3 transition-colors duration-200 ${
+            isActive("/employees")
+              ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4"
+              : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"
+          }`}
+        >
           <span className="material-symbols-outlined" data-icon="badge">
             badge
           </span>
