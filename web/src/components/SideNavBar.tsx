@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // Đọc thông tin user từ localStorage
 function getUserInfo() {
@@ -70,7 +70,7 @@ export default function SideNavBar() {
       <div className="flex flex-1 flex-col gap-1 px-2">
         <button
           onClick={() => navigate("/")}
-          className={`${location.pathname === "/" || location.pathname === "/dashboard" ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4" : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"} flex items-center gap-3 px-4 py-3 transition-colors duration-200 w-full text-left`}
+          className={`${location.pathname === "/" || location.pathname === "/dashboard" ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4" : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"} flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200`}
         >
           <span className="material-symbols-outlined" data-icon="dashboard">
             dashboard
@@ -80,7 +80,7 @@ export default function SideNavBar() {
 
         <button
           onClick={() => navigate("/categories")}
-          className={`${location.pathname === "/categories" ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4" : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"} flex items-center gap-3 px-4 py-3 transition-colors duration-200 w-full text-left`}
+          className={`${location.pathname === "/categories" ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4" : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"} flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200`}
         >
           <span className="material-symbols-outlined" data-icon="category">
             category
@@ -88,18 +88,14 @@ export default function SideNavBar() {
           <span className="text-label-sm font-label-sm">Danh mục</span>
         </button>
 
-        <button
-          className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex items-center gap-3 px-4 py-3 transition-colors duration-200 w-full text-left"
-        >
+        <button className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200">
           <span className="material-symbols-outlined" data-icon="badge">
             badge
           </span>
           <span className="text-label-sm font-label-sm">Nhân Viên</span>
         </button>
 
-        <button
-          className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex items-center gap-3 px-4 py-3 transition-colors duration-200 w-full text-left"
-        >
+        <button className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200">
           <span className="material-symbols-outlined" data-icon="group">
             group
           </span>
