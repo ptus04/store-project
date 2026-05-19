@@ -3,7 +3,6 @@ package io.github.ptus04.server.service.impl;
 import io.github.ptus04.server.dto.request.ProductCreateRequest;
 import io.github.ptus04.server.dto.response.ProductResponse;
 import io.github.ptus04.server.entity.Product;
-import io.github.ptus04.server.exception.ProductNotFoundException;
 import io.github.ptus04.server.mapper.ProductImageMapper;
 import io.github.ptus04.server.mapper.ProductMapper;
 import io.github.ptus04.server.mapper.ProductSizeMapper;
@@ -12,7 +11,6 @@ import io.github.ptus04.server.repository.ProductRepository;
 import io.github.ptus04.server.repository.ProductSizeRepository;
 import io.github.ptus04.server.repository.specification.ProductSpecifications;
 import io.github.ptus04.server.service.ProductService;
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -51,7 +49,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Cacheable(value = "products", key = "#id")
     public ProductResponse getProductById(UUID id) {
-        Product product = productRepository.findById(id).orElseThrow(ProductNotFoundException::new);
+        Product product = productRepository.findById(id).orElseThrow(EntityNotFoundException::new);
         return productMapper.toProductResponse(product);
     }
 
