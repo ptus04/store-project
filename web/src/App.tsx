@@ -12,7 +12,7 @@ function isAuthenticated(): boolean {
     const raw = localStorage.getItem("user");
     if (!token || !raw) return false;
     const user = JSON.parse(raw);
-    return user?.role === "ADMIN";
+    return user?.role === "ADMIN" || user?.role === "EMPLOYEE";
   } catch {
     return false;
   }
