@@ -10,8 +10,8 @@
     <!-- FAB Button -->
     <button id="chat-fab"
         class="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-900 text-white shadow-[0_8px_30px_rgb(0,0,0,0.2)] transition-all duration-300 hover:scale-110 hover:bg-black active:scale-95 group border border-neutral-700">
-        <i class="fa-solid fa-robot text-2xl group-hover:hidden transition-opacity"></i>
-        <i class="fa-solid fa-comment-dots text-2xl hidden group-hover:block transition-opacity"></i>
+        <i class="fa fa-robot text-2xl group-hover:hidden transition-opacity"></i>
+        <i class="fa fa-comment-dots text-2xl hidden group-hover:block transition-opacity"></i>
 
         <!-- Unread Badge -->
         <span id="chat-unread-badge"
@@ -20,12 +20,12 @@
         </span>
 
         <!-- Pulse animation element -->
-        <div class="absolute inset-0 -z-10 animate-ping rounded-full bg-neutral-600 opacity-20"></div>
+        <span class="absolute inset-0 -z-10 animate-ping rounded-full bg-neutral-600 opacity-20"></span>
     </button>
 
     <!-- Chat Popup -->
     <div id="chat-popup"
-        class="fixed bottom-0 right-4 z-50 flex h-[600px] max-h-[calc(100vh-8rem)] w-[380px] max-w-[calc(100vw-3rem)] origin-bottom-right scale-0 flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] opacity-0 transition-all duration-300">
+        class="fixed bottom-0 right-4 z-50 flex h-150 max-h-[calc(100vh-8rem)] w-95 max-w-[calc(100vw-3rem)] origin-bottom-right scale-0 flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] opacity-0 transition-all duration-300">
 
         <!-- Header -->
         <div
@@ -33,7 +33,7 @@
             <div class="flex items-center gap-3">
                 <div id="header-avatar-bg"
                     class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 shadow-inner">
-                    <i id="header-avatar-icon" class="fa-solid fa-robot text-lg"></i>
+                    <i id="header-avatar-icon" class="fa fa-robot text-lg"></i>
                 </div>
                 <div class="flex flex-col">
                     <h3 class="font-semibold text-neutral-900 tracking-wide text-sm" id="chat-header-title">Trợ lý AI
@@ -46,7 +46,7 @@
             </div>
             <button id="chat-minimize"
                 class="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-neutral-500 transition-colors hover:bg-neutral-200 hover:text-neutral-800">
-                <i class="fa-solid fa-xmark text-sm"></i>
+                <i class="fa fa-times text-sm"></i>
             </button>
         </div>
 
@@ -55,7 +55,7 @@
             <!-- Sample AI Welcome Message -->
             <div class="flex flex-col gap-1 w-full animate-fade-in-up">
                 <div class="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500 mb-0.5 ml-1">
-                    <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> Trợ lý AI SLY
+                    <i class="fa fa-magic text-[10px]"></i> Trợ lý AI SLY
                 </div>
                 <div class="flex gap-2">
                     <div class="flex flex-col gap-1 max-w-[85%]">
@@ -99,18 +99,18 @@
                     <button type="button" id="chat-mode-switch"
                         class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-800"
                         title="Chọn chế độ">
-                        <i id="mode-switch-icon" class="fa-solid fa-robot text-lg"></i>
+                        <i id="mode-switch-icon" class="fa fa-robot text-lg"></i>
                     </button>
                     <!-- Dropdown Menu (Pops Up) -->
                     <div id="chat-mode-dropdown"
                         class="absolute bottom-12 left-0 z-50 hidden w-48 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
                         <button type="button" id="select-ai-mode"
                             class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100">
-                            <i class="fa-solid fa-robot text-neutral-500 w-5"></i> Chat với AI
+                            <i class="fa fa-robot text-neutral-500 w-5"></i> Chat với AI
                         </button>
                         <button type="button" id="select-staff-mode"
                             class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100">
-                            <i class="fa-solid fa-user text-neutral-500 w-5"></i> Chat với Nhân viên
+                            <i class="fa fa-user text-neutral-500 w-5"></i> Chat với Nhân viên
                         </button>
                     </div>
                 </div>
@@ -118,10 +118,10 @@
                 <div class="relative w-full">
                     <input type="text" id="chat-input"
                         class="w-full rounded-full border border-neutral-200 bg-neutral-50 py-2.5 pl-4 pr-12 text-sm text-neutral-800 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-400 transition-all"
-                        placeholder="Nhắn tin với SLY AI..." autocomplete="off">
+                        placeholder="Nhắn tin với SLY AI..." autocomplete="off" aria-label="Nhập tin nhắn">
                     <button type="submit" id="chat-send-btn"
                         class="absolute right-1 top-1 bottom-1 flex aspect-square items-center justify-center rounded-full bg-neutral-800 text-white shadow-sm transition-all hover:bg-neutral-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i class="fa-solid fa-paper-plane text-[11px] ml-0.5"></i>
+                        <i class="fa fa-paper-plane text-[11px] ml-0.5"></i>
                     </button>
                 </div>
             </form>
@@ -132,7 +132,9 @@
     </div>
 
     <!-- STOMP & SockJS for WebSocket (if needed later) -->
+    <!-- noinspection HtmlUnknownTarget -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <!-- noinspection HtmlUnknownTarget -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <!-- Tailwind CDN to ensure newly added classes work immediately during dev -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -144,10 +146,10 @@
             const CONFIG = {
                 // Set this to true to use your Spring Boot Backend API (/api/chat & websockets)
                 // Set to false to directly call Gemini API from client-side for testing
-                useBackendApi: false,
+                useBackendApi: true,
 
                 // If useBackendApi is false, use this Gemini API Key
-                geminiApiKey: '####', // CHANGE THIS TO YOUR ACTUAL KEY OR PASS FROM MODEL
+                geminiApiKey: '', // Kept secure on backend, not loaded client-side
                 model: 'gemini-3-flash-preview',
 
                 geminiApiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/', // Note: URL base
@@ -176,7 +178,13 @@
             let currentMode = 'AI'; // 'AI' or 'STAFF'
             let isWaitingForResponse = false;
             let stompClient = null;
-            let sessionId = Math.random().toString(36).substring(7);
+            
+            // Persist sessionId in localStorage to maintain history across page reloads
+            let sessionId = localStorage.getItem('chat_session_id');
+            if (!sessionId) {
+                sessionId = 'session_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+                localStorage.setItem('chat_session_id', sessionId);
+            }
 
             // --- UI Functions ---
             function togglePopup() {
@@ -229,7 +237,7 @@
                 if (sender === 'USER') {
                     msgDiv.innerHTML = `
                         <div class="flex items-center justify-end gap-1.5 text-[11px] font-medium text-neutral-500 mb-0.5 mr-1">
-                            Bạn <i class="fa-solid fa-user text-[10px]"></i>
+                            Bạn <i class="fa fa-user text-[10px]"></i>
                         </div>
                         <div class="flex gap-2 justify-end">
                             <div class="flex flex-col gap-1 max-w-[85%] items-end">
@@ -243,7 +251,7 @@
                 } else if (sender === 'AI') {
                     msgDiv.innerHTML = `
                         <div class="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500 mb-0.5 ml-1">
-                            <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> Trợ lý AI SLY
+                            <i class="fa fa-magic text-[10px]"></i> Trợ lý AI SLY
                         </div>
                         <div class="flex gap-2">
                             <div class="flex flex-col gap-1 max-w-[85%]">
@@ -257,7 +265,7 @@
                 } else if (sender === 'STAFF') {
                     msgDiv.innerHTML = `
                         <div class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 mb-0.5 ml-1">
-                            <i class="fa-solid fa-user-headset text-[10px]"></i> Nhân viên SLY
+                            <i class="fa fa-headset text-[10px]"></i> Nhân viên SLY
                         </div>
                         <div class="flex gap-2">
                             <div class="flex flex-col gap-1 max-w-[85%]">
@@ -289,8 +297,8 @@
                 typingDiv.className = 'flex flex-col gap-1 w-full animate-fade-in-up';
 
                 const nameHeader = currentMode === 'AI'
-                    ? `<div class="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500 mb-0.5 ml-1"><i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> Trợ lý AI SLY đang gõ...</div>`
-                    : `<div class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 mb-0.5 ml-1"><i class="fa-solid fa-user-headset text-[10px]"></i> Nhân viên đang gõ...</div>`;
+                    ? `<div class="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500 mb-0.5 ml-1"><i class="fa fa-magic text-[10px]"></i> Trợ lý AI SLY đang gõ...</div>`
+                    : `<div class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 mb-0.5 ml-1"><i class="fa fa-headset text-[10px]"></i> Nhân viên đang gõ...</div>`;
 
                 const dotColor = currentMode === 'AI' ? 'bg-neutral-500' : 'bg-emerald-500';
 
@@ -339,7 +347,10 @@
                         body: JSON.stringify(payload)
                     });
 
-                    if (!response.ok) throw new Error('API Error');
+                    if (!response.ok) {
+                        console.error("Gemini API Error status:", response.status);
+                        return "Đã có lỗi xảy ra khi kết nối tới AI. Vui lòng thử lại sau.";
+                    }
 
                     const data = await response.json();
                     if (data.candidates && data.candidates[0].content.parts[0].text) {
@@ -368,7 +379,10 @@
                         })
                     });
 
-                    if (!response.ok) throw new Error('Backend Error');
+                    if (!response.ok) {
+                        console.error("Backend API Error status:", response.status);
+                        return "Không thể kết nối đến máy chủ SLY. Vui lòng thử lại.";
+                    }
                     const data = await response.json();
                     return data.reply;
                 } catch (error) {
@@ -385,7 +399,7 @@
                 stompClient = Stomp.over(socket);
                 stompClient.debug = null; // disable debug logs
 
-                stompClient.connect({}, function (frame) {
+                stompClient.connect({}, function () {
                     stompClient.subscribe('/topic/chat/' + sessionId, function (messageOutput) {
                         const message = JSON.parse(messageOutput.body);
                         if (message.sender === 'STAFF') {
@@ -417,8 +431,8 @@
                     currentMode = 'STAFF';
                     headerTitle.textContent = 'Nhân viên hỗ trợ';
                     headerAvatarBg.className = 'flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-inner';
-                    headerAvatarIcon.className = 'fa-solid fa-user-headset text-lg';
-                    if (modeIcon) modeIcon.className = 'fa-solid fa-user-headset text-lg';
+                    headerAvatarIcon.className = 'fa fa-headset text-lg';
+                    if (modeIcon) modeIcon.className = 'fa fa-headset text-lg';
                     document.getElementById('chat-header-status').textContent = 'Nhân viên sẵn sàng';
 
                     const statusDot = document.querySelector('#chat-header-status').previousElementSibling;
@@ -437,8 +451,8 @@
                     currentMode = 'AI';
                     headerTitle.textContent = 'Trợ lý AI SLY';
                     headerAvatarBg.className = 'flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 shadow-inner';
-                    headerAvatarIcon.className = 'fa-solid fa-robot text-lg';
-                    if (modeIcon) modeIcon.className = 'fa-solid fa-robot text-lg';
+                    headerAvatarIcon.className = 'fa fa-robot text-lg';
+                    if (modeIcon) modeIcon.className = 'fa fa-robot text-lg';
                     document.getElementById('chat-header-status').textContent = 'SLY AI sẵn sàng';
 
                     const statusDot = document.querySelector('#chat-header-status').previousElementSibling;
@@ -475,7 +489,7 @@
                     showTypingIndicator();
                     chatInput.disabled = true;
 
-                    let responseText = "";
+                    let responseText;
                     if (CONFIG.useBackendApi) {
                         responseText = await callBackendApi(text);
                     } else {
@@ -527,7 +541,7 @@
 
             // --- Event Listeners ---
             fabBtn.addEventListener('click', togglePopup);
-            document.getElementById('chat-minimize').addEventListener('click', togglePopup);
+            minimizeBtn.addEventListener('click', togglePopup);
 
             // Quick reply buttons listener
             document.querySelectorAll('.quick-reply-btn').forEach(btn => {
@@ -539,9 +553,39 @@
                 });
             });
 
-            // Connect socket if using backend
+            async function loadChatHistory() {
+                try {
+                    const response = await fetch('/api/chat/history/' + sessionId);
+                    if (response.ok) {
+                        const history = await response.json();
+                        if (history.length > 0) {
+                            // Clear default welcome messages if we have history
+                            chatMessages.innerHTML = '';
+                            
+                            // Restore correct current mode based on the last message from user or AI vs STAFF
+                            let hasStaffMessages = history.some(msg => msg.sender === 'STAFF');
+                            if (hasStaffMessages) {
+                                setMode('STAFF');
+                            }
+                            
+                            history.forEach(msg => {
+                                const formattedContent = msg.content
+                                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                    .replace(/\n/g, '<br>');
+                                appendMessage(msg.sender, formattedContent, true);
+                            });
+                            scrollToBottom();
+                        }
+                    }
+                } catch (err) {
+                    console.error("Không thể tải lịch sử chat:", err);
+                }
+            }
+
+            // Connect socket and load history if using backend
             if (CONFIG.useBackendApi) {
                 connectWebSocket();
+                loadChatHistory();
             }
         });
     </script>

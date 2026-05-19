@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: store-server
   data:
@@ -49,3 +51,6 @@ custom:
 jwt:
   secret: ${JWT_SECRET}
   expiration-ms: ${JWT_EXPIRATION_MS}
+
+gemini:
+  api-key: ${GEMINI_API_KEY}
