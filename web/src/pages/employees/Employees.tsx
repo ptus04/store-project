@@ -63,7 +63,7 @@ export default function Employees() {
   async function fetchEmployees() {
     try {
       setLoading(true);
-      const url = new URL(`${API_URL}/api/admin/employees`);
+      const url = new URL(`${API_URL}/api/employees`);
       if (roleFilter !== "ALL") {
         url.searchParams.append("role", roleFilter);
       }
