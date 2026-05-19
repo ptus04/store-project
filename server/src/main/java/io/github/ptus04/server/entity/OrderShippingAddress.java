@@ -16,7 +16,6 @@ import java.util.UUID;
 public class OrderShippingAddress {
     @Id
     @Column(name = "order_id", nullable = false, length = 16)
-    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
     private UUID orderId;
 
     @MapsId

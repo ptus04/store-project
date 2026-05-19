@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi"
+      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
+      xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán đơn hàng | SLY</title>
+</head>
+<body>
+<main class="container mx-auto p-4 sm:p-8">
+    <div class="mx-auto max-w-4xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm lg:p-10">
+
+        <!-- Header -->
+        <div class="mb-8 text-center">
+            <h1 class="mb-2 text-3xl font-bold text-gray-800">Thanh toán đơn hàng</h1>
+            <p class="text-gray-500">
+                Vui lòng mở Ứng dụng ngân hàng và <strong>quét mã QR</strong> bên dưới để hoàn tất thanh toán.
+            </p>
+        </div>
+
+        <div class="flex flex-col items-center justify-center gap-10 md:flex-row md:items-stretch">
+
+            <!-- Left Side: QR Code Container -->
+            <div class="flex w-full max-w-xs flex-col items-center gap-4 rounded-xl border border-gray-100 bg-gray-50 p-6">
+                <div class="text-xl font-bold text-blue-800">
+                    <i class="fa fa-university mr-2"></i>MB Bank
+                </div>
+
+                <!-- QR Code Block -->
+                <div class="h-64 w-64 rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+                    <img class="h-full w-full object-contain" th:src="${qrCodeUrl}" alt="Mã QR Thanh Toán"/>
+                </div>
+
+                <p class="text-center text-xs text-gray-500 mt-2">
+                    Vui lòng làm mới lại trang sau khi thanh toán.
+                </p>
+            </div>
+
+            <!-- Right Side: Transfer Information Form -->
+            <div class=" flex w-full max-w-sm flex-col gap-5 justify-center">
+                <h2 class="border-b border-gray-200 pb-3 text-xl font-bold text-gray-800">Thông tin chuyển khoản</h2>
+
+                <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-gray-500">Ngân hàng thụ hưởng</span>
+                    <span class="font-bold text-gray-800 uppercase">Ngân hàng Quân Đội (MB Bank)</span>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-gray-500">Chủ tài khoản</span>
+                    <span class="font-bold text-gray-800 uppercase" th:text="${accountName}"></span>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-gray-500">Số tài khoản</span>
+                    <div class="flex items-center justify-between rounded bg-gray-50 px-3 py-2 border border-gray-200">
+                        <span class="text-lg font-bold tracking-wider text-gray-800" th:text="${accountNumber}">
+                        </span>
+                        <button type="button" class="text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
+                                title="Sao chép số tài khoản" onclick="copyAccountNumber()">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-gray-500">Số tiền cần thanh toán</span>
+                    <div class="flex items-center justify-between rounded bg-gray-50 px-3 py-2 border border-gray-200">
+                        <span class="text-xl font-bold text-red-600"
+                              th:text="${#numbers.formatDecimal(amount, 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                        </span>
+                        <button type="button" class="text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
+                                title="Sao chép số tiền" onclick="copyAmount()">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-gray-500">Nội dung chuyển khoản</span>
+                    <div class="flex items-center justify-between rounded border border-yellow-300 bg-yellow-50 px-3 py-2">
+                        <span class="font-bold text-gray-800" th:text="${transferContent}"></span>
+                        <button type="button" class="text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
+                                title="Sao chép nội dung" onclick="copyTransferContent()">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                    <span class="mt-1 text-xs italic text-red-500">
+                        * Bắt buộc ghi đúng nội dung để hệ thống xác nhận tự động.
+                    </span>
+                </div>
+
+                <!-- Call to Actions -->
+                <div class="mt-4 flex flex-col gap-3">
+                    <button class="my-btn-primary flex items-center justify-center gap-2 w-full py-3"
+                            onclick="window.location.reload()">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Kiểm tra trạng thái</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const transferContent = /*[[${transferContent}]]*/ null;
+        const accountNumber = /*[[${accountNumber}]]*/ null;
+        const amount = /*[[${amount}]]*/ null;
+
+        function copyTransferContent() {
+            navigator.clipboard.writeText(transferContent);
+        }
+
+        function copyAccountNumber() {
+            navigator.clipboard.writeText(accountNumber);
+        }
+
+        function copyAmount() {
+            navigator.clipboard.writeText(amount);
+        }
+    </script>
+</main>
+</body>
+</html>

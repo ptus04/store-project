@@ -38,8 +38,8 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @NotNull
-    @Column(name = "order_date", nullable = false)
+    @CreationTimestamp
+    @Column(name = "order_date", nullable = false, updatable = false)
     private Instant orderDate;
 
     @NotNull
@@ -77,14 +77,15 @@ public class Order {
     private Instant updatedAt;
 
     @NonNull
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderDetail> orderDetails = new LinkedHashSet<>();
 
-    @OneToOne(mappedBy = "order")
+    @NonNull
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private OrderShippingAddress orderShippingAddress;
 
     @NonNull
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Transaction> transactions = new LinkedHashSet<>();
 
 

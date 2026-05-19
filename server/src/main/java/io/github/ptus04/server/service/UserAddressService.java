@@ -13,4 +13,5 @@ public interface UserAddressService {
     void updateAddress(UUID addressId, UserAddressUpdateRequest request);
     void deleteAddress(UUID addressId);
     void setDefaultAddress(UUID addressId);
+    UserAddressResponse getDefaultAddressByUserId(UUID userId);
 }

@@ -135,12 +135,25 @@ public class GlobalApiExceptionControllerAdvice {
     }
 
     @ExceptionHandler(value = BusinessConstraintViolationException.class)
-    public ResponseEntity<ApiErrorResponse<?>> handleException(BusinessConstraintViolationException ex,
-                                                               WebRequest request) {
+    public ResponseEntity<ApiErrorResponse<?>> handleBusinessConstraintViolationException(
+            BusinessConstraintViolationException ex,
+            WebRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         String message = ex.getMessage();
         String path = getRequestPath(request);
         String errorCode = "BUSINESS_CONSTRAINT_VIOLATION";
+        return ResponseEntity
+                .badRequest()
+                .body(new ApiErrorResponse<>(status, message, path, errorCode));
+    }
+
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    public ResponseEntity<ApiErrorResponse<?>> handleIllegalArgumentException(IllegalArgumentException ex,
+                                                                              WebRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        String message = ex.getMessage();
+        String path = getRequestPath(request);
+        String errorCode = "ILLEGAL_ARGUMENT";
         return ResponseEntity
                 .badRequest()
                 .body(new ApiErrorResponse<>(status, message, path, errorCode));

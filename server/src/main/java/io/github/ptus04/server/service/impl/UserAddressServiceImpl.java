@@ -115,6 +115,12 @@ public class UserAddressServiceImpl implements UserAddressService {
         userAddressRepository.save(address);
     }
 
+    @Override
+    public UserAddressResponse getDefaultAddressByUserId(UUID userId) {
+        return userAddressRepository.findByUser_IdAndIsDefaultTrue(userId).map(userAddressMapper::toResponse)
+                .orElse(null);
+    }
+
     private void unsetCurrentDefault(UUID userId) {
         userAddressRepository.findByUser_IdAndIsDefaultTrue(userId)
                 .ifPresent(addr -> {

@@ -43,7 +43,8 @@ public class ProductController {
                 activeCategory,
                 query,
                 minPriceValue,
-                maxPriceValue
+                maxPriceValue,
+                false
         );
 
         model.addAttribute("products", productPage.getContent());
