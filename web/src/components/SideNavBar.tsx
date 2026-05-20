@@ -110,7 +110,15 @@ export default function SideNavBar() {
           <span className="text-label-sm font-label-sm">Nhân Viên</span>
         </button>
 
-        <button className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200">
+        <button
+          onClick={() => navigate("/customer")}
+          // className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200"
+          className={`flex w-full items-center gap-3 px-4 py-3 transition-colors duration-200 ${
+            isActive("/customer")
+              ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4"
+              : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"
+          }`}
+        >
           <span className="material-symbols-outlined" data-icon="group">
             group
           </span>
