@@ -241,7 +241,6 @@ export default function Employees() {
     setStatusSort(e.target.value as "NONE" | "ACTIVE_FIRST" | "DISABLED_FIRST");
   }
 
-  // --- SỬA LỖI DÒNG 260 & 263: THAY TOÁN TỬ BA NGÔI LỒNG NHAU THÀNH CÂU LỆNH IF/ELSE ---
   const sortedEmployees = useMemo(() => {
     if (statusSort === "NONE") return filteredEmployees;
 
@@ -881,7 +880,6 @@ export default function Employees() {
   );
 }
 
-// --- SỬA LỖI DÒNG 910: MARK PROPS LÀ READ-ONLY ---
 interface EmployeeTableProps {
   readonly sortedEmployees: Employee[];
   readonly updatingAccountIds: Set<string>;
@@ -892,7 +890,6 @@ interface EmployeeTableProps {
   readonly openEditModal: (employee: Employee) => void;
 }
 
-// --- SỬA LỖI DÒNG 937: GIẢM COGNITIVE COMPLEXITY CHO BẢNG ---
 function EmployeeTable({
   sortedEmployees,
   updatingAccountIds,
@@ -946,7 +943,6 @@ function EmployeeTable({
   );
 }
 
-// --- TÁCH THÀNH COMPONENT CON RIÊNG BIỆT ĐỂ GIẢM ĐỘ PHỨC TẠP NHẬN THỨC THEO CHUẨN SONAR ---
 interface EmployeeRowProps {
   readonly employee: Employee;
   readonly updatingAccountIds: Set<string>;
@@ -957,6 +953,33 @@ interface EmployeeRowProps {
   readonly openEditModal: (employee: Employee) => void;
 }
 
+// --- HÀM HELPER THUẦN TÚY (PURE FUNCTION) ĐỂ TRIỆT TIÊU ĐỘ PHỨC TẠP NHẬN THỨC TRONG UI ---
+function getRowPermissionsAndLabels(
+  employee: Employee,
+  currentUser: { id: string; role: string; phone: string },
+  isCurrentUserAdmin: boolean,
+  isUpdating: boolean,
+) {
+  const isDisabled = Boolean(employee.disabledAt);
+  const isSelf =
+    (currentUser.id && employee.id === currentUser.id) ||
+    (currentUser.phone && employee.phone === currentUser.phone);
+
+  const canToggle = isCurrentUserAdmin && !isSelf && !isUpdating;
+
+  let title = isDisabled ? "Kích hoạt tài khoản" : "Vô hiệu hóa tài khoản";
+  if (!isCurrentUserAdmin) {
+    title = "Nhân viên không có quyền vô hiệu hóa tài khoản";
+  } else if (isUpdating) {
+    title = "Đang cập nhật trạng thái tài khoản";
+  } else if (isSelf) {
+    title = "Không thể tự vô hiệu hóa tài khoản của chính mình";
+  }
+
+  return { isDisabled, canToggle, title };
+}
+
+// --- DÒNG R960: HÀM NÀY BÂY GIỜ ĐÃ KHÔNG CÒN LOGIC LỒNG NHAU (COGNITIVE COMPLEXITY < 5) ---
 function EmployeeRow({
   employee,
   updatingAccountIds,
@@ -966,23 +989,14 @@ function EmployeeRow({
   openDetailModal,
   openEditModal,
 }: Readonly<EmployeeRowProps>) {
-  const isDisabled = Boolean(employee.disabledAt);
   const isUpdating = updatingAccountIds.has(employee.id);
 
-  const isSelf =
-    (currentUser.id && employee.id === currentUser.id) ||
-    (currentUser.phone && employee.phone === currentUser.phone);
-
-  const canToggle = isCurrentUserAdmin && !isSelf && !isUpdating;
-
-  // Xử lý title hiển thị (Thay thế cấu trúc rẽ nhánh phức tạp cũ)
-  const getToggleTitle = () => {
-    if (!isCurrentUserAdmin)
-      return "Nhân viên không có quyền vô hiệu hóa tài khoản";
-    if (isUpdating) return "Đang cập nhật trạng thái tài khoản";
-    if (isSelf) return "Không thể tự vô hiệu hóa tài khoản của chính mình";
-    return isDisabled ? "Kích hoạt tài khoản" : "Vô hiệu hóa tài khoản";
-  };
+  const { isDisabled, canToggle, title } = getRowPermissionsAndLabels(
+    employee,
+    currentUser,
+    isCurrentUserAdmin,
+    isUpdating,
+  );
 
   return (
     <tr
@@ -1025,7 +1039,7 @@ function EmployeeRow({
                 onClick={() => void toggleDisableAccount(employee)}
                 disabled={!canToggle}
                 className={`focus:ring-primary/30 relative inline-flex h-6 w-11 items-center rounded-full border transition-all focus:ring-2 focus:outline-none ${isDisabled ? "border-rose-300 bg-rose-500" : "border-emerald-300 bg-emerald-500"} ${canToggle ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}
-                title={getToggleTitle()}
+                title={title}
               >
                 <span
                   className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${isDisabled ? "translate-x-1" : "translate-x-5"}`}
