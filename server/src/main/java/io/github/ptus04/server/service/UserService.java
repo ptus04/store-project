@@ -2,6 +2,7 @@ package io.github.ptus04.server.service;
 
 import io.github.ptus04.server.dto.request.UserProfileUpdateRequest;
 import io.github.ptus04.server.dto.response.UserResponse;
+import io.github.ptus04.server.enums.UserGenderEnum;
 import io.github.ptus04.server.enums.UserRoleEnum;
 import org.springframework.data.domain.Page;
 
@@ -24,4 +25,7 @@ public interface UserService {
     Page<UserResponse> getAllUsersPaged(int page, int size);
 
     UserResponse updateEmployeeAccountStatus(UUID actorId, UUID targetId, boolean disabled);
+
+    Page<UserResponse> searchCustomers(UserGenderEnum gender, String search, int page, int size);
+
 }
