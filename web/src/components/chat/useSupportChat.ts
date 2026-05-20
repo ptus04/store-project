@@ -1,3 +1,4 @@
+import type { IMessage } from "@stomp/stompjs";
 import { Client } from "@stomp/stompjs";
 import type { FormEvent } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -53,6 +54,37 @@ function playNotificationSound() {
   }
 }
 
+function processSessionUpdate(prev: SupportSession[], session: SupportSession) {
+  const sessionList = [...prev];
+  if (!session.active) {
+    return sessionList.filter((item) => item.sessionId !== session.sessionId);
+  }
+  const index = sessionList.findIndex(
+    (item) => item.sessionId === session.sessionId,
+  );
+  if (index !== -1) {
+    sessionList[index] = session;
+    return sessionList;
+  }
+  playNotificationSound();
+  return [session, ...sessionList];
+}
+
+function processChatMessageUpdate(
+  prev: Record<string, ChatMessage[]>,
+  selectedSession: string,
+  chatMsg: ChatMessage,
+) {
+  const sessionMessages = prev[selectedSession] || [];
+  const isDuplicate = sessionMessages.some(
+    (msg) =>
+      msg.timestamp === chatMsg.timestamp && msg.content === chatMsg.content,
+  );
+  if (isDuplicate) return prev;
+  if (chatMsg.sender === "USER") playNotificationSound();
+  return { ...prev, [selectedSession]: [...sessionMessages, chatMsg] };
+}
+
 export function useSupportChat() {
   const [sessions, setSessions] = useState<SupportSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
@@ -99,30 +131,14 @@ export function useSupportChat() {
       heartbeatOutgoing: 4000,
     });
 
+    const handleSupportRequest = (message: IMessage) => {
+      const session: SupportSession = JSON.parse(message.body);
+      setSessions((prev) => processSessionUpdate(prev, session));
+    };
+
     client.onConnect = () => {
       setConnected(true);
-
-      client.subscribe("/topic/support/requests", (message) => {
-        const session: SupportSession = JSON.parse(message.body);
-
-        setSessions((prev) => {
-          const sessionList = [...prev];
-          if (!session.active) {
-            return sessionList.filter(
-              (item) => item.sessionId !== session.sessionId,
-            );
-          }
-          const index = sessionList.findIndex(
-            (item) => item.sessionId === session.sessionId,
-          );
-          if (index !== -1) {
-            sessionList[index] = session;
-            return sessionList;
-          }
-          playNotificationSound();
-          return [session, ...sessionList];
-        });
-      });
+      client.subscribe("/topic/support/requests", handleSupportRequest);
     };
 
     client.onDisconnect = () => {
@@ -140,23 +156,16 @@ export function useSupportChat() {
   useEffect(() => {
     if (!selectedSession || !stompClientRef.current || !connected) return;
 
+    const handleIncomingMessage = (message: IMessage) => {
+      const chatMsg: ChatMessage = JSON.parse(message.body);
+      setMessages((prev) =>
+        processChatMessageUpdate(prev, selectedSession, chatMsg),
+      );
+    };
+
     const subscription = stompClientRef.current.subscribe(
       `/topic/chat/${selectedSession}`,
-      (message) => {
-        const chatMsg: ChatMessage = JSON.parse(message.body);
-
-        setMessages((prev) => {
-          const sessionMessages = prev[selectedSession] || [];
-          const isDuplicate = sessionMessages.some(
-            (msg) =>
-              msg.timestamp === chatMsg.timestamp &&
-              msg.content === chatMsg.content,
-          );
-          if (isDuplicate) return prev;
-          if (chatMsg.sender === "USER") playNotificationSound();
-          return { ...prev, [selectedSession]: [...sessionMessages, chatMsg] };
-        });
-      },
+      handleIncomingMessage,
     );
 
     return () => {
@@ -285,7 +294,8 @@ export function useSupportChat() {
             return;
           }
 
-          throw new Error("Failed to assign session");
+          console.error("Failed to assign session");
+          return;
         }
       } catch (error) {
         console.error("Failed to claim session:", error);

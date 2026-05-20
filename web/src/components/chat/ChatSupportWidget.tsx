@@ -105,7 +105,7 @@ export default function ChatSupportWidget() {
                       <div className="flex items-center gap-1.5 font-semibold">
                         <span className="material-symbols-outlined text-[16px]">
                           warning
-                        </span>
+                        </span>{" "}
                         Chế độ chỉ xem
                       </div>
                       <p className="mt-1 text-[10px] leading-relaxed">
