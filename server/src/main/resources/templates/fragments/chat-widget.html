@@ -186,6 +186,11 @@
                 localStorage.setItem('chat_session_id', sessionId);
             }
 
+            let customerName = "Khách vãng lai";
+            /*[# th:if="${#authorization.expression('isAuthenticated()')}"]*/
+            customerName = /*[[${#authentication.principal.name}]]*/ "Khách vãng lai";
+            /*[/]*/
+
             // --- UI Functions ---
             function togglePopup() {
                 isPopupOpen = !isPopupOpen;
@@ -223,13 +228,18 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
 
+            function resetUnreadBadge() {
+                unreadCount = 0;
+                updateBadge();
+            }
+
             function getTimestamp() {
                 const now = new Date();
                 return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
             }
 
             // --- Add Message to UI ---
-            function appendMessage(sender, text, isHtml = false) {
+            function appendMessage(sender, text, isHtml = false, countAsUnread = sender !== 'USER') {
                 const time = getTimestamp();
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'flex flex-col gap-1 w-full animate-fade-in-up transition-all duration-300';
@@ -281,7 +291,7 @@
                 chatMessages.appendChild(msgDiv);
                 scrollToBottom();
 
-                if (!isPopupOpen && sender !== 'USER') {
+                if (!isPopupOpen && countAsUnread) {
                     unreadCount++;
                     updateBadge();
 
@@ -438,13 +448,16 @@
                     const statusDot = document.querySelector('#chat-header-status').previousElementSibling;
                     if (statusDot) statusDot.className = 'h-1.5 w-1.5 rounded-full bg-emerald-500';
 
-                    appendMessage('STAFF', 'Xin chào! Bạn đang trò chuyện với nhân viên tư vấn. Vui lòng đợi trong giây lát...');
+                    appendMessage('STAFF', 'Xin chào! Bạn đang trò chuyện với nhân viên tư vấn. Vui lòng đợi trong giây lát...', false, false);
 
                     if (CONFIG.useBackendApi) {
                         fetch('/api/support/request', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ sessionId: sessionId })
+                            body: JSON.stringify({ 
+                                sessionId: sessionId,
+                                customerName: customerName
+                            })
                         });
                     }
                 } else {
@@ -458,7 +471,7 @@
                     const statusDot = document.querySelector('#chat-header-status').previousElementSibling;
                     if (statusDot) statusDot.className = 'h-1.5 w-1.5 rounded-full bg-green-500';
 
-                    appendMessage('AI', 'Đã chuyển về chế độ AI trợ lý. Tôi có thể giúp gì tiếp cho bạn?');
+                    appendMessage('AI', 'Đã chuyển về chế độ AI trợ lý. Tôi có thể giúp gì tiếp cho bạn?', false, false);
                 }
             }
 
@@ -561,6 +574,7 @@
                         if (history.length > 0) {
                             // Clear default welcome messages if we have history
                             chatMessages.innerHTML = '';
+                            resetUnreadBadge();
                             
                             // Restore correct current mode based on the last message from user or AI vs STAFF
                             let hasStaffMessages = history.some(msg => msg.sender === 'STAFF');
@@ -572,8 +586,9 @@
                                 const formattedContent = msg.content
                                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                                     .replace(/\n/g, '<br>');
-                                appendMessage(msg.sender, formattedContent, true);
+                                appendMessage(msg.sender, formattedContent, true, false);
                             });
+                            resetUnreadBadge();
                             scrollToBottom();
                         }
                     }

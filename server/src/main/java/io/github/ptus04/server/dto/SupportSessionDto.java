@@ -11,4 +11,6 @@ public class SupportSessionDto {
     private String sessionId;
     private boolean active;
     private String lastMessage;
+    private String customerName;
+    private String staffName;
 }

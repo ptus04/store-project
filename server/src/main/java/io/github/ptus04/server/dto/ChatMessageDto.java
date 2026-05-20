@@ -12,4 +12,5 @@ public class ChatMessageDto {
     private String sender; // "USER", "STAFF"
     private String content;
     private Long timestamp;
+    private String senderName;
 }
