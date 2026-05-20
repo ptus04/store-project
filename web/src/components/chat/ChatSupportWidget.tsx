@@ -126,7 +126,9 @@ export default function ChatSupportWidget() {
 
                       return (
                         <div
-                          key={index}
+                          key={
+                            msg.timestamp ? `${msg.timestamp}-${index}` : index
+                          }
                           className={`flex max-w-[85%] flex-col ${
                             isStaff
                               ? "ml-auto items-end"
@@ -175,7 +177,7 @@ export default function ChatSupportWidget() {
                   >
                     <span className="material-symbols-outlined mr-1 text-[16px]">
                       send
-                    </span>
+                    </span>{" "}
                     Gửi
                   </button>
                 </form>

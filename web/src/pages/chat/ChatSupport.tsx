@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useSupportChat } from "../../components/chat/useSupportChat.ts";
+import { useSupportChat } from "@components/chat/useSupportChat.ts";
 
 export default function ChatSupport() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -76,7 +76,7 @@ export default function ChatSupport() {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-label-sm max-w-[150px] truncate font-semibold">
+                      <span className="text-label-sm max-w-37.5 truncate font-semibold">
                         {session.customerName &&
                         session.customerName !== "Khách vãng lai"
                           ? session.customerName
@@ -108,7 +108,7 @@ export default function ChatSupport() {
                     {activeSession?.customerName || selectedSession}
                   </h3>
                   <span className="mt-0.5 flex items-center gap-1 text-xs font-medium text-green-600">
-                    <span className="h-1.5 w-1.5 animate-ping rounded-full bg-green-500" />
+                    <span className="h-1.5 w-1.5 animate-ping rounded-full bg-green-500" />{" "}
                     Trực tuyến
                   </span>
                 </div>
@@ -130,7 +130,7 @@ export default function ChatSupport() {
                     <div className="flex items-center gap-2 font-semibold">
                       <span className="material-symbols-outlined text-[18px]">
                         warning
-                      </span>
+                      </span>{" "}
                       Chế độ chỉ xem
                     </div>
                     <p className="mt-1 text-xs">
@@ -151,7 +151,9 @@ export default function ChatSupport() {
 
                     return (
                       <div
-                        key={index}
+                        key={
+                          msg.timestamp ? `${msg.timestamp}-${index}` : index
+                        }
                         className={`flex max-w-[70%] flex-col ${isStaff ? "ml-auto items-end" : "mr-auto items-start"}`}
                       >
                         <span className="mr-1 mb-1 ml-1 text-[10px] font-medium text-neutral-400">

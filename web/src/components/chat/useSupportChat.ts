@@ -32,8 +32,8 @@ function getCurrentStaffName() {
 function playNotificationSound() {
   try {
     const audioCtx = new (
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext })
+      globalThis.AudioContext ||
+      (globalThis as unknown as { webkitAudioContext: typeof AudioContext })
         .webkitAudioContext
     )();
     const oscillator = audioCtx.createOscillator();
@@ -106,22 +106,21 @@ export function useSupportChat() {
         const session: SupportSession = JSON.parse(message.body);
 
         setSessions((prev) => {
+          const sessionList = [...prev];
           if (!session.active) {
-            return prev.filter((item) => item.sessionId !== session.sessionId);
-          }
-
-          const exists = prev.some(
-            (item) => item.sessionId === session.sessionId,
-          );
-
-          if (exists) {
-            return prev.map((item) =>
-              item.sessionId === session.sessionId ? session : item,
+            return sessionList.filter(
+              (item) => item.sessionId !== session.sessionId,
             );
           }
-
+          const index = sessionList.findIndex(
+            (item) => item.sessionId === session.sessionId,
+          );
+          if (index !== -1) {
+            sessionList[index] = session;
+            return sessionList;
+          }
           playNotificationSound();
-          return [session, ...prev];
+          return [session, ...sessionList];
         });
       });
     };
@@ -148,22 +147,14 @@ export function useSupportChat() {
 
         setMessages((prev) => {
           const sessionMessages = prev[selectedSession] || [];
-          const duplicateExists = sessionMessages.some(
-            (sessionMessage) =>
-              sessionMessage.timestamp === chatMsg.timestamp &&
-              sessionMessage.content === chatMsg.content,
+          const isDuplicate = sessionMessages.some(
+            (msg) =>
+              msg.timestamp === chatMsg.timestamp &&
+              msg.content === chatMsg.content,
           );
-
-          if (duplicateExists) return prev;
-
-          if (chatMsg.sender === "USER") {
-            playNotificationSound();
-          }
-
-          return {
-            ...prev,
-            [selectedSession]: [...sessionMessages, chatMsg],
-          };
+          if (isDuplicate) return prev;
+          if (chatMsg.sender === "USER") playNotificationSound();
+          return { ...prev, [selectedSession]: [...sessionMessages, chatMsg] };
         });
       },
     );
