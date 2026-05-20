@@ -186,7 +186,10 @@
             // Persist sessionId in localStorage to maintain history across page reloads
             let sessionId = localStorage.getItem('chat_session_id');
             if (!sessionId) {
-                sessionId = 'session_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+                const randomArray = new Uint32Array(2);
+                window.crypto.getRandomValues(randomArray);
+                const randomStr = randomArray[0].toString(36) + randomArray[1].toString(36);
+                sessionId = 'session_' + randomStr + '_' + Date.now();
                 localStorage.setItem('chat_session_id', sessionId);
             }
 
