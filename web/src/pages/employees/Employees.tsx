@@ -125,13 +125,11 @@ const formatPhone = (phone: string) => {
   return phone.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
 };
 
-// --- TÁCH BIỆT LOGIC KIỂM TRA ĐỊNH DẠNG (FIX WARNING REGEX) ---
 function validateAccountForm(
   formState: AccountFormState,
   formMode: FormMode,
 ): string | null {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  // Sửa lỗi: bỏ trùng lặp dấu gạch thẳng | và thay [0-9] thành \d gọn hơn theo chuẩn Sonar
   const phoneRegex = /^(0[35789])+(\d{8})$/;
 
   if (!formState.name.trim()) {
@@ -243,6 +241,7 @@ export default function Employees() {
     setStatusSort(e.target.value as "NONE" | "ACTIVE_FIRST" | "DISABLED_FIRST");
   }
 
+  // --- SỬA LỖI DÒNG 260 & 263: THAY TOÁN TỬ BA NGÔI LỒNG NHAU THÀNH CÂU LỆNH IF/ELSE ---
   const sortedEmployees = useMemo(() => {
     if (statusSort === "NONE") return filteredEmployees;
 
@@ -254,13 +253,11 @@ export default function Employees() {
         return a.name.localeCompare(b.name);
       }
 
-      return statusSort === "ACTIVE_FIRST"
-        ? aDisabled
-          ? 1
-          : -1
-        : aDisabled
-          ? -1
-          : 1;
+      if (statusSort === "ACTIVE_FIRST") {
+        return aDisabled ? 1 : -1;
+      } else {
+        return aDisabled ? -1 : 1;
+      }
     });
   }, [filteredEmployees, statusSort]);
 
@@ -308,7 +305,6 @@ export default function Employees() {
     setSelectedEmployee(null);
   }
 
-  // --- KIỂM TRA TRÙNG LẶP DỮ LIỆU ĐĂNG KÝ TRÊN CLIENT ---
   function checkLocalDuplicates(): boolean {
     const isPhoneTaken = employees.some(
       (emp) =>
@@ -338,7 +334,6 @@ export default function Employees() {
     return false;
   }
 
-  // --- XỬ LÝ PHẢN HỒI LỖI TỪ SERVER TRẢ VỀ ---
   function handleServerError(serverMsg: string) {
     const msgLower = serverMsg.toLowerCase();
     if (msgLower.includes("phone") || msgLower.includes("số điện thoại")) {
@@ -352,7 +347,6 @@ export default function Employees() {
     }
   }
 
-  // --- HÀM SUBMIT ĐÃ ĐƯỢC GIẢM TẢI ĐỘ PHỨC TẠP NHẬN THỨC ---
   async function handleFormSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (isSubmittingForm) return;
@@ -623,7 +617,6 @@ export default function Employees() {
             </div>
           )}
 
-          {/* SỬ DỤNG TABLE COMPONENT ĐÃ ĐƯỢC TÁCH RIÊNG ĐỂ GIẢM ĐỘ PHỨC TẠP NHẬN THỨC CỦA FILE */}
           {hasTable && (
             <EmployeeTable
               sortedEmployees={sortedEmployees}
@@ -888,17 +881,18 @@ export default function Employees() {
   );
 }
 
-// --- COMPONENT CON TÁCH BIỆT: BẢNG DANH SÁCH NHÂN VIÊN ---
+// --- SỬA LỖI DÒNG 910: MARK PROPS LÀ READ-ONLY ---
 interface EmployeeTableProps {
-  sortedEmployees: Employee[];
-  updatingAccountIds: Set<string>;
-  currentUser: { id: string; role: string; phone: string };
-  isCurrentUserAdmin: boolean;
-  toggleDisableAccount: (employee: Employee) => Promise<void>;
-  openDetailModal: (employee: Employee) => void;
-  openEditModal: (employee: Employee) => void;
+  readonly sortedEmployees: Employee[];
+  readonly updatingAccountIds: Set<string>;
+  readonly currentUser: { id: string; role: string; phone: string };
+  readonly isCurrentUserAdmin: boolean;
+  readonly toggleDisableAccount: (employee: Employee) => Promise<void>;
+  readonly openDetailModal: (employee: Employee) => void;
+  readonly openEditModal: (employee: Employee) => void;
 }
 
+// --- SỬA LỖI DÒNG 937: GIẢM COGNITIVE COMPLEXITY CHO BẢNG ---
 function EmployeeTable({
   sortedEmployees,
   updatingAccountIds,
@@ -907,7 +901,7 @@ function EmployeeTable({
   toggleDisableAccount,
   openDetailModal,
   openEditModal,
-}: EmployeeTableProps) {
+}: Readonly<EmployeeTableProps>) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -934,127 +928,162 @@ function EmployeeTable({
           </tr>
         </thead>
         <tbody className="divide-outline/10 divide-y">
-          {sortedEmployees.map((employee) => {
-            const isDisabled = Boolean(employee.disabledAt);
-            const isUpdating = updatingAccountIds.has(employee.id);
-            const isSelf =
-              (currentUser.id && employee.id === currentUser.id) ||
-              (currentUser.phone && employee.phone === currentUser.phone);
-            const canToggle = isCurrentUserAdmin && !isSelf && !isUpdating;
-
-            let toggleTitle = "Vô hiệu hóa tài khoản";
-            if (!isCurrentUserAdmin)
-              toggleTitle = "Nhân viên không có quyền vô hiệu hóa tài khoản";
-            else if (isUpdating)
-              toggleTitle = "Đang cập nhật trạng thái tài khoản";
-            else if (isSelf)
-              toggleTitle = "Không thể tự vô hiệu hóa tài khoản của chính mình";
-            else if (isDisabled) toggleTitle = "Kích hoạt tài khoản";
-
-            return (
-              <tr
-                key={employee.id}
-                className={`group hover:bg-primary/5 transition-colors duration-300 ${isDisabled ? "bg-slate-50/80 opacity-75" : ""}`}
-              >
-                <td className="text-on-surface px-6 py-4 text-sm font-semibold">
-                  <div className="flex items-center gap-3">
-                    <div className="from-primary/30 to-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br">
-                      <span className="text-primary text-xs font-bold">
-                        {employee.name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span>{employee.name}</span>
-                      </div>
-                      <p className="text-secondary mt-1 text-xs">
-                        {employee.id}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                <td className="text-on-surface-variant px-6 py-4 text-sm">
-                  {formatPhone(employee.phone)}
-                </td>
-                <td className="text-on-surface-variant px-6 py-4 text-sm">
-                  {employee.email || "—"}
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <span
-                    className={`inline-block rounded-full px-3 py-1 text-xs font-bold whitespace-nowrap ${ROLE_BADGE_COLORS[employee.role] || "border bg-gray-100 text-gray-800"}`}
-                  >
-                    {ROLE_LABELS[employee.role] || employee.role}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      {isCurrentUserAdmin ? (
-                        <button
-                          type="button"
-                          onClick={() => void toggleDisableAccount(employee)}
-                          disabled={!canToggle}
-                          className={`focus:ring-primary/30 relative inline-flex h-6 w-11 items-center rounded-full border transition-all focus:ring-2 focus:outline-none ${isDisabled ? "border-rose-300 bg-rose-500" : "border-emerald-300 bg-emerald-500"} ${canToggle ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}
-                          title={toggleTitle}
-                        >
-                          <span
-                            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${isDisabled ? "translate-x-1" : "translate-x-5"}`}
-                          />
-                        </button>
-                      ) : (
-                        <span
-                          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${isDisabled ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}
-                        >
-                          {isDisabled ? "Đã vô hiệu" : "Đang hoạt động"}
-                        </span>
-                      )}
-                      {isCurrentUserAdmin && (
-                        <span
-                          className={`text-xs font-semibold ${isDisabled ? "text-rose-700" : "text-emerald-700"}`}
-                        >
-                          {isDisabled ? "Đã vô hiệu hóa" : "Đang hoạt động"}
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-secondary text-xs">
-                      Cập nhật: {formatDate(employee.updatedAt)}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-center">
-                  <div className="flex justify-center gap-2 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
-                    <button
-                      onClick={() => openDetailModal(employee)}
-                      className="rounded-lg bg-slate-100 p-2 text-slate-700 transition-all hover:scale-110 hover:bg-slate-200 active:scale-95"
-                      title="Xem chi tiết"
-                    >
-                      <span className="material-symbols-outlined text-lg">
-                        visibility
-                      </span>
-                    </button>
-                    {isCurrentUserAdmin && (
-                      <button
-                        onClick={() => openEditModal(employee)}
-                        className="bg-primary/10 text-primary hover:bg-primary/20 rounded-lg p-2 transition-all hover:scale-110 active:scale-95"
-                        title="Cập nhật tài khoản"
-                      >
-                        <span className="material-symbols-outlined text-lg">
-                          edit
-                        </span>
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
+          {sortedEmployees.map((employee) => (
+            <EmployeeRow
+              key={employee.id}
+              employee={employee}
+              updatingAccountIds={updatingAccountIds}
+              currentUser={currentUser}
+              isCurrentUserAdmin={isCurrentUserAdmin}
+              toggleDisableAccount={toggleDisableAccount}
+              openDetailModal={openDetailModal}
+              openEditModal={openEditModal}
+            />
+          ))}
         </tbody>
       </table>
     </div>
   );
 }
 
-function DetailItem({ label, value }: { label: string; value: string }) {
+// --- TÁCH THÀNH COMPONENT CON RIÊNG BIỆT ĐỂ GIẢM ĐỘ PHỨC TẠP NHẬN THỨC THEO CHUẨN SONAR ---
+interface EmployeeRowProps {
+  readonly employee: Employee;
+  readonly updatingAccountIds: Set<string>;
+  readonly currentUser: { id: string; role: string; phone: string };
+  readonly isCurrentUserAdmin: boolean;
+  readonly toggleDisableAccount: (employee: Employee) => Promise<void>;
+  readonly openDetailModal: (employee: Employee) => void;
+  readonly openEditModal: (employee: Employee) => void;
+}
+
+function EmployeeRow({
+  employee,
+  updatingAccountIds,
+  currentUser,
+  isCurrentUserAdmin,
+  toggleDisableAccount,
+  openDetailModal,
+  openEditModal,
+}: Readonly<EmployeeRowProps>) {
+  const isDisabled = Boolean(employee.disabledAt);
+  const isUpdating = updatingAccountIds.has(employee.id);
+
+  const isSelf =
+    (currentUser.id && employee.id === currentUser.id) ||
+    (currentUser.phone && employee.phone === currentUser.phone);
+
+  const canToggle = isCurrentUserAdmin && !isSelf && !isUpdating;
+
+  // Xử lý title hiển thị (Thay thế cấu trúc rẽ nhánh phức tạp cũ)
+  const getToggleTitle = () => {
+    if (!isCurrentUserAdmin)
+      return "Nhân viên không có quyền vô hiệu hóa tài khoản";
+    if (isUpdating) return "Đang cập nhật trạng thái tài khoản";
+    if (isSelf) return "Không thể tự vô hiệu hóa tài khoản của chính mình";
+    return isDisabled ? "Kích hoạt tài khoản" : "Vô hiệu hóa tài khoản";
+  };
+
+  return (
+    <tr
+      className={`group hover:bg-primary/5 transition-colors duration-300 ${isDisabled ? "bg-slate-50/80 opacity-75" : ""}`}
+    >
+      <td className="text-on-surface px-6 py-4 text-sm font-semibold">
+        <div className="flex items-center gap-3">
+          <div className="from-primary/30 to-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br">
+            <span className="text-primary text-xs font-bold">
+              {employee.name.charAt(0).toUpperCase()}
+            </span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span>{employee.name}</span>
+            </div>
+            <p className="text-secondary mt-1 text-xs">{employee.id}</p>
+          </div>
+        </div>
+      </td>
+      <td className="text-on-surface-variant px-6 py-4 text-sm">
+        {formatPhone(employee.phone)}
+      </td>
+      <td className="text-on-surface-variant px-6 py-4 text-sm">
+        {employee.email || "—"}
+      </td>
+      <td className="px-6 py-4 text-sm">
+        <span
+          className={`inline-block rounded-full px-3 py-1 text-xs font-bold whitespace-nowrap ${ROLE_BADGE_COLORS[employee.role] || "border bg-gray-100 text-gray-800"}`}
+        >
+          {ROLE_LABELS[employee.role] || employee.role}
+        </span>
+      </td>
+      <td className="px-6 py-4 text-sm">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            {isCurrentUserAdmin ? (
+              <button
+                type="button"
+                onClick={() => void toggleDisableAccount(employee)}
+                disabled={!canToggle}
+                className={`focus:ring-primary/30 relative inline-flex h-6 w-11 items-center rounded-full border transition-all focus:ring-2 focus:outline-none ${isDisabled ? "border-rose-300 bg-rose-500" : "border-emerald-300 bg-emerald-500"} ${canToggle ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}
+                title={getToggleTitle()}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${isDisabled ? "translate-x-1" : "translate-x-5"}`}
+                />
+              </button>
+            ) : (
+              <span
+                className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${isDisabled ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}
+              >
+                {isDisabled ? "Đã vô hiệu" : "Đang hoạt động"}
+              </span>
+            )}
+            {isCurrentUserAdmin && (
+              <span
+                className={`text-xs font-semibold ${isDisabled ? "text-rose-700" : "text-emerald-700"}`}
+              >
+                {isDisabled ? "Đã vô hiệu hóa" : "Đang hoạt động"}
+              </span>
+            )}
+          </div>
+          <span className="text-secondary text-xs">
+            Cập nhật: {formatDate(employee.updatedAt)}
+          </span>
+        </div>
+      </td>
+      <td className="px-6 py-4 text-center">
+        <div className="flex justify-center gap-2 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+          <button
+            onClick={() => openDetailModal(employee)}
+            className="rounded-lg bg-slate-100 p-2 text-slate-700 transition-all hover:scale-110 hover:bg-slate-200 active:scale-95"
+            title="Xem chi tiết"
+          >
+            <span className="material-symbols-outlined text-lg">
+              visibility
+            </span>
+          </button>
+          {isCurrentUserAdmin && (
+            <button
+              onClick={() => openEditModal(employee)}
+              className="bg-primary/10 text-primary hover:bg-primary/20 rounded-lg p-2 transition-all hover:scale-110 active:scale-95"
+              title="Cập nhật tài khoản"
+            >
+              <span className="material-symbols-outlined text-lg">edit</span>
+            </button>
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+function DetailItem({
+  label,
+  value,
+}: {
+  readonly label: string;
+  readonly value: string;
+}) {
   return (
     <div className="border-outline/10 rounded-xl border bg-slate-50 p-4">
       <p className="text-secondary text-xs font-bold tracking-widest uppercase">
@@ -1074,13 +1103,13 @@ function InputField({
   disabled = false,
   placeholder = "",
 }: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  type?: string;
-  fullWidth?: boolean;
-  disabled?: boolean;
-  placeholder?: string;
+  readonly label: string;
+  readonly value: string;
+  readonly onChange: (value: string) => void;
+  readonly type?: string;
+  readonly fullWidth?: boolean;
+  readonly disabled?: boolean;
+  readonly placeholder?: string;
 }) {
   return (
     <label className={fullWidth ? "md:col-span-2" : ""}>
@@ -1107,12 +1136,12 @@ function SelectField({
   optionLabels,
   disabled = false,
 }: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: string[];
-  optionLabels: string[];
-  disabled?: boolean;
+  readonly label: string;
+  readonly value: string;
+  readonly onChange: (value: string) => void;
+  readonly options: string[];
+  readonly optionLabels: string[];
+  readonly disabled?: boolean;
 }) {
   return (
     <label>
