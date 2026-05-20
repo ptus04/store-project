@@ -6,6 +6,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
@@ -17,6 +18,7 @@ public class CustomUserDetails implements UserDetails {
     private String name;
     private String password;
     private Set<GrantedAuthority> authorities;
+    private Instant disabledAt;
 
     @Override
     public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
@@ -26,5 +28,10 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public @NonNull String getUsername() {
         return id.toString();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return disabledAt == null;
     }
 }

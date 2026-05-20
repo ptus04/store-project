@@ -69,7 +69,9 @@ public class SecurityConfig {
                                 "/actuator/**",
                                 "/auth/**",
                                 "/products/**",
-                                "/cart/**"
+                                "/cart/**",
+                                "/ws/**",
+                                "/api/support/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

@@ -47,13 +47,16 @@ public class CustomerApiController {
      * PATCH /api/customers/{id}/status?disabled=true
      * Vô hiệu hóa / kích hoạt tài khoản khách hàng
      */
-    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/status")
-    public ResponseEntity<UserResponse> toggleStatus(
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> updateCustomerStatus(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable UUID id,
-            @RequestParam boolean disabled,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        UUID actorId = userDetails.getId();
-        return ResponseEntity.ok(userService.updateEmployeeAccountStatus(actorId, id, disabled));
+            @RequestParam boolean disabled
+    ) {
+        UserResponse updated = userService.updateEmployeeAccountStatus(
+                userDetails.getId(), id, disabled
+        );
+        return ResponseEntity.ok(updated);
     }
 }
