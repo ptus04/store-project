@@ -37,9 +37,9 @@ export default function SideNavBar() {
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3Ug5Cspk24gYZjhxUTV-eG8Gko9CGFpdXFN4GYMuLY3iV3Duq0ztpyQNJvbbVPwSYlDx5s4C6w04HZmHk6ZiKnBbNT1RZpECrgkS5OXgfsZlBT_rts2ec-xTIczahVkg-hXhGSMDefdGKO1qP2Bet7Ok0XZm3yXyr77JzyDrrQu9am82mf-xUit3HnW-LGmw-4vvHXWfQMJEFx8I-uKaYtGrRw_7AeFlbd3NQSLyUF800Pdaimvx9PIBSPEpCYYd9_Xp0NdXSjPI"
         />
 
-        <div
+        <button
           onClick={() => navigate("/profile")}
-          className="hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex w-full cursor-pointer items-center gap-3 rounded p-2 transition-all duration-200"
+          className="hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex w-full cursor-pointer items-center gap-3 rounded p-2 text-left transition-all duration-200"
         >
           <div className="bg-surface-container-high border-outline-variant flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border">
             {user.avatar ? (
@@ -68,7 +68,7 @@ export default function SideNavBar() {
               {user.role}
             </p>
           </div>
-        </div>
+        </button>
       </div>
 
       {/* Navigation Links */}
