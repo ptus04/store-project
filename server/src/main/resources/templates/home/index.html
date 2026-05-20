@@ -17,11 +17,11 @@
                th:href="@{${item.link()}}">
                 <picture>
                     <source media="(orientation: portrait)"
-                            th:srcset="@{${imageContainerUrl} + 'carousel/' + ${item.portraitImage()}}"/>
+                            th:srcset="@{${carouselContainerUrl} + ${item.portraitImage()}}"/>
                     <img class="h-full w-full object-cover"
                          loading="lazy"
                          th:alt="${item.title()}"
-                         th:src="@{${imageContainerUrl} + 'carousel/' + ${item.landscapeImage()}}"/>
+                         th:src="@{${carouselContainerUrl} + ${item.landscapeImage()}}"/>
                 </picture>
 
                 <div class="absolute right-0 bottom-0 left-0 bg-linear-to-t from-black to-75% pt-9 pr-4 pb-6 pl-4 text-white"
