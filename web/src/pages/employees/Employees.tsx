@@ -50,6 +50,8 @@ const ROLE_BADGE_COLORS: Record<string, string> = {
   EMPLOYEE: "bg-blue-100 text-blue-800 border border-blue-300",
 };
 
+const ALLOWED_EMPLOYEE_ROLES = new Set<AccountRole>(["ADMIN", "EMPLOYEE"]);
+
 function parseJwtPayload(token: string | null): Record<string, unknown> {
   if (!token) return {};
 
@@ -200,7 +202,11 @@ export default function Employees() {
       }
 
       const data: Employee[] = await response.json();
-      setEmployees(data);
+      setEmployees(
+        data.filter((employee) =>
+          ALLOWED_EMPLOYEE_ROLES.has(employee.role as AccountRole),
+        ),
+      );
       setError("");
     } catch (err) {
       console.error("Error fetching employees:", err);
