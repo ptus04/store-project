@@ -39,9 +39,31 @@ public class SePayService {
     public CompletableFuture<SePayInvoiceCheckResponse> checkInvoice(String trackingCode) {
         ensureValidToken();
 
-        SePayInvoiceCheckResponse response = injectAuthorizationBearerHeader(restClient.get().uri(SEPAY_INVOICE_CHECK_URL + trackingCode))
-                .retrieve()
-                .body(SePayInvoiceCheckResponse.class);
+        SePayInvoiceCheckResponse response = null;
+
+        int maxAttempts = 3;
+        int attempt = 0;
+        long backoffMillis = 3000;
+
+        while (attempt < maxAttempts) {
+            log.info("Checking invoice status, attempt {} of {}", attempt, maxAttempts);
+
+            response = injectAuthorizationBearerHeader(restClient.get().uri(SEPAY_INVOICE_CHECK_URL + trackingCode))
+                    .retrieve()
+                    .body(SePayInvoiceCheckResponse.class);
+            if (response != null && response.getData().getInvoice() != null) {
+                break;
+            }
+
+            try {
+                Thread.sleep(backoffMillis);
+            } catch (InterruptedException e) {
+                log.atWarn().setMessage("Invoice check interrupted during backoff").setCause(e).log();
+                throw new RuntimeException(e);
+            }
+            attempt++;
+        }
+
         return CompletableFuture.completedFuture(response);
     }
 

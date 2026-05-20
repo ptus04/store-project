@@ -18,10 +18,9 @@ public record ProductCreateRequest(@Size(max = 255) @NotBlank(message = "Tên kh
                                    String description, String careInstructions,
                                    @NotNull @PositiveOrZero(message = "Giá bán không được là số âm") BigDecimal price,
                                    @PositiveOrZero(message = "Số lượng tồn kho không được là số âm") int inStock,
-                                   float discount,
+                                   @PositiveOrZero(message = "Giảm giá không được là số âm") float discount,
                                    @NotNull @Size(message = "Sản phẩm phải có ít nhất 01 hình ảnh", min = 1)
-                                   List<ProductImageCreateRequest> productImages,
-                                   List<ProductSizeCreateRequest> productSizes,
-                                   List<UUID> categoryIds
+                                   List<ProductImagePutRequest> productImages,
+                                   List<ProductSizePutRequest> productSizes, List<UUID> categoryIds
 ) implements Serializable {
 }
