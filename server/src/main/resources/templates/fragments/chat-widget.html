@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<!-- 
-    Chat Widget Fragment 
-    Include this in your main layout just before </body>:
-    <div th:replace="~{fragments/chat-widget :: chatWidget}"></div>
--->
-<div th:fragment="chatWidget" class="font-sans">
+<div th:fragment="chatWidget" class="font-sans" xmlns:th="http://www.thymeleaf.org">
 
     <!-- FAB Button -->
     <button id="chat-fab"
@@ -132,15 +125,26 @@
     </div>
 
     <!-- STOMP & SockJS for WebSocket (if needed later) -->
-    <!-- noinspection HtmlUnknownTarget -->
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-    <!-- noinspection HtmlUnknownTarget -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js" integrity="sha512-1QvjE7BtotQjkq8PxLeF6P46gEpBRXuskzIVgjFpekzFVF4yjRgrQvTG1MTOJ3yQgvTteKAcO7DSZI92+u/yZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js" integrity="sha512-iKDtgDyTHjAitUDdLljGhenhPwrbBfqTKWO1mkhSFH3A7blITC9MhYon6SjnMhp4o0rADGw9yAC6EW4t5a4K3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!-- Tailwind CDN to ensure newly added classes work immediately during dev -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com" integrity="sha384-igm5BeiBt36UU4gqwWS7imYmelpTsZlQ45FZf+XBn9MuJbn4nQr7yx1yFydocC/K" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <!-- Custom Chat JS -->
     <script th:inline="javascript">
+        function getTimestamp() {
+            const now = new Date();
+            return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
         document.addEventListener('DOMContentLoaded', function () {
             // --- Configuration ---
             const CONFIG = {
@@ -233,10 +237,7 @@
                 updateBadge();
             }
 
-            function getTimestamp() {
-                const now = new Date();
-                return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-            }
+
 
             // --- Add Message to UI ---
             function appendMessage(sender, text, isHtml = false, countAsUnread = sender !== 'USER') {
@@ -266,7 +267,7 @@
                         <div class="flex gap-2">
                             <div class="flex flex-col gap-1 max-w-[85%]">
                                 <div class="rounded-2xl rounded-tl-sm bg-[#e5e7eb] px-4 py-3 text-[14px] text-neutral-800 shadow-sm leading-relaxed prose prose-sm prose-neutral">
-                                    ${isHtml ? text : escapeHtml(text).replace(/\n/g, '<br>')}
+                                    ${isHtml ? text : escapeHtml(text).replaceAll('\n', '<br>')}
                                 </div>
                                 <span class="text-[10px] text-neutral-400 ml-1">${time}</span>
                             </div>
@@ -280,7 +281,7 @@
                         <div class="flex gap-2">
                             <div class="flex flex-col gap-1 max-w-[85%]">
                                 <div class="rounded-2xl rounded-tl-sm border border-emerald-200 bg-emerald-50 px-4 py-3 text-[14px] text-emerald-900 shadow-sm leading-relaxed">
-                                    ${escapeHtml(text).replace(/\n/g, '<br>')}
+                                    ${escapeHtml(text).replaceAll('\n', '<br>')}
                                 </div>
                                 <span class="text-[10px] text-neutral-400 ml-1">${time}</span>
                             </div>
@@ -505,21 +506,19 @@
                     let responseText;
                     if (CONFIG.useBackendApi) {
                         responseText = await callBackendApi(text);
-                    } else {
+                    } else if (CONFIG.geminiApiKey === 'YOUR_GEMINI_API_KEY') {
                         // Mock slightly if no API key provided to avoid ugly error
-                        if (CONFIG.geminiApiKey === 'YOUR_GEMINI_API_KEY') {
-                            await new Promise(r => setTimeout(r, 1500));
-                            responseText = "Đây là bản demo giao diện (API Key chưa được cấu hình). Tin nhắn của bạn: '" + text + "'. Model: " + CONFIG.model;
-                        } else {
-                            responseText = await callGeminiApi(text);
-                        }
+                        await new Promise(r => setTimeout(r, 1500));
+                        responseText = "Đây là bản demo giao diện (API Key chưa được cấu hình). Tin nhắn của bạn: '" + text + "'. Model: " + CONFIG.model;
+                    } else {
+                        responseText = await callGeminiApi(text);
                     }
 
                     hideTypingIndicator();
                     // Format markdown-like bold text **text** to HTML
                     const formattedHtml = escapeHtml(responseText)
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\n/g, '<br>');
+                        .replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replaceAll('\n', '<br>');
 
                     appendMessage('AI', formattedHtml, true);
 
@@ -529,15 +528,7 @@
                 }
             });
 
-            // Utilities
-            function escapeHtml(unsafe) {
-                return unsafe
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-            }
+
 
             // Add custom CSS for animations that aren't native to Tailwind v4 out-of-the-box
             const style = document.createElement('style');
@@ -584,8 +575,8 @@
                             
                             history.forEach(msg => {
                                 const formattedContent = msg.content
-                                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                                    .replace(/\n/g, '<br>');
+                                    .replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                    .replaceAll('\n', '<br>');
                                 appendMessage(msg.sender, formattedContent, true, false);
                             });
                             resetUnreadBadge();
@@ -606,4 +597,3 @@
     </script>
 </div>
 
-</html>
