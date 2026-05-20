@@ -195,6 +195,127 @@ export default function Customer() {
     );
   };
 
+  // ── FIX R430: Extract nested ternary in tbody into independent function ──
+  const renderTableBody = () => {
+    if (loading) {
+      return SKELETON_ROW_KEYS.map((rowKey) => (
+        <tr key={rowKey}>
+          {SKELETON_COL_KEYS.map((colKey) => (
+            <td key={colKey} className="px-6 py-5">
+              <div className="bg-surface-container-high h-4 animate-pulse rounded" />
+            </td>
+          ))}
+        </tr>
+      ));
+    }
+
+    if (customers.length === 0) {
+      return (
+        <tr>
+          <td
+            colSpan={6}
+            className="text-secondary px-6 py-16 text-center text-sm"
+          >
+            <span className="material-symbols-outlined text-outline mb-2 block text-4xl">
+              person_search
+            </span>
+            <p>Không tìm thấy khách hàng nào</p>
+          </td>
+        </tr>
+      );
+    }
+
+    return customers.map((customer) => {
+      const disabled = isDisabled(customer);
+      const toggling = togglingId === customer.id;
+
+      return (
+        <tr
+          key={customer.id}
+          className={`hover:bg-surface-container-low group transition-colors ${
+            disabled ? "opacity-60" : ""
+          }`}
+        >
+          <td className="px-6 py-5">
+            <div className="flex items-center space-x-4">
+              <div className="border-outline-variant bg-surface-container-highest text-outline flex h-10 w-10 shrink-0 items-center justify-center border text-xs font-bold">
+                {getInitials(customer.name)}
+              </div>
+              <div>
+                <p className="font-body-base text-body-base text-primary font-bold">
+                  {customer.name}
+                </p>
+                <p className="text-secondary text-[11px]">
+                  ID: #{customer.id.slice(0, 13).toUpperCase()}
+                </p>
+              </div>
+            </div>
+          </td>
+          <td className="font-body-base text-body-base px-6 py-5">
+            {customer.phone}
+          </td>
+          <td className="font-body-base text-body-base text-secondary px-6 py-5">
+            {customer.email ?? "—"}
+          </td>
+          <td className="px-6 py-5">
+            <span className="border-outline-variant border px-3 py-1 text-[11px] font-bold tracking-wider uppercase">
+              {getGenderLabel(customer.gender)}
+            </span>
+          </td>
+          <td className="font-body-base text-body-base text-secondary px-6 py-5">
+            {formatDate(customer.createdAt)}
+          </td>
+          <td className="px-6 py-5 text-right">
+            <div className="flex items-center justify-end space-x-1">
+              <button
+                title="Xem chi tiết"
+                onClick={() => navigate(`/customer/${customer.id}`)}
+                className="border-outline-variant hover:border-primary text-outline hover:text-primary flex h-9 w-9 items-center justify-center border transition-all"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  visibility
+                </span>
+              </button>
+              {canToggle && (
+                <button
+                  title={disabled ? "Kích hoạt" : "Vô hiệu hóa"}
+                  disabled={toggling}
+                  onClick={() => handleToggleStatus(customer)}
+                  className={getToggleButtonClass(disabled, toggling)}
+                >
+                  {toggling ? (
+                    <span className="material-symbols-outlined text-outline animate-spin text-[16px]">
+                      progress_activity
+                    </span>
+                  ) : (
+                    <svg width="26" height="16" viewBox="0 0 26 16" fill="none">
+                      <rect
+                        width="26"
+                        height="16"
+                        rx="8"
+                        fill={
+                          disabled
+                            ? "var(--color-outline,#8c8c8c)"
+                            : "var(--color-tertiary,#6dbfa7)"
+                        }
+                      />
+                      <circle
+                        cx={disabled ? 8 : 18}
+                        cy="8"
+                        r="5"
+                        fill="white"
+                      />
+                    </svg>
+                  )}
+                </button>
+              )}
+            </div>
+          </td>
+        </tr>
+      );
+    });
+  };
+
   // ─── render ──────────────────────────────────────────────────────────────
 
   return (
@@ -306,128 +427,7 @@ export default function Customer() {
           </thead>
 
           <tbody className="divide-outline-variant divide-y">
-            {loading ? (
-              // ── FIX R266/R268: Use stable constant keys, not array index ──
-              SKELETON_ROW_KEYS.map((rowKey) => (
-                <tr key={rowKey}>
-                  {SKELETON_COL_KEYS.map((colKey) => (
-                    <td key={colKey} className="px-6 py-5">
-                      <div className="bg-surface-container-high h-4 animate-pulse rounded" />
-                    </td>
-                  ))}
-                </tr>
-              ))
-            ) : customers.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={6}
-                  className="text-secondary px-6 py-16 text-center text-sm"
-                >
-                  <span className="material-symbols-outlined text-outline mb-2 block text-4xl">
-                    person_search
-                  </span>
-                  {/* ── FIX R282: Wrap text after </span> to avoid ambiguous spacing ── */}
-                  <p>Không tìm thấy khách hàng nào</p>
-                </td>
-              </tr>
-            ) : (
-              customers.map((customer) => {
-                const disabled = isDisabled(customer);
-                const toggling = togglingId === customer.id;
-
-                return (
-                  <tr
-                    key={customer.id}
-                    className={`hover:bg-surface-container-low group transition-colors ${
-                      disabled ? "opacity-60" : ""
-                    }`}
-                  >
-                    <td className="px-6 py-5">
-                      <div className="flex items-center space-x-4">
-                        <div className="border-outline-variant bg-surface-container-highest text-outline flex h-10 w-10 shrink-0 items-center justify-center border text-xs font-bold">
-                          {getInitials(customer.name)}
-                        </div>
-                        <div>
-                          <p className="font-body-base text-body-base text-primary font-bold">
-                            {customer.name}
-                          </p>
-                          <p className="text-secondary text-[11px]">
-                            ID: #{customer.id.slice(0, 13).toUpperCase()}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="font-body-base text-body-base px-6 py-5">
-                      {customer.phone}
-                    </td>
-                    <td className="font-body-base text-body-base text-secondary px-6 py-5">
-                      {customer.email ?? "—"}
-                    </td>
-                    <td className="px-6 py-5">
-                      {/* ── FIX R325: Use getGenderLabel() instead of nested ternary ── */}
-                      <span className="border-outline-variant border px-3 py-1 text-[11px] font-bold tracking-wider uppercase">
-                        {getGenderLabel(customer.gender)}
-                      </span>
-                    </td>
-                    <td className="font-body-base text-body-base text-secondary px-6 py-5">
-                      {formatDate(customer.createdAt)}
-                    </td>
-                    <td className="px-6 py-5 text-right">
-                      <div className="flex items-center justify-end space-x-1">
-                        <button
-                          title="Xem chi tiết"
-                          onClick={() => navigate(`/customer/${customer.id}`)}
-                          className="border-outline-variant hover:border-primary text-outline hover:text-primary flex h-9 w-9 items-center justify-center border transition-all"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">
-                            visibility
-                          </span>
-                        </button>
-                        {canToggle && (
-                          <button
-                            title={disabled ? "Kích hoạt" : "Vô hiệu hóa"}
-                            disabled={toggling}
-                            onClick={() => handleToggleStatus(customer)}
-                            // ── FIX R389: Use getToggleButtonClass() instead of nested ternary ──
-                            className={getToggleButtonClass(disabled, toggling)}
-                          >
-                            {toggling ? (
-                              <span className="material-symbols-outlined text-outline animate-spin text-[16px]">
-                                progress_activity
-                              </span>
-                            ) : (
-                              <svg
-                                width="26"
-                                height="16"
-                                viewBox="0 0 26 16"
-                                fill="none"
-                              >
-                                <rect
-                                  width="26"
-                                  height="16"
-                                  rx="8"
-                                  fill={
-                                    disabled
-                                      ? "var(--color-outline,#8c8c8c)"
-                                      : "var(--color-tertiary,#6dbfa7)"
-                                  }
-                                />
-                                <circle
-                                  cx={disabled ? 8 : 18}
-                                  cy="8"
-                                  r="5"
-                                  fill="white"
-                                />
-                              </svg>
-                            )}
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
+            {renderTableBody()}
           </tbody>
         </table>
 
