@@ -114,6 +114,7 @@ export default function Employees() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [modalError, setModalError] = useState(""); // Lỗi dành riêng cho Modal
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("ALL");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [statusSort, setStatusSort] = useState<
@@ -128,6 +129,7 @@ export default function Employees() {
   const [updatingAccountIds, setUpdatingAccountIds] = useState<Set<string>>(
     new Set(),
   );
+  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("token");
@@ -243,7 +245,6 @@ export default function Employees() {
       const bDisabled = Boolean(b.disabledAt);
 
       if (aDisabled === bDisabled) {
-        // Keep stable order - fallback to name
         return a.name.localeCompare(b.name);
       }
 
@@ -251,7 +252,6 @@ export default function Employees() {
         return aDisabled ? 1 : -1;
       }
 
-      // DISABLED_FIRST
       return aDisabled ? -1 : 1;
     });
   }, [filteredEmployees, statusSort]);
@@ -260,6 +260,7 @@ export default function Employees() {
 
   function openCreateModal(role: AccountRole) {
     setFormMode("create");
+    setModalError("");
     setFormState({ ...EMPTY_FORM, role });
     setSelectedEmployee(null);
     setIsModalOpen(true);
@@ -267,6 +268,7 @@ export default function Employees() {
 
   function openEditModal(employee: Employee) {
     setFormMode("edit");
+    setModalError("");
     setSelectedEmployee(employee);
     setFormState({
       name: employee.name,
@@ -288,54 +290,182 @@ export default function Employees() {
     setIsModalOpen(false);
     setSelectedEmployee(null);
     setFormState(EMPTY_FORM);
+    setModalError("");
   }
 
   function closeDetail() {
     setSelectedEmployee(null);
   }
 
-  function handleFormSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleFormSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (formMode === "create") {
-      const newEmployee: Employee = {
-        id: `temp-${Date.now()}`,
-        name: formState.name,
-        phone: formState.phone,
-        email: formState.email,
-        role: formState.role,
-        gender: formState.gender,
-        birthDate: formState.birthDate,
-        phoneVerifiedAt: null,
-        emailVerifiedAt: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        disabledAt: null,
-      };
+    if (isSubmittingForm) return;
 
-      setEmployees((current) => [newEmployee, ...current]);
-      closeModal();
+    // --- BỘ VALIDATE CLIENT-SIDE ---
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/; // Định dạng số điện thoại Việt Nam 10 số
+
+    if (!formState.name.trim()) {
+      setModalError("Vui lòng điền họ và tên.");
       return;
     }
 
-    if (selectedEmployee) {
-      setEmployees((current) =>
-        current.map((employee) =>
-          employee.id === selectedEmployee.id
-            ? {
-                ...employee,
-                name: formState.name,
-                phone: formState.phone,
-                email: formState.email,
-                role: formState.role,
-                gender: formState.gender,
-                birthDate: formState.birthDate,
-                updatedAt: new Date().toISOString(),
-              }
-            : employee,
-        ),
+    if (!formState.phone.trim()) {
+      setModalError("Vui lòng nhập số điện thoại.");
+      return;
+    }
+
+    if (!phoneRegex.test(formState.phone.trim())) {
+      setModalError(
+        "Số điện thoại không đúng định dạng (Ví dụ hợp lệ: 0912345678).",
       );
-      closeModal();
+      return;
+    }
+
+    if (formState.email.trim() && !emailRegex.test(formState.email.trim())) {
+      setModalError(
+        "Email không đúng định dạng (Ví dụ hợp lệ: NguyenVanA@gmail.com).",
+      );
+      return;
+    }
+
+    if (formMode === "create" && !formState.password) {
+      setModalError("Vui lòng nhập mật khẩu cho tài khoản mới.");
+      return;
+    }
+    // ---------------------------------
+
+    try {
+      setIsSubmittingForm(true);
+      setModalError("");
+
+      // Kiểm tra trùng SĐT / Email trực tiếp với list state hiện tại ở client để chặn sớm nếu cần
+      const isPhoneTaken = employees.some(
+        (emp) =>
+          emp.phone === formState.phone.trim() &&
+          (formMode === "create" || emp.id !== selectedEmployee?.id),
+      );
+      if (isPhoneTaken) {
+        setModalError(
+          "Số điện thoại này đã được sử dụng bởi một tài khoản khác.",
+        );
+        setIsSubmittingForm(false);
+        return;
+      }
+
+      if (formState.email.trim()) {
+        const isEmailTaken = employees.some(
+          (emp) =>
+            emp.email === formState.email.trim() &&
+            (formMode === "create" || emp.id !== selectedEmployee?.id),
+        );
+        if (isEmailTaken) {
+          setModalError(
+            "Địa chỉ email này đã được sử dụng bởi một tài khoản khác.",
+          );
+          setIsSubmittingForm(false);
+          return;
+        }
+      }
+
+      if (formMode === "create") {
+        const response = await fetch(`${API_URL}/api/employees`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: formState.name,
+            phone: formState.phone,
+            email: formState.email || null,
+            password: formState.password,
+            role: formState.role,
+            gender: formState.gender || null,
+            birthDate: formState.birthDate || null,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          // Bắt mã lỗi/message từ server trả về nếu trùng hoặc sai định dạng
+          const serverMsg = errorData.message || "";
+          if (
+            serverMsg.toLowerCase().includes("phone") ||
+            serverMsg.toLowerCase().includes("số điện thoại")
+          ) {
+            setModalError("Số điện thoại này đã được sử dụng.");
+          } else if (serverMsg.toLowerCase().includes("email")) {
+            setModalError("Email không đúng định dạng hoặc đã tồn tại.");
+          } else {
+            setModalError(
+              serverMsg ||
+                "Không thể tạo tài khoản. Vui lòng kiểm tra lại dữ liệu.",
+            );
+          }
+          return;
+        }
+
+        const newEmployee: Employee = await response.json();
+        setEmployees((current) => [newEmployee, ...current]);
+        closeModal();
+        return;
+      }
+
+      if (selectedEmployee) {
+        const response = await fetch(
+          `${API_URL}/api/employees/${selectedEmployee.id}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              name: formState.name,
+              phone: formState.phone,
+              email: formState.email || null,
+              role: formState.role,
+              gender: formState.gender || null,
+              birthDate: formState.birthDate || null,
+            }),
+          },
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          const serverMsg = errorData.message || "";
+          if (
+            serverMsg.toLowerCase().includes("phone") ||
+            serverMsg.toLowerCase().includes("số điện thoại")
+          ) {
+            setModalError("Số điện thoại này đã tồn tại trong hệ thống.");
+          } else if (serverMsg.toLowerCase().includes("email")) {
+            setModalError(
+              "Email không hợp lệ hoặc đã thuộc về tài khoản khác.",
+            );
+          } else {
+            setModalError(
+              serverMsg || "Không thể cập nhật tài khoản. Vui lòng thử lại.",
+            );
+          }
+          return;
+        }
+
+        const updatedEmployee: Employee = await response.json();
+        setEmployees((current) =>
+          current.map((employee) =>
+            employee.id === updatedEmployee.id ? updatedEmployee : employee,
+          ),
+        );
+        closeModal();
+      }
+    } catch (err) {
+      console.error("Error submitting form:", err);
+      setModalError("Có lỗi kết nối mạng xảy ra. Vui lòng thử lại.");
+    } finally {
+      setIsSubmittingForm(false);
     }
   }
 
@@ -347,7 +477,6 @@ export default function Employees() {
       (currentUser.id && targetEmployee.id === currentUser.id) ||
       (currentUser.phone && targetEmployee.phone === currentUser.phone);
 
-    // Admin mới có quyền vô hiệu hóa và không được tự khóa chính mình
     const canToggle = isCurrentUserAdmin && !isSelfAccount;
 
     if (!canToggle) return;
@@ -433,7 +562,6 @@ export default function Employees() {
                   </span>
                 </div>
 
-                {/* Status sort select */}
                 <div className="group relative">
                   <select
                     value={statusSort}
@@ -449,7 +577,6 @@ export default function Employees() {
                   </span>
                 </div>
 
-                {/* Search input: name / phone / email */}
                 <div className="relative min-w-[260px] flex-1">
                   <input
                     type="text"
@@ -473,7 +600,6 @@ export default function Employees() {
                       <span className="material-symbols-outlined">
                         person_add
                       </span>
-                      {/*Tạo tài khoản*/}
                     </button>
                   </div>
                 )}
@@ -527,7 +653,7 @@ export default function Employees() {
                 error
               </span>
               <div>
-                <p className="font-semibold text-red-900">Lỗi</p>
+                <p className="font-semibold text-red-900">Lỗi hệ thống</p>
                 <p className="text-sm text-red-800">{error}</p>
               </div>
             </div>
@@ -710,7 +836,6 @@ export default function Employees() {
                               </span>
                             </button>
 
-                            {/* CHỈ ADMIN MỚI THẤY NÚT SỬA TÀI KHOẢN TRÊN DÒNG */}
                             {isCurrentUserAdmin && (
                               <button
                                 onClick={() => openEditModal(employee)}
@@ -813,7 +938,6 @@ export default function Employees() {
             </div>
 
             <div className="mt-6 flex justify-end gap-3">
-              {/* CHỈ ADMIN MỚI THẤY NÚT CẬP NHẬT TRONG CHI TIẾT */}
               {isCurrentUserAdmin && (
                 <button
                   onClick={() => {
@@ -844,9 +968,9 @@ export default function Employees() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <form
             onSubmit={handleFormSubmit}
-            className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl"
+            className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white p-6 shadow-2xl"
           >
-            <div className="mb-6 flex items-start justify-between gap-4">
+            <div className="mb-4 flex shrink-0 items-start justify-between gap-4">
               <div>
                 <p className="text-secondary text-xs font-bold tracking-widest uppercase">
                   {formMode === "create"
@@ -868,13 +992,28 @@ export default function Employees() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Vùng hiển thị thông báo lỗi ngay dưới Header của Modal */}
+            {modalError && (
+              <div className="animate-fadeIn mb-4 flex shrink-0 items-start gap-3 rounded-lg border-2 border-red-300 bg-red-50 p-3">
+                <span className="material-symbols-outlined shrink-0 text-xl text-red-600">
+                  error
+                </span>
+                <div className="text-sm text-red-800">
+                  <p className="font-bold">Lỗi nhập liệu</p>
+                  <p>{modalError}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Vùng điền thông tin cuộn được nếu màn hình nhỏ */}
+            <div className="grid grid-cols-1 gap-4 overflow-y-auto py-1 pr-1 md:grid-cols-2">
               <InputField
                 label="Họ tên"
                 value={formState.name}
                 onChange={(value) =>
                   setFormState((current) => ({ ...current, name: value }))
                 }
+                disabled={isSubmittingForm}
               />
               <InputField
                 label="Số điện thoại"
@@ -882,6 +1021,8 @@ export default function Employees() {
                 onChange={(value) =>
                   setFormState((current) => ({ ...current, phone: value }))
                 }
+                disabled={isSubmittingForm}
+                placeholder="Ví dụ: 0912345678"
               />
               <InputField
                 label="Email"
@@ -889,6 +1030,8 @@ export default function Employees() {
                 onChange={(value) =>
                   setFormState((current) => ({ ...current, email: value }))
                 }
+                disabled={isSubmittingForm}
+                placeholder="Ví dụ: name@company.com"
               />
               <InputField
                 label="Ngày sinh"
@@ -897,6 +1040,7 @@ export default function Employees() {
                 onChange={(value) =>
                   setFormState((current) => ({ ...current, birthDate: value }))
                 }
+                disabled={isSubmittingForm}
               />
               <SelectField
                 label="Giới tính"
@@ -906,6 +1050,7 @@ export default function Employees() {
                 }
                 options={["", "MALE", "FEMALE"]}
                 optionLabels={["Chọn giới tính", "Nam", "Nữ"]}
+                disabled={isSubmittingForm}
               />
               <SelectField
                 label="Vai trò"
@@ -918,8 +1063,9 @@ export default function Employees() {
                 }
                 options={["EMPLOYEE", "ADMIN"]}
                 optionLabels={["Nhân viên", "Quản trị viên"]}
+                disabled={isSubmittingForm}
               />
-              {formMode === "create" ? (
+              {formMode === "create" && (
                 <InputField
                   label="Mật khẩu"
                   type="password"
@@ -928,27 +1074,31 @@ export default function Employees() {
                     setFormState((current) => ({ ...current, password: value }))
                   }
                   fullWidth
+                  disabled={isSubmittingForm}
                 />
-              ) : (
-                <div className="border-outline/20 text-secondary rounded-xl border border-dashed bg-slate-50 p-4 text-sm md:col-span-2">
-                  Giao diện cập nhật tài khoản đã sẵn sàng. Khi kết nối API, nút
-                  lưu sẽ cập nhật dữ liệu thật.
-                </div>
               )}
             </div>
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex shrink-0 justify-end gap-3 border-t border-slate-100 pt-4">
               <button
                 type="button"
                 onClick={closeModal}
-                className="border-outline/20 text-secondary rounded-lg border px-5 py-3 font-semibold transition-all hover:bg-slate-50"
+                disabled={isSubmittingForm}
+                className="border-outline/20 text-secondary rounded-lg border px-5 py-3 font-semibold transition-all hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Hủy
               </button>
               <button
                 type="submit"
-                className="from-primary to-primary/80 text-on-primary hover:from-primary/90 hover:to-primary rounded-lg bg-linear-to-r px-5 py-3 font-semibold transition-all"
+                disabled={isSubmittingForm}
+                className="from-primary to-primary/80 text-on-primary hover:from-primary/90 hover:to-primary flex items-center gap-2 rounded-lg bg-linear-to-r px-5 py-3 font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50"
               >
+                {isSubmittingForm && (
+                  <div className="relative h-4 w-4">
+                    <div className="border-on-primary/30 absolute inset-0 rounded-full border-2"></div>
+                    <div className="border-on-primary absolute inset-0 animate-spin rounded-full border-2 border-t-transparent"></div>
+                  </div>
+                )}
                 {formMode === "create" ? "Tạo tài khoản" : "Lưu thay đổi"}
               </button>
             </div>
@@ -976,12 +1126,16 @@ function InputField({
   onChange,
   type = "text",
   fullWidth = false,
+  disabled = false,
+  placeholder = "",
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
   fullWidth?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
 }) {
   return (
     <label className={fullWidth ? "md:col-span-2" : ""}>
@@ -992,7 +1146,9 @@ function InputField({
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="border-outline/20 focus:border-primary focus:ring-primary/20 w-full rounded-lg border bg-white px-4 py-3 transition-all outline-none focus:ring-2"
+        disabled={disabled}
+        placeholder={placeholder}
+        className="border-outline/20 focus:border-primary focus:ring-primary/20 w-full rounded-lg border bg-white px-4 py-3 text-sm transition-all outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
       />
     </label>
   );
@@ -1004,12 +1160,14 @@ function SelectField({
   onChange,
   options,
   optionLabels,
+  disabled = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   options: string[];
   optionLabels: string[];
+  disabled?: boolean;
 }) {
   return (
     <label>
@@ -1019,7 +1177,8 @@ function SelectField({
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="border-outline/20 focus:border-primary focus:ring-primary/20 w-full rounded-lg border bg-white px-4 py-3 transition-all outline-none focus:ring-2"
+        disabled={disabled}
+        className="border-outline/20 focus:border-primary focus:ring-primary/20 w-full rounded-lg border bg-white px-4 py-3 text-sm transition-all outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {options.map((option, index) => (
           <option key={option || index} value={option}>
