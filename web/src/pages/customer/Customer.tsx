@@ -6,6 +6,7 @@ import {
   type UserResponse,
 } from "@/api/customerApi";
 import { isAdmin } from "@/utils/auth";
+import { formatDate, getGenderLabel, getInitials } from "@/utils/customerUtils";
 
 const PAGE_SIZE = 10;
 
@@ -20,34 +21,8 @@ const SKELETON_COL_KEYS = [
   "sk-c-5",
 ];
 
-function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return d.toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(-2)
-    .map((w) => w[0].toUpperCase())
-    .join("");
-}
-
 function isDisabled(user: UserResponse): boolean {
   return !!user.disabledAt;
-}
-
-// ── FIX R325: Extract nested ternary (gender) into independent function ──
-function getGenderLabel(gender: string | null | undefined): string {
-  if (gender === "MALE") return "Nam";
-  if (gender === "FEMALE") return "Nữ";
-  return "—";
 }
 
 // ── FIX R389: Extract nested ternary (toggle button class) into independent function ──
