@@ -129,7 +129,7 @@ function validateAccountForm(
   formState: AccountFormState,
   formMode: FormMode,
 ): string | null {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z0-9-]{2,6}$/;
   const phoneRegex = /^(0[35789])+(\d{8})$/;
 
   if (!formState.name.trim()) {
