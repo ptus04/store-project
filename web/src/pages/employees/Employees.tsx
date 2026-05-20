@@ -115,6 +115,10 @@ export default function Employees() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("ALL");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [statusSort, setStatusSort] = useState<
+    "NONE" | "ACTIVE_FIRST" | "DISABLED_FIRST"
+  >("NONE");
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
     null,
   );
@@ -195,6 +199,64 @@ export default function Employees() {
     [employees],
   );
   const disabledCount = employees.length - activeCount;
+
+  // Filter employees by search term (name, phone, email)
+  const filteredEmployees = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return employees;
+
+    const normalizedQ = q.replace(/\s+/g, "");
+
+    return employees.filter((employee) => {
+      const name = (employee.name || "").toLowerCase();
+      const phone = (employee.phone || "").toLowerCase().replace(/\s+/g, "");
+      const email = (employee.email || "").toLowerCase();
+
+      const matchesName = name.includes(q);
+      const matchesPhone = phone.includes(normalizedQ);
+      const matchesEmail = email.includes(q);
+
+      return matchesName || matchesPhone || matchesEmail;
+    });
+  }, [employees, searchTerm]);
+
+  const hasNoResults =
+    !loading &&
+    filteredEmployees.length === 0 &&
+    employees.length > 0 &&
+    !error;
+  const hasFooter = !loading && employees.length > 0;
+
+  function handleRoleFilterChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    setRoleFilter(e.target.value as RoleFilter);
+  }
+
+  function handleStatusSortChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    setStatusSort(e.target.value as "NONE" | "ACTIVE_FIRST" | "DISABLED_FIRST");
+  }
+
+  const sortedEmployees = useMemo(() => {
+    if (statusSort === "NONE") return filteredEmployees;
+
+    return [...filteredEmployees].sort((a, b) => {
+      const aDisabled = Boolean(a.disabledAt);
+      const bDisabled = Boolean(b.disabledAt);
+
+      if (aDisabled === bDisabled) {
+        // Keep stable order - fallback to name
+        return a.name.localeCompare(b.name);
+      }
+
+      if (statusSort === "ACTIVE_FIRST") {
+        return aDisabled ? 1 : -1;
+      }
+
+      // DISABLED_FIRST
+      return aDisabled ? -1 : 1;
+    });
+  }, [filteredEmployees, statusSort]);
+
+  const hasTable = !loading && sortedEmployees.length > 0;
 
   function openCreateModal(role: AccountRole) {
     setFormMode("create");
@@ -285,7 +347,7 @@ export default function Employees() {
       (currentUser.id && targetEmployee.id === currentUser.id) ||
       (currentUser.phone && targetEmployee.phone === currentUser.phone);
 
-    // Admin có thể vô hiệu hóa bất kỳ tài khoản nào trừ chính mình
+    // Admin mới có quyền vô hiệu hóa và không được tự khóa chính mình
     const canToggle = isCurrentUserAdmin && !isSelfAccount;
 
     if (!canToggle) return;
@@ -306,7 +368,7 @@ export default function Employees() {
       });
 
       if (!response.ok) {
-        setError("Không thể cập nhật trạng thái tài khoản của chính mình");
+        setError("Không thể cập nhật trạng thái tài khoản");
         return;
       }
 
@@ -354,39 +416,68 @@ export default function Employees() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="group relative">
-                <select
-                  value={roleFilter}
-                  onChange={(e) => setRoleFilter(e.target.value as RoleFilter)}
-                  className="border-primary/30 text-body-base text-on-surface hover:border-primary focus:border-primary focus:ring-primary/30 appearance-none rounded-lg border-2 bg-white px-4 py-3 pr-10 shadow-md transition-all outline-none focus:ring-2"
-                >
-                  <option value="ALL">Tất cả tài khoản</option>
-                  <option value="ADMIN">Quản trị viên</option>
-                  <option value="EMPLOYEE">Nhân viên</option>
-                </select>
-                <span className="material-symbols-outlined text-secondary pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
-                  expand_more
-                </span>
+            <div className="flex w-full flex-col gap-3">
+              <div className="flex w-full flex-wrap items-center gap-3">
+                <div className="group relative">
+                  <select
+                    value={roleFilter}
+                    onChange={handleRoleFilterChange}
+                    className="border-outline/20 focus:border-primary focus:ring-primary/20 appearance-none rounded-lg border bg-white px-4 py-3 pr-10 shadow-md transition-all outline-none"
+                  >
+                    <option value="ALL">Tất cả tài khoản</option>
+                    <option value="ADMIN">Quản trị viên</option>
+                    <option value="EMPLOYEE">Nhân viên</option>
+                  </select>
+                  <span className="material-symbols-outlined text-secondary pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
+                    expand_more
+                  </span>
+                </div>
+
+                {/* Status sort select */}
+                <div className="group relative">
+                  <select
+                    value={statusSort}
+                    onChange={handleStatusSortChange}
+                    className="border-outline/20 focus:border-primary focus:ring-primary/20 appearance-none rounded-lg border bg-white px-4 py-3 pr-10 shadow-md transition-all outline-none"
+                  >
+                    <option value="NONE">Không sắp xếp</option>
+                    <option value="ACTIVE_FIRST">Hoạt động trước</option>
+                    <option value="DISABLED_FIRST">Đã vô hiệu trước</option>
+                  </select>
+                  <span className="material-symbols-outlined text-secondary pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
+                    expand_more
+                  </span>
+                </div>
+
+                {/* Search input: name / phone / email */}
+                <div className="relative min-w-[260px] flex-1">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Tìm theo tên, SĐT hoặc email"
+                    className="border-outline/20 focus:border-primary focus:ring-primary/20 w-full rounded-lg border bg-white px-4 py-3 pr-10 shadow-md transition-all outline-none"
+                  />
+                  <span className="material-symbols-outlined text-secondary pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
+                    search
+                  </span>
+                </div>
+
+                {isCurrentUserAdmin && (
+                  <div className="ml-auto shrink-0">
+                    <button
+                      onClick={() => openCreateModal("EMPLOYEE")}
+                      className="from-primary to-primary/80 text-on-primary hover:from-primary/90 hover:to-primary flex items-center gap-2 rounded-lg bg-linear-to-r px-4 py-2 font-semibold shadow-md transition-all hover:shadow-lg active:scale-95"
+                      title="Tạo tài khoản"
+                    >
+                      <span className="material-symbols-outlined">
+                        person_add
+                      </span>
+                      {/*Tạo tài khoản*/}
+                    </button>
+                  </div>
+                )}
               </div>
-
-              <button
-                onClick={() => openCreateModal("EMPLOYEE")}
-                className="from-primary to-primary/80 text-on-primary hover:from-primary/90 hover:to-primary flex items-center gap-2 rounded-lg bg-linear-to-r px-5 py-3 font-semibold shadow-md transition-all hover:shadow-lg active:scale-95"
-              >
-                <span className="material-symbols-outlined">person_add</span>
-                Tạo nhân viên
-              </button>
-
-              <button
-                onClick={() => openCreateModal("ADMIN")}
-                className="border-primary/30 text-primary hover:bg-primary/5 flex items-center gap-2 rounded-lg border bg-white px-5 py-3 font-semibold shadow-md transition-all hover:shadow-lg active:scale-95"
-              >
-                <span className="material-symbols-outlined">
-                  admin_panel_settings
-                </span>
-                Tạo admin
-              </button>
             </div>
           </div>
 
@@ -442,7 +533,7 @@ export default function Employees() {
             </div>
           )}
 
-          {!loading && employees.length === 0 && !error && (
+          {hasNoResults && (
             <div className="flex h-80 flex-col items-center justify-center gap-4">
               <div className="bg-primary/10 rounded-full p-6">
                 <span className="material-symbols-outlined text-primary text-5xl">
@@ -451,16 +542,16 @@ export default function Employees() {
               </div>
               <div className="text-center">
                 <p className="text-secondary text-lg font-medium">
-                  Chưa có tài khoản nào
+                  Không tìm thấy kết quả
                 </p>
                 <p className="text-secondary/60 mt-1 text-sm">
-                  Hãy tạo tài khoản nhân viên hoặc quản trị viên mới
+                  Không có tài khoản nào phù hợp với từ khóa tìm kiếm
                 </p>
               </div>
             </div>
           )}
 
-          {!loading && employees.length > 0 && (
+          {hasTable && (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -486,7 +577,7 @@ export default function Employees() {
                   </tr>
                 </thead>
                 <tbody className="divide-outline/10 divide-y">
-                  {employees.map((employee) => {
+                  {sortedEmployees.map((employee) => {
                     const isDisabled = Boolean(employee.disabledAt);
                     const isUpdatingAccount = updatingAccountIds.has(
                       employee.id,
@@ -589,16 +680,18 @@ export default function Employees() {
                                   }`}
                                   title={toggleTitle}
                                 >
-                                  {isDisabled ? "Vô hiệu" : "Hoạt động"}
+                                  {isDisabled ? "Đã vô hiệu" : "Đang hoạt động"}
                                 </span>
                               )}
-                              <span
-                                className={`text-xs font-semibold ${isDisabled ? "text-rose-700" : "text-emerald-700"}`}
-                              >
-                                {isDisabled
-                                  ? "Đã vô hiệu hóa"
-                                  : "Đang hoạt động"}
-                              </span>
+                              {isCurrentUserAdmin && (
+                                <span
+                                  className={`text-xs font-semibold ${isDisabled ? "text-rose-700" : "text-emerald-700"}`}
+                                >
+                                  {isDisabled
+                                    ? "Đã vô hiệu hóa"
+                                    : "Đang hoạt động"}
+                                </span>
+                              )}
                             </div>
                             <span className="text-secondary text-xs">
                               Cập nhật: {formatDate(employee.updatedAt)}
@@ -616,15 +709,19 @@ export default function Employees() {
                                 visibility
                               </span>
                             </button>
-                            <button
-                              onClick={() => openEditModal(employee)}
-                              className="bg-primary/10 text-primary hover:bg-primary/20 rounded-lg p-2 transition-all hover:scale-110 active:scale-95"
-                              title="Cập nhật tài khoản"
-                            >
-                              <span className="material-symbols-outlined text-lg">
-                                edit
-                              </span>
-                            </button>
+
+                            {/* CHỈ ADMIN MỚI THẤY NÚT SỬA TÀI KHOẢN TRÊN DÒNG */}
+                            {isCurrentUserAdmin && (
+                              <button
+                                onClick={() => openEditModal(employee)}
+                                className="bg-primary/10 text-primary hover:bg-primary/20 rounded-lg p-2 transition-all hover:scale-110 active:scale-95"
+                                title="Cập nhật tài khoản"
+                              >
+                                <span className="material-symbols-outlined text-lg">
+                                  edit
+                                </span>
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -635,7 +732,7 @@ export default function Employees() {
             </div>
           )}
 
-          {!loading && employees.length > 0 && (
+          {hasFooter && (
             <div className="border-primary/20 from-primary/5 to-primary/10 flex items-center justify-between border-t-2 bg-linear-to-r px-6 py-4">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">
@@ -716,18 +813,21 @@ export default function Employees() {
             </div>
 
             <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  const employeeToEdit = selectedEmployee;
-                  closeDetail();
-                  if (employeeToEdit) {
-                    openEditModal(employeeToEdit);
-                  }
-                }}
-                className="bg-primary text-on-primary hover:bg-primary/90 rounded-lg px-5 py-3 font-semibold transition-all"
-              >
-                Cập nhật
-              </button>
+              {/* CHỈ ADMIN MỚI THẤY NÚT CẬP NHẬT TRONG CHI TIẾT */}
+              {isCurrentUserAdmin && (
+                <button
+                  onClick={() => {
+                    const employeeToEdit = selectedEmployee;
+                    closeDetail();
+                    if (employeeToEdit) {
+                      openEditModal(employeeToEdit);
+                    }
+                  }}
+                  className="bg-primary text-on-primary hover:bg-primary/90 rounded-lg px-5 py-3 font-semibold transition-all"
+                >
+                  Cập nhật
+                </button>
+              )}
               <button
                 onClick={closeDetail}
                 className="border-outline/20 text-secondary rounded-lg border px-5 py-3 font-semibold transition-all hover:bg-slate-50"
