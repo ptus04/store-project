@@ -110,11 +110,53 @@ function readCurrentUser(token: string | null) {
   };
 }
 
+const formatDate = (dateString: string) => {
+  if (!dateString) return "—";
+  return new Date(dateString).toLocaleDateString("vi-VN");
+};
+
+const formatDateTime = (dateString: string) => {
+  if (!dateString) return "—";
+  return new Date(dateString).toLocaleString("vi-VN");
+};
+
+const formatPhone = (phone: string) => {
+  if (!phone) return "—";
+  return phone.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
+};
+
+// --- TÁCH BIỆT LOGIC KIỂM TRA ĐỊNH DẠNG (FIX WARNING REGEX) ---
+function validateAccountForm(
+  formState: AccountFormState,
+  formMode: FormMode,
+): string | null {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Sửa lỗi: bỏ trùng lặp dấu gạch thẳng | và thay [0-9] thành \d gọn hơn theo chuẩn Sonar
+  const phoneRegex = /^(0[35789])+(\d{8})$/;
+
+  if (!formState.name.trim()) {
+    return "Vui lòng điền họ và tên.";
+  }
+  if (!formState.phone.trim()) {
+    return "Vui lòng nhập số điện thoại.";
+  }
+  if (!phoneRegex.test(formState.phone.trim())) {
+    return "Số điện thoại không đúng định dạng (Ví dụ hợp lệ: 0912345678).";
+  }
+  if (formState.email.trim() && !emailRegex.test(formState.email.trim())) {
+    return "Email không đúng định dạng (Ví dụ hợp lệ: NguyenVanA@gmail.com).";
+  }
+  if (formMode === "create" && !formState.password) {
+    return "Vui lòng nhập mật khẩu cho tài khoản mới.";
+  }
+  return null;
+}
+
 export default function Employees() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [modalError, setModalError] = useState(""); // Lỗi dành riêng cho Modal
+  const [modalError, setModalError] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("ALL");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [statusSort, setStatusSort] = useState<
@@ -170,39 +212,12 @@ export default function Employees() {
     }
   }
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "—";
-    return new Date(dateString).toLocaleDateString("vi-VN");
-  };
-
-  const formatDateTime = (dateString: string) => {
-    if (!dateString) return "—";
-    return new Date(dateString).toLocaleString("vi-VN");
-  };
-
-  const formatPhone = (phone: string) => {
-    if (!phone) return "—";
-    return phone.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
-  };
-
-  const getRoleLabel = (role: string) => {
-    return ROLE_LABELS[role] || role;
-  };
-
-  const getRoleBadgeColor = (role: string) => {
-    return (
-      ROLE_BADGE_COLORS[role] ||
-      "bg-gray-100 text-gray-800 border border-gray-300"
-    );
-  };
-
   const activeCount = useMemo(
     () => employees.filter((employee) => !employee.disabledAt).length,
     [employees],
   );
   const disabledCount = employees.length - activeCount;
 
-  // Filter employees by search term (name, phone, email)
   const filteredEmployees = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
     if (!q) return employees;
@@ -214,20 +229,11 @@ export default function Employees() {
       const phone = (employee.phone || "").toLowerCase().replace(/\s+/g, "");
       const email = (employee.email || "").toLowerCase();
 
-      const matchesName = name.includes(q);
-      const matchesPhone = phone.includes(normalizedQ);
-      const matchesEmail = email.includes(q);
-
-      return matchesName || matchesPhone || matchesEmail;
+      return (
+        name.includes(q) || phone.includes(normalizedQ) || email.includes(q)
+      );
     });
   }, [employees, searchTerm]);
-
-  const hasNoResults =
-    !loading &&
-    filteredEmployees.length === 0 &&
-    employees.length > 0 &&
-    !error;
-  const hasFooter = !loading && employees.length > 0;
 
   function handleRoleFilterChange(e: React.ChangeEvent<HTMLSelectElement>) {
     setRoleFilter(e.target.value as RoleFilter);
@@ -248,15 +254,20 @@ export default function Employees() {
         return a.name.localeCompare(b.name);
       }
 
-      if (statusSort === "ACTIVE_FIRST") {
-        return aDisabled ? 1 : -1;
-      }
-
-      return aDisabled ? -1 : 1;
+      return statusSort === "ACTIVE_FIRST"
+        ? aDisabled
+          ? 1
+          : -1
+        : aDisabled
+          ? -1
+          : 1;
     });
   }, [filteredEmployees, statusSort]);
 
+  const hasNoResults =
+    !loading && sortedEmployees.length === 0 && employees.length > 0 && !error;
   const hasTable = !loading && sortedEmployees.length > 0;
+  const hasFooter = !loading && employees.length > 0;
 
   function openCreateModal(role: AccountRole) {
     setFormMode("create");
@@ -297,170 +308,107 @@ export default function Employees() {
     setSelectedEmployee(null);
   }
 
+  // --- KIỂM TRA TRÙNG LẶP DỮ LIỆU ĐĂNG KÝ TRÊN CLIENT ---
+  function checkLocalDuplicates(): boolean {
+    const isPhoneTaken = employees.some(
+      (emp) =>
+        emp.phone === formState.phone.trim() &&
+        (formMode === "create" || emp.id !== selectedEmployee?.id),
+    );
+    if (isPhoneTaken) {
+      setModalError(
+        "Số điện thoại này đã được sử dụng bởi một tài khoản khác.",
+      );
+      return true;
+    }
+
+    if (formState.email.trim()) {
+      const isEmailTaken = employees.some(
+        (emp) =>
+          emp.email === formState.email.trim() &&
+          (formMode === "create" || emp.id !== selectedEmployee?.id),
+      );
+      if (isEmailTaken) {
+        setModalError(
+          "Địa chỉ email này đã được sử dụng bởi một tài khoản khác.",
+        );
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // --- XỬ LÝ PHẢN HỒI LỖI TỪ SERVER TRẢ VỀ ---
+  function handleServerError(serverMsg: string) {
+    const msgLower = serverMsg.toLowerCase();
+    if (msgLower.includes("phone") || msgLower.includes("số điện thoại")) {
+      setModalError("Số điện thoại này đã tồn tại trong hệ thống.");
+    } else if (msgLower.includes("email")) {
+      setModalError("Email không hợp lệ hoặc đã thuộc về tài khoản khác.");
+    } else {
+      setModalError(
+        serverMsg || "Có lỗi xảy ra. Vui lòng kiểm tra lại dữ liệu.",
+      );
+    }
+  }
+
+  // --- HÀM SUBMIT ĐÃ ĐƯỢC GIẢM TẢI ĐỘ PHỨC TẠP NHẬN THỨC ---
   async function handleFormSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     if (isSubmittingForm) return;
 
-    // --- BỘ VALIDATE CLIENT-SIDE ---
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/; // Định dạng số điện thoại Việt Nam 10 số
-
-    if (!formState.name.trim()) {
-      setModalError("Vui lòng điền họ và tên.");
+    const validationMessage = validateAccountForm(formState, formMode);
+    if (validationMessage) {
+      setModalError(validationMessage);
       return;
     }
 
-    if (!formState.phone.trim()) {
-      setModalError("Vui lòng nhập số điện thoại.");
-      return;
-    }
-
-    if (!phoneRegex.test(formState.phone.trim())) {
-      setModalError(
-        "Số điện thoại không đúng định dạng (Ví dụ hợp lệ: 0912345678).",
-      );
-      return;
-    }
-
-    if (formState.email.trim() && !emailRegex.test(formState.email.trim())) {
-      setModalError(
-        "Email không đúng định dạng (Ví dụ hợp lệ: NguyenVanA@gmail.com).",
-      );
-      return;
-    }
-
-    if (formMode === "create" && !formState.password) {
-      setModalError("Vui lòng nhập mật khẩu cho tài khoản mới.");
-      return;
-    }
-    // ---------------------------------
+    if (checkLocalDuplicates()) return;
 
     try {
       setIsSubmittingForm(true);
       setModalError("");
 
-      // Kiểm tra trùng SĐT / Email trực tiếp với list state hiện tại ở client để chặn sớm nếu cần
-      const isPhoneTaken = employees.some(
-        (emp) =>
-          emp.phone === formState.phone.trim() &&
-          (formMode === "create" || emp.id !== selectedEmployee?.id),
+      const isCreate = formMode === "create";
+      const url = isCreate
+        ? `${API_URL}/api/employees`
+        : `${API_URL}/api/employees/${selectedEmployee?.id}`;
+
+      const method = isCreate ? "POST" : "PATCH";
+      const bodyData = {
+        name: formState.name,
+        phone: formState.phone,
+        email: formState.email || null,
+        role: formState.role,
+        gender: formState.gender || null,
+        birthDate: formState.birthDate || null,
+        ...(isCreate && { password: formState.password }),
+      };
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(bodyData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        handleServerError(errorData.message || "");
+        return;
+      }
+
+      const savedEmployee: Employee = await response.json();
+      setEmployees((current) =>
+        isCreate
+          ? [savedEmployee, ...current]
+          : current.map((emp) =>
+              emp.id === savedEmployee.id ? savedEmployee : emp,
+            ),
       );
-      if (isPhoneTaken) {
-        setModalError(
-          "Số điện thoại này đã được sử dụng bởi một tài khoản khác.",
-        );
-        setIsSubmittingForm(false);
-        return;
-      }
-
-      if (formState.email.trim()) {
-        const isEmailTaken = employees.some(
-          (emp) =>
-            emp.email === formState.email.trim() &&
-            (formMode === "create" || emp.id !== selectedEmployee?.id),
-        );
-        if (isEmailTaken) {
-          setModalError(
-            "Địa chỉ email này đã được sử dụng bởi một tài khoản khác.",
-          );
-          setIsSubmittingForm(false);
-          return;
-        }
-      }
-
-      if (formMode === "create") {
-        const response = await fetch(`${API_URL}/api/employees`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: formState.name,
-            phone: formState.phone,
-            email: formState.email || null,
-            password: formState.password,
-            role: formState.role,
-            gender: formState.gender || null,
-            birthDate: formState.birthDate || null,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          // Bắt mã lỗi/message từ server trả về nếu trùng hoặc sai định dạng
-          const serverMsg = errorData.message || "";
-          if (
-            serverMsg.toLowerCase().includes("phone") ||
-            serverMsg.toLowerCase().includes("số điện thoại")
-          ) {
-            setModalError("Số điện thoại này đã được sử dụng.");
-          } else if (serverMsg.toLowerCase().includes("email")) {
-            setModalError("Email không đúng định dạng hoặc đã tồn tại.");
-          } else {
-            setModalError(
-              serverMsg ||
-                "Không thể tạo tài khoản. Vui lòng kiểm tra lại dữ liệu.",
-            );
-          }
-          return;
-        }
-
-        const newEmployee: Employee = await response.json();
-        setEmployees((current) => [newEmployee, ...current]);
-        closeModal();
-        return;
-      }
-
-      if (selectedEmployee) {
-        const response = await fetch(
-          `${API_URL}/api/employees/${selectedEmployee.id}`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              name: formState.name,
-              phone: formState.phone,
-              email: formState.email || null,
-              role: formState.role,
-              gender: formState.gender || null,
-              birthDate: formState.birthDate || null,
-            }),
-          },
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          const serverMsg = errorData.message || "";
-          if (
-            serverMsg.toLowerCase().includes("phone") ||
-            serverMsg.toLowerCase().includes("số điện thoại")
-          ) {
-            setModalError("Số điện thoại này đã tồn tại trong hệ thống.");
-          } else if (serverMsg.toLowerCase().includes("email")) {
-            setModalError(
-              "Email không hợp lệ hoặc đã thuộc về tài khoản khác.",
-            );
-          } else {
-            setModalError(
-              serverMsg || "Không thể cập nhật tài khoản. Vui lòng thử lại.",
-            );
-          }
-          return;
-        }
-
-        const updatedEmployee: Employee = await response.json();
-        setEmployees((current) =>
-          current.map((employee) =>
-            employee.id === updatedEmployee.id ? updatedEmployee : employee,
-          ),
-        );
-        closeModal();
-      }
+      closeModal();
     } catch (err) {
       console.error("Error submitting form:", err);
       setModalError("Có lỗi kết nối mạng xảy ra. Vui lòng thử lại.");
@@ -477,9 +425,7 @@ export default function Employees() {
       (currentUser.id && targetEmployee.id === currentUser.id) ||
       (currentUser.phone && targetEmployee.phone === currentUser.phone);
 
-    const canToggle = isCurrentUserAdmin && !isSelfAccount;
-
-    if (!canToggle) return;
+    if (!isCurrentUserAdmin || isSelfAccount) return;
 
     const isCurrentlyDisabled = targetEmployee.disabledAt !== null;
     const disabledAt = isCurrentlyDisabled ? null : new Date().toISOString();
@@ -677,184 +623,17 @@ export default function Employees() {
             </div>
           )}
 
+          {/* SỬ DỤNG TABLE COMPONENT ĐÃ ĐƯỢC TÁCH RIÊNG ĐỂ GIẢM ĐỘ PHỨC TẠP NHẬN THỨC CỦA FILE */}
           {hasTable && (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-primary/20 from-primary/5 to-primary/10 border-b-2 bg-linear-to-r">
-                    <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
-                      Họ Tên
-                    </th>
-                    <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
-                      Số Điện Thoại
-                    </th>
-                    <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
-                      Email
-                    </th>
-                    <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
-                      Vai Trò
-                    </th>
-                    <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
-                      Trạng thái
-                    </th>
-                    <th className="text-secondary px-6 py-4 text-center text-sm font-bold tracking-wide uppercase">
-                      Thao tác
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-outline/10 divide-y">
-                  {sortedEmployees.map((employee) => {
-                    const isDisabled = Boolean(employee.disabledAt);
-                    const isUpdatingAccount = updatingAccountIds.has(
-                      employee.id,
-                    );
-                    const isSelfAccount =
-                      (currentUser.id && employee.id === currentUser.id) ||
-                      (currentUser.phone &&
-                        employee.phone === currentUser.phone);
-                    const canToggleAccount =
-                      isCurrentUserAdmin &&
-                      !isSelfAccount &&
-                      !isUpdatingAccount;
-                    const toggleTitle = !isCurrentUserAdmin
-                      ? "Nhân viên không có quyền vô hiệu hóa tài khoản"
-                      : isUpdatingAccount
-                        ? "Đang cập nhật trạng thái tài khoản"
-                        : isSelfAccount
-                          ? "Không thể tự vô hiệu hóa tài khoản của chính mình"
-                          : isDisabled
-                            ? "Kích hoạt tài khoản"
-                            : "Vô hiệu hóa tài khoản";
-
-                    return (
-                      <tr
-                        key={employee.id}
-                        className={`group hover:bg-primary/5 transition-colors duration-300 ${
-                          isDisabled ? "bg-slate-50/80 opacity-75" : ""
-                        }`}
-                      >
-                        <td className="text-on-surface px-6 py-4 text-sm font-semibold">
-                          <div className="flex items-center gap-3">
-                            <div className="from-primary/30 to-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br">
-                              <span className="text-primary text-xs font-bold">
-                                {employee.name.charAt(0).toUpperCase()}
-                              </span>
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span>{employee.name}</span>
-                              </div>
-                              <p className="text-secondary mt-1 text-xs">
-                                {employee.id}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="text-on-surface-variant px-6 py-4 text-sm">
-                          {formatPhone(employee.phone)}
-                        </td>
-                        <td className="text-on-surface-variant px-6 py-4 text-sm">
-                          {employee.email || "—"}
-                        </td>
-                        <td className="px-6 py-4 text-sm">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`inline-block rounded-full px-3 py-1 text-xs font-bold whitespace-nowrap ${getRoleBadgeColor(
-                                employee.role,
-                              )}`}
-                            >
-                              {getRoleLabel(employee.role)}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm">
-                          <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2">
-                              {isCurrentUserAdmin ? (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    void toggleDisableAccount(employee)
-                                  }
-                                  disabled={!canToggleAccount}
-                                  className={`focus:ring-primary/30 relative inline-flex h-6 w-11 items-center rounded-full border transition-all focus:ring-2 focus:outline-none ${
-                                    isDisabled
-                                      ? "border-rose-300 bg-rose-500"
-                                      : "border-emerald-300 bg-emerald-500"
-                                  } ${
-                                    canToggleAccount
-                                      ? "cursor-pointer"
-                                      : "cursor-not-allowed opacity-50"
-                                  }`}
-                                  aria-pressed={isDisabled}
-                                  title={toggleTitle}
-                                >
-                                  <span
-                                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
-                                      isDisabled
-                                        ? "translate-x-1"
-                                        : "translate-x-5"
-                                    }`}
-                                  />
-                                </button>
-                              ) : (
-                                <span
-                                  className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                                    isDisabled
-                                      ? "bg-rose-100 text-rose-700"
-                                      : "bg-emerald-100 text-emerald-700"
-                                  }`}
-                                  title={toggleTitle}
-                                >
-                                  {isDisabled ? "Đã vô hiệu" : "Đang hoạt động"}
-                                </span>
-                              )}
-                              {isCurrentUserAdmin && (
-                                <span
-                                  className={`text-xs font-semibold ${isDisabled ? "text-rose-700" : "text-emerald-700"}`}
-                                >
-                                  {isDisabled
-                                    ? "Đã vô hiệu hóa"
-                                    : "Đang hoạt động"}
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-secondary text-xs">
-                              Cập nhật: {formatDate(employee.updatedAt)}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <div className="flex justify-center gap-2 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
-                            <button
-                              onClick={() => openDetailModal(employee)}
-                              className="rounded-lg bg-slate-100 p-2 text-slate-700 transition-all hover:scale-110 hover:bg-slate-200 active:scale-95"
-                              title="Xem chi tiết"
-                            >
-                              <span className="material-symbols-outlined text-lg">
-                                visibility
-                              </span>
-                            </button>
-
-                            {isCurrentUserAdmin && (
-                              <button
-                                onClick={() => openEditModal(employee)}
-                                className="bg-primary/10 text-primary hover:bg-primary/20 rounded-lg p-2 transition-all hover:scale-110 active:scale-95"
-                                title="Cập nhật tài khoản"
-                              >
-                                <span className="material-symbols-outlined text-lg">
-                                  edit
-                                </span>
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <EmployeeTable
+              sortedEmployees={sortedEmployees}
+              updatingAccountIds={updatingAccountIds}
+              currentUser={currentUser}
+              isCurrentUserAdmin={isCurrentUserAdmin}
+              toggleDisableAccount={toggleDisableAccount}
+              openDetailModal={openDetailModal}
+              openEditModal={openEditModal}
+            />
           )}
 
           {hasFooter && (
@@ -900,7 +679,9 @@ export default function Employees() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <DetailItem
                 label="Vai trò"
-                value={getRoleLabel(selectedEmployee.role)}
+                value={
+                  ROLE_LABELS[selectedEmployee.role] || selectedEmployee.role
+                }
               />
               <DetailItem
                 label="Trạng thái"
@@ -992,7 +773,6 @@ export default function Employees() {
               </button>
             </div>
 
-            {/* Vùng hiển thị thông báo lỗi ngay dưới Header của Modal */}
             {modalError && (
               <div className="animate-fadeIn mb-4 flex shrink-0 items-start gap-3 rounded-lg border-2 border-red-300 bg-red-50 p-3">
                 <span className="material-symbols-outlined shrink-0 text-xl text-red-600">
@@ -1005,7 +785,6 @@ export default function Employees() {
               </div>
             )}
 
-            {/* Vùng điền thông tin cuộn được nếu màn hình nhỏ */}
             <div className="grid grid-cols-1 gap-4 overflow-y-auto py-1 pr-1 md:grid-cols-2">
               <InputField
                 label="Họ tên"
@@ -1105,6 +884,172 @@ export default function Employees() {
           </form>
         </div>
       )}
+    </div>
+  );
+}
+
+// --- COMPONENT CON TÁCH BIỆT: BẢNG DANH SÁCH NHÂN VIÊN ---
+interface EmployeeTableProps {
+  sortedEmployees: Employee[];
+  updatingAccountIds: Set<string>;
+  currentUser: { id: string; role: string; phone: string };
+  isCurrentUserAdmin: boolean;
+  toggleDisableAccount: (employee: Employee) => Promise<void>;
+  openDetailModal: (employee: Employee) => void;
+  openEditModal: (employee: Employee) => void;
+}
+
+function EmployeeTable({
+  sortedEmployees,
+  updatingAccountIds,
+  currentUser,
+  isCurrentUserAdmin,
+  toggleDisableAccount,
+  openDetailModal,
+  openEditModal,
+}: EmployeeTableProps) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full">
+        <thead>
+          <tr className="border-primary/20 from-primary/5 to-primary/10 border-b-2 bg-linear-to-r">
+            <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
+              Họ Tên
+            </th>
+            <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
+              Số Điện Thoại
+            </th>
+            <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
+              Email
+            </th>
+            <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
+              Vai Trò
+            </th>
+            <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
+              Trạng thái
+            </th>
+            <th className="text-secondary px-6 py-4 text-center text-sm font-bold tracking-wide uppercase">
+              Thao tác
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-outline/10 divide-y">
+          {sortedEmployees.map((employee) => {
+            const isDisabled = Boolean(employee.disabledAt);
+            const isUpdating = updatingAccountIds.has(employee.id);
+            const isSelf =
+              (currentUser.id && employee.id === currentUser.id) ||
+              (currentUser.phone && employee.phone === currentUser.phone);
+            const canToggle = isCurrentUserAdmin && !isSelf && !isUpdating;
+
+            let toggleTitle = "Vô hiệu hóa tài khoản";
+            if (!isCurrentUserAdmin)
+              toggleTitle = "Nhân viên không có quyền vô hiệu hóa tài khoản";
+            else if (isUpdating)
+              toggleTitle = "Đang cập nhật trạng thái tài khoản";
+            else if (isSelf)
+              toggleTitle = "Không thể tự vô hiệu hóa tài khoản của chính mình";
+            else if (isDisabled) toggleTitle = "Kích hoạt tài khoản";
+
+            return (
+              <tr
+                key={employee.id}
+                className={`group hover:bg-primary/5 transition-colors duration-300 ${isDisabled ? "bg-slate-50/80 opacity-75" : ""}`}
+              >
+                <td className="text-on-surface px-6 py-4 text-sm font-semibold">
+                  <div className="flex items-center gap-3">
+                    <div className="from-primary/30 to-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br">
+                      <span className="text-primary text-xs font-bold">
+                        {employee.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span>{employee.name}</span>
+                      </div>
+                      <p className="text-secondary mt-1 text-xs">
+                        {employee.id}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td className="text-on-surface-variant px-6 py-4 text-sm">
+                  {formatPhone(employee.phone)}
+                </td>
+                <td className="text-on-surface-variant px-6 py-4 text-sm">
+                  {employee.email || "—"}
+                </td>
+                <td className="px-6 py-4 text-sm">
+                  <span
+                    className={`inline-block rounded-full px-3 py-1 text-xs font-bold whitespace-nowrap ${ROLE_BADGE_COLORS[employee.role] || "border bg-gray-100 text-gray-800"}`}
+                  >
+                    {ROLE_LABELS[employee.role] || employee.role}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-sm">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      {isCurrentUserAdmin ? (
+                        <button
+                          type="button"
+                          onClick={() => void toggleDisableAccount(employee)}
+                          disabled={!canToggle}
+                          className={`focus:ring-primary/30 relative inline-flex h-6 w-11 items-center rounded-full border transition-all focus:ring-2 focus:outline-none ${isDisabled ? "border-rose-300 bg-rose-500" : "border-emerald-300 bg-emerald-500"} ${canToggle ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}
+                          title={toggleTitle}
+                        >
+                          <span
+                            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${isDisabled ? "translate-x-1" : "translate-x-5"}`}
+                          />
+                        </button>
+                      ) : (
+                        <span
+                          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${isDisabled ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}
+                        >
+                          {isDisabled ? "Đã vô hiệu" : "Đang hoạt động"}
+                        </span>
+                      )}
+                      {isCurrentUserAdmin && (
+                        <span
+                          className={`text-xs font-semibold ${isDisabled ? "text-rose-700" : "text-emerald-700"}`}
+                        >
+                          {isDisabled ? "Đã vô hiệu hóa" : "Đang hoạt động"}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-secondary text-xs">
+                      Cập nhật: {formatDate(employee.updatedAt)}
+                    </span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <div className="flex justify-center gap-2 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+                    <button
+                      onClick={() => openDetailModal(employee)}
+                      className="rounded-lg bg-slate-100 p-2 text-slate-700 transition-all hover:scale-110 hover:bg-slate-200 active:scale-95"
+                      title="Xem chi tiết"
+                    >
+                      <span className="material-symbols-outlined text-lg">
+                        visibility
+                      </span>
+                    </button>
+                    {isCurrentUserAdmin && (
+                      <button
+                        onClick={() => openEditModal(employee)}
+                        className="bg-primary/10 text-primary hover:bg-primary/20 rounded-lg p-2 transition-all hover:scale-110 active:scale-95"
+                        title="Cập nhật tài khoản"
+                      >
+                        <span className="material-symbols-outlined text-lg">
+                          edit
+                        </span>
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
