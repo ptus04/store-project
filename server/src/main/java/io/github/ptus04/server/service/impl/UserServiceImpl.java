@@ -41,15 +41,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateProfile(UUID id, UserProfileUpdateRequest request) {
         User user = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
 
-        if (StringUtils.hasText(request.phone()) && !request.phone().equals(user.getPhone())) {
-            userRepository.findByPhone(request.phone())
-                    .filter(existed -> !existed.getId().equals(id))
-                    .ifPresent(existed -> {
-                        throw new PhoneExistedException("Số điện thoại đang được sử dụng");
-                    });
-            user.setPhone(request.phone());
-            user.setPhoneVerifiedAt(null);
-        }
+        validateAndSetPhone(user, request.phone(), id);
 
         user.setName(request.name());
         user.setEmail(StringUtils.hasText(request.email()) ? request.email() : null);
@@ -99,20 +91,24 @@ public class UserServiceImpl implements UserService {
             throw new BusinessConstraintViolationException("Bạn không có quyền tạo tài khoản");
         }
 
-        // Kiểm tra số điện thoại đã tồn tại
         userRepository.findByPhone(request.phone()).ifPresent(existed -> {
             throw new PhoneExistedException("Số điện thoại đang được sử dụng");
         });
 
-        // Tạo user mới
         User newUser = new User();
-        newUser.setPhone(request.phone());
-        newUser.setName(request.name());
-        newUser.setEmail(StringUtils.hasText(request.email()) ? request.email() : null);
+        UserResponse mockResponse = new UserResponse(
+                null,
+                request.name(),
+                request.phone(),
+                StringUtils.hasText(request.email()) ? request.email() : null,
+                request.role(),
+                request.gender(),
+                request.birthDate(),
+                null, null, null, null, null
+        );
+        userMapper.partialUpdate(mockResponse, newUser);
+
         newUser.setPassword(passwordEncoder.encode(request.password()));
-        newUser.setRole(request.role());
-        newUser.setGender(request.gender());
-        newUser.setBirthDate(request.birthDate());
         newUser.setCreatedAt(Instant.now());
         newUser.setUpdatedAt(Instant.now());
         newUser.setDisabledAt(null);
@@ -130,22 +126,24 @@ public class UserServiceImpl implements UserService {
 
         User target = userRepository.findById(targetId).orElseThrow(EntityNotFoundException::new);
 
-        // Kiểm tra nếu thay đổi số điện thoại
-        if (StringUtils.hasText(request.phone()) && !request.phone().equals(target.getPhone())) {
-            userRepository.findByPhone(request.phone())
-                    .filter(existed -> !existed.getId().equals(targetId))
-                    .ifPresent(existed -> {
-                        throw new PhoneExistedException("Số điện thoại đang được sử dụng");
-                    });
-            target.setPhone(request.phone());
-            target.setPhoneVerifiedAt(null);
-        }
+        validateAndSetPhone(target, request.phone(), targetId);
 
-        target.setName(request.name());
-        target.setEmail(StringUtils.hasText(request.email()) ? request.email() : null);
-        target.setRole(request.role());
-        target.setGender(request.gender());
-        target.setBirthDate(request.birthDate());
+        UserResponse mockUpdateResponse = new UserResponse(
+                targetId,
+                request.name(),
+                request.phone(),
+                StringUtils.hasText(request.email()) ? request.email() : null,
+                request.role(),
+                request.gender(),
+                request.birthDate(),
+                target.getPhoneVerifiedAt(),
+                target.getEmailVerifiedAt(),
+                target.getCreatedAt(),
+                null,
+                target.getDisabledAt()
+        );
+
+        userMapper.partialUpdate(mockUpdateResponse, target);
         target.setUpdatedAt(Instant.now());
 
         User savedUser = userRepository.save(target);
@@ -173,9 +171,20 @@ public class UserServiceImpl implements UserService {
     public Page<UserResponse> searchCustomers(UserGenderEnum gender, String search, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         String keyword = StringUtils.hasText(search) ? search.trim() : null;
-        UserGenderEnum genderFilter = gender; // null = tất cả
+        UserGenderEnum genderFilter = gender;
         return userRepository.searchByRoleAndFilters(UserRoleEnum.CUSTOMER, genderFilter, keyword, pageable)
                 .map(userMapper::toUserResponse);
     }
-}
 
+    private void validateAndSetPhone(User user, String newPhone, UUID userId) {
+        if (StringUtils.hasText(newPhone) && !newPhone.equals(user.getPhone())) {
+            userRepository.findByPhone(newPhone)
+                    .filter(existed -> !existed.getId().equals(userId))
+                    .ifPresent(existed -> {
+                        throw new PhoneExistedException("Số điện thoại đang được sử dụng");
+                    });
+            user.setPhone(newPhone);
+            user.setPhoneVerifiedAt(null);
+        }
+    }
+}
