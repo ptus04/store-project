@@ -10,6 +10,7 @@ import io.github.ptus04.server.service.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -19,12 +20,26 @@ import java.util.UUID;
 @Service
 public class AzureStorageServiceImpl implements StorageService {
     private static final Duration SAS_EXPIRATION = Duration.ofMinutes(15);
-
+    private static final SecureRandom random = new SecureRandom();
     private final BlobServiceClient serviceClient;
+
+    private UUID generateV7() {
+        long timestamp = System.currentTimeMillis();
+        long msecs = timestamp & 0xFFFFFFFFFFFFL; // 48-bit timestamp
+
+        // High 64 bits: timestamp (48b) + version (4b) + rand_a (12b)
+        long mostSigBits = (msecs << 16) | (0x7L << 12) | (random.nextLong() & 0xFFFL);
+
+        // Low 64 bits: variant (2b) + rand_b (62b)
+        // 0x8... sets the variant to 2 (10xx)
+        long leastSigBits = (0x8000000000000000L) | (random.nextLong() & 0x3FFFFFFFFFFFFFFFL);
+
+        return new UUID(mostSigBits, leastSigBits);
+    }
 
     @Override
     public StorageSasResponse createBlobUploadUrl(String containerName) {
-        return createBlobUploadUrl(containerName, UUID.randomUUID().toString());
+        return createBlobUploadUrl(containerName, generateV7().toString());
     }
 
     @Override

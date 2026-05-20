@@ -86,4 +86,13 @@ public class Product {
     @OrderBy("id ASC")
     private Set<Category> categories = new LinkedHashSet<>();
 
+    /**
+     * Nếu SP có size thì tính tổng số lượng tồn kho từ các size, nếu không thì dùng số lượng tồn kho do người dùng nhập
+     */
+    public void recalculateProductInStock() {
+        if (!productSizes.isEmpty()) {
+            setInStock(productSizes.stream().mapToInt(ProductSize::getInStock).sum());
+        }
+    }
+
 }
