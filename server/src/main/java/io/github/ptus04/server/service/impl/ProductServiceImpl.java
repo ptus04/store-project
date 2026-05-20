@@ -109,7 +109,7 @@ public class ProductServiceImpl implements ProductService {
         List<UUID> categoryIds = productUpdateRequest.categoryIds();
         mapCategoryIdsToCategories(categoryIds, product);
 
-        if (productUpdateRequest.isRestore()) {
+        if (productUpdateRequest.isRestore() != null && productUpdateRequest.isRestore()) {
             product.setDeletedAt(null);
         }
 
@@ -147,7 +147,7 @@ public class ProductServiceImpl implements ProductService {
     @Cacheable(value = "new-products")
     @Transactional(readOnly = true)
     public List<ProductResponse> getNewProducts() {
-        return productRepository.findTop10ByOrderByCreatedAtDesc().stream()
+        return productRepository.findTop10ByDeletedAtIsNullOrderByCreatedAtDesc().stream()
                 .map(productMapper::toProductResponse)
                 .toList();
     }
