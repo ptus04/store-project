@@ -1,5 +1,7 @@
 package io.github.ptus04.server.service.impl;
 
+import io.github.ptus04.server.dto.request.EmployeeCreateRequest;
+import io.github.ptus04.server.dto.request.EmployeeUpdateRequest;
 import io.github.ptus04.server.dto.request.UserProfileUpdateRequest;
 import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.entity.User;
@@ -15,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -27,6 +30,7 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponse getUserById(UUID id) {
@@ -37,15 +41,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateProfile(UUID id, UserProfileUpdateRequest request) {
         User user = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
 
-        if (StringUtils.hasText(request.phone()) && !request.phone().equals(user.getPhone())) {
-            userRepository.findByPhone(request.phone())
-                    .filter(existed -> !existed.getId().equals(id))
-                    .ifPresent(existed -> {
-                        throw new PhoneExistedException("Số điện thoại đang được sử dụng");
-                    });
-            user.setPhone(request.phone());
-            user.setPhoneVerifiedAt(null);
-        }
+        validateAndSetPhone(user, request.phone(), id);
 
         user.setName(request.name());
         user.setEmail(StringUtils.hasText(request.email()) ? request.email() : null);
@@ -89,6 +85,72 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponse createEmployee(UUID actorId, EmployeeCreateRequest request) {
+        User actor = userRepository.findById(actorId).orElseThrow(EntityNotFoundException::new);
+        if (actor.getRole() != UserRoleEnum.ADMIN) {
+            throw new BusinessConstraintViolationException("Bạn không có quyền tạo tài khoản");
+        }
+
+        userRepository.findByPhone(request.phone()).ifPresent(existed -> {
+            throw new PhoneExistedException("Số điện thoại đang được sử dụng");
+        });
+
+        User newUser = new User();
+        UserResponse mockResponse = new UserResponse(
+                null,
+                request.name(),
+                request.phone(),
+                StringUtils.hasText(request.email()) ? request.email() : null,
+                request.role(),
+                request.gender(),
+                request.birthDate(),
+                null, null, null, null, null
+        );
+        userMapper.partialUpdate(mockResponse, newUser);
+
+        newUser.setPassword(passwordEncoder.encode(request.password()));
+        newUser.setCreatedAt(Instant.now());
+        newUser.setUpdatedAt(Instant.now());
+        newUser.setDisabledAt(null);
+
+        User savedUser = userRepository.save(newUser);
+        return userMapper.toUserResponse(savedUser);
+    }
+
+    @Override
+    public UserResponse updateEmployee(UUID actorId, UUID targetId, EmployeeUpdateRequest request) {
+        User actor = userRepository.findById(actorId).orElseThrow(EntityNotFoundException::new);
+        if (actor.getRole() != UserRoleEnum.ADMIN) {
+            throw new BusinessConstraintViolationException("Bạn không có quyền cập nhật tài khoản");
+        }
+
+        User target = userRepository.findById(targetId).orElseThrow(EntityNotFoundException::new);
+
+        validateAndSetPhone(target, request.phone(), targetId);
+
+        UserResponse mockUpdateResponse = new UserResponse(
+                targetId,
+                request.name(),
+                request.phone(),
+                StringUtils.hasText(request.email()) ? request.email() : null,
+                request.role(),
+                request.gender(),
+                request.birthDate(),
+                target.getPhoneVerifiedAt(),
+                target.getEmailVerifiedAt(),
+                target.getCreatedAt(),
+                null,
+                target.getDisabledAt()
+        );
+
+        userMapper.partialUpdate(mockUpdateResponse, target);
+        target.setUpdatedAt(Instant.now());
+
+        User savedUser = userRepository.save(target);
+        return userMapper.toUserResponse(savedUser);
+    }
+
+    @Override
     public UserResponse updateEmployeeAccountStatus(UUID actorId, UUID targetId, boolean disabled) {
         User actor = userRepository.findById(actorId).orElseThrow(EntityNotFoundException::new);
         if (actor.getRole() != UserRoleEnum.ADMIN) {
@@ -100,7 +162,6 @@ public class UserServiceImpl implements UserService {
             throw new BusinessConstraintViolationException("Không thể tự vô hiệu hóa tài khoản của chính mình");
         }
 
-
         target.setDisabledAt(disabled ? Instant.now() : null);
         User savedUser = userRepository.save(target);
         return userMapper.toUserResponse(savedUser);
@@ -110,9 +171,20 @@ public class UserServiceImpl implements UserService {
     public Page<UserResponse> searchCustomers(UserGenderEnum gender, String search, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         String keyword = StringUtils.hasText(search) ? search.trim() : null;
-        UserGenderEnum genderFilter = gender; // null = tất cả
+        UserGenderEnum genderFilter = gender;
         return userRepository.searchByRoleAndFilters(UserRoleEnum.CUSTOMER, genderFilter, keyword, pageable)
                 .map(userMapper::toUserResponse);
     }
-}
 
+    private void validateAndSetPhone(User user, String newPhone, UUID userId) {
+        if (StringUtils.hasText(newPhone) && !newPhone.equals(user.getPhone())) {
+            userRepository.findByPhone(newPhone)
+                    .filter(existed -> !existed.getId().equals(userId))
+                    .ifPresent(existed -> {
+                        throw new PhoneExistedException("Số điện thoại đang được sử dụng");
+                    });
+            user.setPhone(newPhone);
+            user.setPhoneVerifiedAt(null);
+        }
+    }
+}
