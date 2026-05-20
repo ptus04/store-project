@@ -1,10 +1,7 @@
 package io.github.ptus04.server.service;
 
-import io.github.ptus04.server.dto.request.EmployeeCreateRequest;
-import io.github.ptus04.server.dto.request.EmployeeUpdateRequest;
 import io.github.ptus04.server.dto.request.UserProfileUpdateRequest;
 import io.github.ptus04.server.dto.response.UserResponse;
-import io.github.ptus04.server.enums.UserGenderEnum;
 import io.github.ptus04.server.enums.UserRoleEnum;
 import org.springframework.data.domain.Page;
 
@@ -31,4 +28,7 @@ public interface UserService {
     UserResponse createEmployee(UUID actorId, EmployeeCreateRequest request);
 
     UserResponse updateEmployee(UUID actorId, UUID targetId, EmployeeUpdateRequest request);
+
+    Page<UserResponse> searchCustomers(UserGenderEnum gender, String search, int page, int size);
+
 }

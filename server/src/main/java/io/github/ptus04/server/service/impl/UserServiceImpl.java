@@ -5,6 +5,7 @@ import io.github.ptus04.server.dto.request.EmployeeUpdateRequest;
 import io.github.ptus04.server.dto.request.UserProfileUpdateRequest;
 import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.entity.User;
+import io.github.ptus04.server.enums.UserGenderEnum;
 import io.github.ptus04.server.enums.UserRoleEnum;
 import io.github.ptus04.server.exception.BusinessConstraintViolationException;
 import io.github.ptus04.server.exception.PhoneExistedException;
@@ -166,6 +167,15 @@ public class UserServiceImpl implements UserService {
         target.setDisabledAt(disabled ? Instant.now() : null);
         User savedUser = userRepository.save(target);
         return userMapper.toUserResponse(savedUser);
+    }
+
+    @Override
+    public Page<UserResponse> searchCustomers(UserGenderEnum gender, String search, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        String keyword = StringUtils.hasText(search) ? search.trim() : null;
+        UserGenderEnum genderFilter = gender; // null = tất cả
+        return userRepository.searchByRoleAndFilters(UserRoleEnum.CUSTOMER, genderFilter, keyword, pageable)
+                .map(userMapper::toUserResponse);
     }
 }
 
