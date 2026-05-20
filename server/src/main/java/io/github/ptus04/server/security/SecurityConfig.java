@@ -46,6 +46,7 @@ public class SecurityConfig {
                                 "/api/products/**",
                                 "/api/categories/**"
                         ).hasRole("ADMIN")
+                        .requestMatchers("/api/users/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
