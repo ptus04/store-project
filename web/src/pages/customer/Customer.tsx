@@ -9,6 +9,17 @@ import { isAdmin } from "@/utils/auth";
 
 const PAGE_SIZE = 10;
 
+// ── FIX R266/R268: Stable keys for skeleton rows (no array index in key) ──
+const SKELETON_ROW_KEYS = ["sk-r-0", "sk-r-1", "sk-r-2", "sk-r-3", "sk-r-4"];
+const SKELETON_COL_KEYS = [
+  "sk-c-0",
+  "sk-c-1",
+  "sk-c-2",
+  "sk-c-3",
+  "sk-c-4",
+  "sk-c-5",
+];
+
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   const d = new Date(iso);
@@ -31,6 +42,25 @@ function getInitials(name: string): string {
 function isDisabled(user: UserResponse): boolean {
   return !!user.disabledAt;
 }
+
+// ── FIX R325: Extract nested ternary (gender) into independent function ──
+function getGenderLabel(gender: string | null | undefined): string {
+  if (gender === "MALE") return "Nam";
+  if (gender === "FEMALE") return "Nữ";
+  return "—";
+}
+
+// ── FIX R389: Extract nested ternary (toggle button class) into independent function ──
+function getToggleButtonClass(disabled: boolean, toggling: boolean): string {
+  const hoverClass = disabled ? "hover:border-primary" : "hover:border-error";
+  const stateClass = toggling ? "cursor-wait opacity-50" : "";
+  return `border-outline-variant flex h-9 w-9 items-center justify-center border transition-all group/toggle ${hoverClass} ${stateClass}`.trim();
+}
+
+// ── FIX R409: Pagination item type with stable keys (no array index in key) ──
+type PaginationItem =
+  | { type: "page"; page: number }
+  | { type: "dots"; key: string };
 
 export default function Customer() {
   const navigate = useNavigate();
@@ -100,11 +130,11 @@ export default function Customer() {
   const handleToggleStatus = async (customer: UserResponse) => {
     if (togglingId) return;
     const willDisable = !isDisabled(customer);
-    const confirmed = window.confirm(
-      willDisable
-        ? `Vô hiệu hóa tài khoản của "${customer.name}"?`
-        : `Kích hoạt lại tài khoản của "${customer.name}"?`,
-    );
+    // ── FIX R103: Prefer `globalThis` over `window` ──
+    const message = willDisable
+      ? `Vô hiệu hóa tài khoản của "${customer.name}"?`
+      : `Kích hoạt lại tài khoản của "${customer.name}"?`;
+    const confirmed = globalThis.confirm(message);
     if (!confirmed) return;
 
     setTogglingId(customer.id);
@@ -114,19 +144,34 @@ export default function Customer() {
         prev.map((c) => (c.id === updated.id ? updated : c)),
       );
     } catch {
-      alert("Thao tác thất bại. Vui lòng thử lại.");
+      globalThis.alert("Thao tác thất bại. Vui lòng thử lại.");
     } finally {
       setTogglingId(null);
     }
   };
 
-  // ── pagination ──
-  const paginationPages = (): (number | "...")[] => {
-    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i);
-    if (currentPage <= 2) return [0, 1, 2, "...", totalPages - 1];
+  // ── FIX R409: pagination returns PaginationItem[] with stable keys ──
+  const paginationPages = (): PaginationItem[] => {
+    let dotsCount = 0;
+    const toItems = (arr: (number | "...")[]): PaginationItem[] =>
+      arr.map((v) =>
+        v === "..."
+          ? { type: "dots", key: `dots-${dotsCount++}` }
+          : { type: "page", page: v },
+      );
+
+    if (totalPages <= 5)
+      return toItems(Array.from({ length: totalPages }, (_, i) => i));
+    if (currentPage <= 2) return toItems([0, 1, 2, "...", totalPages - 1]);
     if (currentPage >= totalPages - 3)
-      return [0, "...", totalPages - 3, totalPages - 2, totalPages - 1];
-    return [
+      return toItems([
+        0,
+        "...",
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+      ]);
+    return toItems([
       0,
       "...",
       currentPage - 1,
@@ -134,7 +179,7 @@ export default function Customer() {
       currentPage + 1,
       "...",
       totalPages - 1,
-    ];
+    ]);
   };
 
   // ── total label ──
@@ -262,10 +307,11 @@ export default function Customer() {
 
           <tbody className="divide-outline-variant divide-y">
             {loading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <tr key={i}>
-                  {Array.from({ length: 6 }).map((__, j) => (
-                    <td key={j} className="px-6 py-5">
+              // ── FIX R266/R268: Use stable constant keys, not array index ──
+              SKELETON_ROW_KEYS.map((rowKey) => (
+                <tr key={rowKey}>
+                  {SKELETON_COL_KEYS.map((colKey) => (
+                    <td key={colKey} className="px-6 py-5">
                       <div className="bg-surface-container-high h-4 animate-pulse rounded" />
                     </td>
                   ))}
@@ -280,7 +326,8 @@ export default function Customer() {
                   <span className="material-symbols-outlined text-outline mb-2 block text-4xl">
                     person_search
                   </span>
-                  Không tìm thấy khách hàng nào
+                  {/* ── FIX R282: Wrap text after </span> to avoid ambiguous spacing ── */}
+                  <p>Không tìm thấy khách hàng nào</p>
                 </td>
               </tr>
             ) : (
@@ -317,12 +364,9 @@ export default function Customer() {
                       {customer.email ?? "—"}
                     </td>
                     <td className="px-6 py-5">
+                      {/* ── FIX R325: Use getGenderLabel() instead of nested ternary ── */}
                       <span className="border-outline-variant border px-3 py-1 text-[11px] font-bold tracking-wider uppercase">
-                        {customer.gender === "MALE"
-                          ? "Nam"
-                          : customer.gender === "FEMALE"
-                            ? "Nữ"
-                            : "—"}
+                        {getGenderLabel(customer.gender)}
                       </span>
                     </td>
                     <td className="font-body-base text-body-base text-secondary px-6 py-5">
@@ -344,11 +388,8 @@ export default function Customer() {
                             title={disabled ? "Kích hoạt" : "Vô hiệu hóa"}
                             disabled={toggling}
                             onClick={() => handleToggleStatus(customer)}
-                            className={`border-outline-variant flex h-9 w-9 items-center justify-center border transition-all ${
-                              disabled
-                                ? "hover:border-primary group/toggle"
-                                : "hover:border-error group/toggle"
-                            } ${toggling ? "cursor-wait opacity-50" : ""}`}
+                            // ── FIX R389: Use getToggleButtonClass() instead of nested ternary ──
+                            className={getToggleButtonClass(disabled, toggling)}
                           >
                             {toggling ? (
                               <span className="material-symbols-outlined text-outline animate-spin text-[16px]">
@@ -403,25 +444,26 @@ export default function Customer() {
               </span>
             </button>
 
-            {paginationPages().map((p, i) =>
-              p === "..." ? (
+            {/* ── FIX R409/R417/R424: PaginationItem type eliminates index keys and `as number` casts ── */}
+            {paginationPages().map((item) =>
+              item.type === "dots" ? (
                 <span
-                  key={`dots-${i}`}
+                  key={item.key}
                   className="flex h-8 w-8 items-center justify-center text-xs"
                 >
                   ...
                 </span>
               ) : (
                 <button
-                  key={p}
-                  onClick={() => setCurrentPage(p as number)}
+                  key={item.page}
+                  onClick={() => setCurrentPage(item.page)}
                   className={`flex h-8 w-8 items-center justify-center text-xs font-bold transition-all ${
-                    currentPage === p
+                    currentPage === item.page
                       ? "bg-primary text-on-primary"
                       : "border-outline-variant hover:border-primary border"
                   }`}
                 >
-                  {(p as number) + 1}
+                  {item.page + 1}
                 </button>
               ),
             )}
