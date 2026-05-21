@@ -7,6 +7,7 @@ import MainLayouts from "@layouts/MainLayouts.tsx";
 import Profile from "@pages/profile/Profile";
 import Customer from "@pages/customer/Customer.tsx";
 import CustomerDetail from "@/pages/customer/CustomerDetail";
+import Carousel from "@pages/carousel/Carousel.tsx";
 
 // Kiểm tra user đã đăng nhập và có role ADMIN chưa
 function isAuthenticated(): boolean {
@@ -57,6 +58,7 @@ const App = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/customer" element={<Customer />} />
         <Route path="/customer/:id" element={<CustomerDetail />} />
+        <Route path="/carousel" element={<Carousel />} />
       </Route>
 
       {/* Mọi route không tồn tại → về trang chủ */}
