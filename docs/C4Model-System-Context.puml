@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+title SLY Clothing Store Project - System Context Diagram
+Person(guest, "Guest", "Khách vãng lai")
+Person(customer, "Customer", "Khách hàng")
+Person(employee, "Employee", "Nhân viên bán hàng")
+Person(admin, "Admin", "Chủ cửa hàng")
+
+System(storeSystem, "Store System", "Hệ thống E-commerce Bán thời trang SLY Clothing")
+System_Ext(sepay, "SePay Payment Gateway", "Cổng thanh toán")
+System_Ext(gmail, "Gmail SMTP Service", "Dịch vụ email")
+System_Ext(azure, "Azure Managed Services", "CSDL, Object storage, Cache")
+
+Rel(guest, storeSystem, "Xem sản phẩm")
+Rel(customer, storeSystem, "Đặt hàng, chat")
+Rel(employee, storeSystem, "Xử lý đơn hàng, chat tư vấn")
+Rel(admin, storeSystem, "Quản lý sản phẩm")
+Rel(storeSystem, azure, "Lưu trữ dữ liệu")
+Rel(storeSystem, gmail, "Gửi email")
+Rel(sepay, storeSystem, "Gửi Webhook thanh toán")
+@enduml

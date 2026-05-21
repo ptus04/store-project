@@ -5,6 +5,6 @@ resource "azurerm_managed_redis" "store" {
   sku_name            = "Balanced_B0"
   default_database {
     access_keys_authentication_enabled = true
-    clustering_policy                  = "EnterpriseCluster"
+    clustering_policy                  = "NoCluster"
   }
 }

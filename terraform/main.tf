@@ -54,9 +54,39 @@ resource "azurerm_linux_web_app" "store" {
     TWILIO_ACCOUNT_SID              = var.twilio_account_sid
     TWILIO_AUTH_TOKEN               = var.twilio_auth_token
     TWILIO_VERIFY_SERVICE_SID       = var.twilio_verify_service_sid
-    ALLOWED_ORIGINS                 = "*"
-    ALLOWED_METHODS                 = "GET,POST,PUT,DELETE"
+    MAIL_USERNAME                   = var.mail_username
+    MAIL_PASSWORD                   = var.mail_password
+    JWT_SECRET                      = var.jwt_secret
+    JWT_EXPIRATION_MS               = var.jwt_expiration_ms
+    SEPAY_ACCOUNT_NAME              = var.sepay_account_name
+    SEPAY_ACCOUNT_NUMBER            = var.sepay_account_number
+    SEPAY_BANK                      = var.sepay_bank
+    SEPAY_USERNAME                  = var.sepay_username
+    SEPAY_PASSWORD                  = var.sepay_password
+    GEMINI_API_KEY                  = var.gemini_api_key
+    ALLOWED_ORIGINS                 = "https://ptus04-store-admin-app.azurewebsites.net"
+    ALLOWED_METHODS                 = "GET,POST,PUT,PATCH,DELETE"
     ALLOWED_HEADERS                 = "Content-Type,Authorization"
     ALLOW_CREDENTIALS               = true
+  }
+}
+
+resource "azurerm_linux_web_app" "store_admin" {
+  name                = "ptus04-store-admin-app"
+  resource_group_name = azurerm_resource_group.store.name
+  location            = azurerm_resource_group.store.location
+  service_plan_id     = azurerm_service_plan.store.id
+
+  site_config {
+    application_stack {
+      docker_image_name = "phungtu081/store-admin:latest"
+    }
+    # health_check_path = ""
+    always_on = false
+  }
+
+  app_settings = {
+    WEBSITES_PORT                   = "8080"
+    DOCKER_ENABLE_CI                = true
   }
 }
