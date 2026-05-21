@@ -2,13 +2,13 @@
 
     <!-- FAB Button -->
     <button id="chat-fab"
-        class="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-900 text-white shadow-[0_8px_30px_rgb(0,0,0,0.2)] transition-all duration-300 hover:scale-110 hover:bg-black active:scale-95 group border border-neutral-700">
+            class="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-900 text-white shadow-[0_8px_30px_rgb(0,0,0,0.2)] transition-all duration-300 hover:scale-110 hover:bg-black active:scale-95 group border border-neutral-700">
         <i class="fa fa-robot text-2xl group-hover:hidden transition-opacity"></i>
         <i class="fa fa-comment-dots text-2xl hidden group-hover:block transition-opacity"></i>
 
         <!-- Unread Badge -->
         <span id="chat-unread-badge"
-            class="absolute -top-1 -right-1 flex h-5 w-5 scale-0 items-center justify-center rounded-full border-2 border-neutral-900 bg-red-500 text-[10px] font-bold text-white shadow-sm transition-transform duration-300">
+              class="absolute -top-1 -right-1 flex h-5 w-5 scale-0 items-center justify-center rounded-full border-2 border-neutral-900 bg-red-500 text-[10px] font-bold text-white shadow-sm transition-transform duration-300">
             0
         </span>
 
@@ -18,14 +18,14 @@
 
     <!-- Chat Popup -->
     <div id="chat-popup"
-        class="fixed bottom-0 right-4 z-50 flex h-150 max-h-[calc(100vh-8rem)] w-95 max-w-[calc(100vw-3rem)] origin-bottom-right scale-0 flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] opacity-0 transition-all duration-300">
+         class="fixed bottom-0 right-4 z-50 flex h-150 max-h-[calc(100vh-8rem)] w-95 max-w-[calc(100vw-3rem)] origin-bottom-right scale-0 flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] opacity-0 transition-all duration-300">
 
         <!-- Header -->
         <div
-            class="relative flex items-center justify-between border-b border-neutral-200 bg-white p-4 text-neutral-800">
+                class="relative flex items-center justify-between border-b border-neutral-200 bg-white p-4 text-neutral-800">
             <div class="flex items-center gap-3">
                 <div id="header-avatar-bg"
-                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 shadow-inner">
+                     class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 shadow-inner">
                     <i id="header-avatar-icon" class="fa fa-robot text-lg"></i>
                 </div>
                 <div class="flex flex-col">
@@ -38,7 +38,7 @@
                 </div>
             </div>
             <button id="chat-minimize"
-                class="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-neutral-500 transition-colors hover:bg-neutral-200 hover:text-neutral-800">
+                    class="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-neutral-500 transition-colors hover:bg-neutral-200 hover:text-neutral-800">
                 <i class="fa fa-times text-sm"></i>
             </button>
         </div>
@@ -53,31 +53,31 @@
                 <div class="flex gap-2">
                     <div class="flex flex-col gap-1 max-w-[85%]">
                         <div
-                            class="rounded-2xl rounded-tl-sm bg-[#e5e7eb] px-4 py-3 text-[14px] text-neutral-800 leading-relaxed">
+                                class="rounded-2xl rounded-tl-sm bg-[#e5e7eb] px-4 py-3 text-[14px] text-neutral-800 leading-relaxed">
                             Xin chào! Tôi là trợ lý AI của SLY — sẵn sàng gợi ý outfit, tư vấn size và tìm sản phẩm cho
                             bạn. Bạn đang tìm gì hôm nay?
                         </div>
                         <span class="text-[10px] text-neutral-400 ml-1"
-                            th:text="${#dates.format(#dates.createNow(), 'HH:mm')}">20:45</span>
+                              th:text="${#dates.format(#dates.createNow(), 'HH:mm')}">20:45</span>
                     </div>
                 </div>
 
                 <!-- Quick Replies (High Contrast) -->
                 <div class="grid grid-cols-2 gap-2 mt-3 w-full pr-4">
                     <button
-                        class="quick-reply-btn rounded-xl border border-neutral-300 bg-white py-2 px-3 text-xs font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:border-neutral-400 active:scale-95 text-center">
+                            class="quick-reply-btn rounded-xl border border-neutral-300 bg-white py-2 px-3 text-xs font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:border-neutral-400 active:scale-95 text-center">
                         Xem áo mới nhất
                     </button>
                     <button
-                        class="quick-reply-btn rounded-xl border border-neutral-300 bg-white py-2 px-3 text-xs font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:border-neutral-400 active:scale-95 text-center">
+                            class="quick-reply-btn rounded-xl border border-neutral-300 bg-white py-2 px-3 text-xs font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:border-neutral-400 active:scale-95 text-center">
                         Hướng dẫn chọn size
                     </button>
                     <button
-                        class="quick-reply-btn rounded-xl border border-neutral-300 bg-white py-2 px-3 text-xs font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:border-neutral-400 active:scale-95 text-center">
+                            class="quick-reply-btn rounded-xl border border-neutral-300 bg-white py-2 px-3 text-xs font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:border-neutral-400 active:scale-95 text-center">
                         Chính sách đổi trả
                     </button>
                     <button
-                        class="quick-reply-btn rounded-xl border border-neutral-300 bg-white py-2 px-3 text-xs font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:border-neutral-400 active:scale-95 text-center">
+                            class="quick-reply-btn rounded-xl border border-neutral-300 bg-white py-2 px-3 text-xs font-medium text-neutral-700 shadow-sm transition-all hover:bg-neutral-50 hover:border-neutral-400 active:scale-95 text-center">
                         Ưu đãi hôm nay
                     </button>
                 </div>
@@ -90,19 +90,19 @@
                 <!-- Dropdown Trigger -->
                 <div class="relative">
                     <button type="button" id="chat-mode-switch"
-                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-800"
-                        title="Chọn chế độ">
+                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-800"
+                            title="Chọn chế độ">
                         <i id="mode-switch-icon" class="fa fa-robot text-lg"></i>
                     </button>
                     <!-- Dropdown Menu (Pops Up) -->
                     <div id="chat-mode-dropdown"
-                        class="absolute bottom-12 left-0 z-50 hidden w-48 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                         class="absolute bottom-12 left-0 z-50 hidden w-48 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
                         <button type="button" id="select-ai-mode"
-                            class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100">
+                                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100">
                             <i class="fa fa-robot text-neutral-500 w-5"></i> Chat với AI
                         </button>
                         <button type="button" id="select-staff-mode"
-                            class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100">
+                                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100">
                             <i class="fa fa-user text-neutral-500 w-5"></i> Chat với Nhân viên
                         </button>
                     </div>
@@ -110,10 +110,10 @@
 
                 <div class="relative w-full">
                     <input type="text" id="chat-input"
-                        class="w-full rounded-full border border-neutral-200 bg-neutral-50 py-2.5 pl-4 pr-12 text-sm text-neutral-800 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-400 transition-all"
-                        placeholder="Nhắn tin với SLY AI..." autocomplete="off" aria-label="Nhập tin nhắn">
+                           class="w-full rounded-full border border-neutral-200 bg-neutral-50 py-2.5 pl-4 pr-12 text-sm text-neutral-800 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-400 transition-all"
+                           placeholder="Nhắn tin với SLY AI..." autocomplete="off" aria-label="Nhập tin nhắn">
                     <button type="submit" id="chat-send-btn"
-                        class="absolute right-1 top-1 bottom-1 flex aspect-square items-center justify-center rounded-full bg-neutral-800 text-white shadow-sm transition-all hover:bg-neutral-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                            class="absolute right-1 top-1 bottom-1 flex aspect-square items-center justify-center rounded-full bg-neutral-800 text-white shadow-sm transition-all hover:bg-neutral-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                         <i class="fa fa-paper-plane text-[11px] ml-0.5"></i>
                     </button>
                 </div>
@@ -125,10 +125,12 @@
     </div>
 
     <!-- STOMP & SockJS for WebSocket (if needed later) -->
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js" integrity="sha512-1QvjE7BtotQjkq8PxLeF6P46gEpBRXuskzIVgjFpekzFVF4yjRgrQvTG1MTOJ3yQgvTteKAcO7DSZI92+u/yZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js" integrity="sha512-iKDtgDyTHjAitUDdLljGhenhPwrbBfqTKWO1mkhSFH3A7blITC9MhYon6SjnMhp4o0rADGw9yAC6EW4t5a4K3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- Tailwind CDN to ensure newly added classes work immediately during dev -->
-    <script src="https://cdn.tailwindcss.com" integrity="sha384-igm5BeiBt36UU4gqwWS7imYmelpTsZlQ45FZf+XBn9MuJbn4nQr7yx1yFydocC/K" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"
+            integrity="sha512-1QvjE7BtotQjkq8PxLeF6P46gEpBRXuskzIVgjFpekzFVF4yjRgrQvTG1MTOJ3yQgvTteKAcO7DSZI92+u/yZw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"
+            integrity="sha512-iKDtgDyTHjAitUDdLljGhenhPwrbBfqTKWO1mkhSFH3A7blITC9MhYon6SjnMhp4o0rADGw9yAC6EW4t5a4K3g=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <!-- Custom Chat JS -->
     <script th:inline="javascript">
@@ -145,6 +147,7 @@
                 .replaceAll('"', "&quot;")
                 .replaceAll("'", "&#039;");
         }
+
         document.addEventListener('DOMContentLoaded', function () {
             // --- Configuration ---
             const CONFIG = {
@@ -182,7 +185,7 @@
             let currentMode = 'AI'; // 'AI' or 'STAFF'
             let isWaitingForResponse = false;
             let stompClient = null;
-            
+
             // Persist sessionId in localStorage to maintain history across page reloads
             let sessionId = localStorage.getItem('chat_session_id');
             if (!sessionId) {
@@ -239,7 +242,6 @@
                 unreadCount = 0;
                 updateBadge();
             }
-
 
 
             // --- Add Message to UI ---
@@ -357,7 +359,7 @@
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(payload)
                     });
 
@@ -457,8 +459,8 @@
                     if (CONFIG.useBackendApi) {
                         fetch('/api/support/request', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ 
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
                                 sessionId: sessionId,
                                 customerName: customerName
                             })
@@ -532,7 +534,6 @@
             });
 
 
-
             // Add custom CSS for animations that aren't native to Tailwind v4 out-of-the-box
             const style = document.createElement('style');
             style.textContent = `
@@ -569,13 +570,13 @@
                             // Clear default welcome messages if we have history
                             chatMessages.innerHTML = '';
                             resetUnreadBadge();
-                            
+
                             // Restore correct current mode based on the last message from user or AI vs STAFF
                             let hasStaffMessages = history.some(msg => msg.sender === 'STAFF');
                             if (hasStaffMessages) {
                                 setMode('STAFF');
                             }
-                            
+
                             history.forEach(msg => {
                                 const formattedContent = msg.content
                                     .replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')

@@ -12,10 +12,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
-    @EntityGraph(attributePaths = "productImages")
     List<Product> findTop10ByDeletedAtIsNullOrderByCreatedAtDesc();
 
-    @EntityGraph(attributePaths = {"productImages", "productSizes", "categories"})
     Page<Product> findAll(Specification<Product> specification, Pageable pageable);
 
     boolean existsByName(String name);
