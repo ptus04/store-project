@@ -57,7 +57,8 @@
                         <!-- Stats -->
                         <div class="mt-8 flex w-full justify-between rounded-2xl bg-gray-50 p-5">
                             <div class="flex flex-col items-center gap-1 flex-1">
-                                <span class="text-lg font-bold text-gray-900">0</span>
+                                <span class="text-lg font-bold text-gray-900"
+                                      th:text="${orders.totalElements}">0</span>
                                 <span class="text-xs text-gray-500 font-medium text-center">Đơn hàng</span>
                             </div>
                             <div class="w-px bg-gray-200"></div>
@@ -180,30 +181,86 @@
                         <i class="fa fa-bag-shopping text-gray-500 text-xl"></i>
                         <h3 class="text-xl font-bold text-gray-900">Đơn hàng của tôi</h3>
                     </div>
-                    <a class="text-red-500 hover:text-red-600 font-semibold text-sm flex items-center gap-1"
-                       th:href="@{/products}">
-                        Mua sắm tiếp <i class="fa fa-arrow-right"></i>
-                    </a>
+                    <div class="flex items-center gap-4">
+                        <a class="text-gray-500 hover:text-gray-900 font-semibold text-sm"
+                           th:href="@{/orders}">
+                            Xem tất cả
+                        </a>
+                        <a class="text-red-500 hover:text-red-600 font-semibold text-sm flex items-center gap-1"
+                           th:href="@{/products}">
+                            Mua sắm tiếp <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </div>
                 </div>
+
+                <form class="mb-6 flex flex-col gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 sm:flex-row"
+                      method="get"
+                      th:action="@{/orders}">
+                    <label class="grow">
+                        <span class="hidden">Từ khóa tìm kiếm đơn hàng</span>
+                        <input class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-[15px] focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                               name="query"
+                               placeholder="Tìm mã đơn, tên, SĐT hoặc sản phẩm"
+                               type="search">
+                    </label>
+                    <button class="rounded-xl bg-gray-900 px-6 py-3 text-[15px] font-semibold text-white transition hover:bg-black"
+                            type="submit">
+                        <i class="fa fa-search"></i>
+                        <span class="ml-2">Tìm đơn</span>
+                    </button>
+                </form>
 
                 <!-- Order Status Tabs -->
                 <div
                         class="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4 overflow-x-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-[#f1f1f1] [&::-webkit-scrollbar-track]:rounded-lg [&::-webkit-scrollbar-thumb]:bg-[#d1d5db] [&::-webkit-scrollbar-thumb]:rounded-lg [&::-webkit-scrollbar-thumb:hover]:bg-[#9ca3af]">
                     <button
-                            class="shrink-0 rounded-xl bg-gray-900 px-6 py-2.5 text-[15px] font-semibold text-white shadow-sm transition hover:bg-black">
+                            class="profile-order-filter shrink-0 rounded-xl bg-gray-900 px-6 py-2.5 text-[15px] font-semibold text-white shadow-sm transition hover:bg-black"
+                            data-active="true"
+                            onclick="filterProfileOrders(this, 'ALL')"
+                            type="button">
                         Tất cả
                     </button>
                     <button
-                            class="shrink-0 rounded-xl border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition">
+                            class="profile-order-filter shrink-0 rounded-xl border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition"
+                            onclick="filterProfileOrders(this, 'UNPAID')"
+                            type="button">
+                        Chờ thanh toán
+                    </button>
+                    <button
+                            class="profile-order-filter shrink-0 rounded-xl border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition"
+                            onclick="filterProfileOrders(this, 'PAID')"
+                            type="button">
+                        Đã thanh toán
+                    </button>
+                    <button
+                            class="profile-order-filter shrink-0 rounded-xl border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition"
+                            onclick="filterProfileOrders(this, 'PACKAGING')"
+                            type="button">
+                        Đang đóng gói
+                    </button>
+                    <button
+                            class="profile-order-filter shrink-0 rounded-xl border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition"
+                            onclick="filterProfileOrders(this, 'SHIPPING')"
+                            type="button">
                         Đang giao
                     </button>
                     <button
-                            class="shrink-0 rounded-xl border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition">
+                            class="profile-order-filter shrink-0 rounded-xl border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition"
+                            onclick="filterProfileOrders(this, 'COMPLETED')"
+                            type="button">
                         Hoàn thành
                     </button>
                     <button
-                            class="shrink-0 rounded-xl border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition">
+                            class="profile-order-filter shrink-0 rounded-xl border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition"
+                            onclick="filterProfileOrders(this, 'CANCELLED')"
+                            type="button">
                         Đã hủy
+                    </button>
+                    <button
+                            class="profile-order-filter shrink-0 rounded-xl border border-transparent px-6 py-2.5 text-[15px] font-medium text-gray-500 hover:border-gray-900 hover:text-gray-900 transition"
+                            onclick="filterProfileOrders(this, 'REFUNDED')"
+                            type="button">
+                        Đã hoàn tiền
                     </button>
                 </div>
 
@@ -211,12 +268,65 @@
                 <div
                         class="flex flex-1 flex-col gap-4 overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-[#f1f1f1] [&::-webkit-scrollbar-track]:rounded-lg [&::-webkit-scrollbar-thumb]:bg-[#d1d5db] [&::-webkit-scrollbar-thumb]:rounded-lg [&::-webkit-scrollbar-thumb:hover]:bg-[#9ca3af] bg-gray-50/50 rounded-2xl p-6 border border-gray-100">
                     <!-- Empty State -->
-                    <div class="flex flex-1 flex-col items-center justify-center gap-3 text-gray-500 min-h-50">
+                    <div class="flex flex-1 flex-col items-center justify-center gap-3 text-gray-500 min-h-50"
+                         id="profileOrdersEmpty"
+                         th:if="${orders.empty}">
                         <div class="h-20 w-20 rounded-full bg-white flex items-center justify-center shadow-sm">
                             <i class="fa fa-box-open text-3xl text-gray-400"></i>
                         </div>
                         <span class="font-medium text-gray-600">Chưa có đơn hàng nào</span>
                     </div>
+                    <div class="hidden flex-1 flex-col items-center justify-center gap-3 text-gray-500 min-h-50"
+                         id="profileOrdersNoMatch"
+                         th:unless="${orders.empty}">
+                        <div class="h-20 w-20 rounded-full bg-white flex items-center justify-center shadow-sm">
+                            <i class="fa fa-filter-circle-xmark text-3xl text-gray-400"></i>
+                        </div>
+                        <span class="font-medium text-gray-600">Không có đơn hàng phù hợp</span>
+                    </div>
+
+                    <a class="profile-order-card block rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                       th:data-order-status="${order.status.name()}"
+                       th:each="order : ${orders.content}"
+                       th:href="@{/orders/{id}(id=${order.id})}">
+                        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="font-bold text-gray-900" th:text="${order.orderCode}">DH0001</span>
+                                    <span class="rounded-full px-3 py-1 text-xs font-semibold"
+                                          th:classappend="${order.status.name() == 'CANCELLED' || order.status.name() == 'REFUNDED'} ? ' bg-red-50 text-red-700' : (${order.status.name() == 'COMPLETED'} ? ' bg-green-50 text-green-700' : (${order.status.name() == 'SHIPPING'} ? ' bg-blue-50 text-blue-700' : ' bg-yellow-50 text-yellow-700'))"
+                                          th:switch="${order.status.name()}">
+                                        <span th:case="'UNPAID'">Chờ thanh toán</span>
+                                        <span th:case="'PAID'">Đã thanh toán</span>
+                                        <span th:case="'PACKAGING'">Đang đóng gói</span>
+                                        <span th:case="'SHIPPING'">Đang giao</span>
+                                        <span th:case="'COMPLETED'">Hoàn tất</span>
+                                        <span th:case="'CANCELLED'">Đã hủy</span>
+                                        <span th:case="'REFUNDED'">Đã hoàn tiền</span>
+                                    </span>
+                                </div>
+                                <p class="mt-2 text-sm text-gray-500"
+                                   th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">
+                                    01/01/2026 10:00
+                                </p>
+                                <p class="mt-1 truncate text-sm text-gray-600"
+                                   th:if="${!#lists.isEmpty(order.orderDetails)}">
+                                    <span th:each="detail, detailStat : ${order.orderDetails}"
+                                          th:if="${detailStat.first}"
+                                          th:text="${detail.product.name + (order.orderDetails.size() > 1 ? ' +' + (order.orderDetails.size() - 1) : '')}">
+                                        Sản phẩm
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="flex shrink-0 items-center justify-between gap-5 md:flex-col md:items-end md:gap-2">
+                                <span class="text-lg font-bold text-red-600"
+                                      th:text="${#numbers.formatDecimal(order.total, 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                                    0 ₫
+                                </span>
+                                <span class="text-sm font-semibold text-gray-500">Xem chi tiết</span>
+                            </div>
+                        </div>
+                    </a>
                 </div>
             </section>
 
@@ -349,6 +459,35 @@
                 }
 
                 modal.classList.remove('hidden');
+            }
+
+            function filterProfileOrders(button, status) {
+                const activeClasses = ['bg-gray-900', 'text-white', 'font-semibold', 'shadow-sm'];
+                const inactiveClasses = ['border', 'border-transparent', 'text-gray-500', 'font-medium'];
+                const cards = Array.from(document.querySelectorAll('.profile-order-card'));
+                const noMatch = document.getElementById('profileOrdersNoMatch');
+                let visibleCount = 0;
+
+                document.querySelectorAll('.profile-order-filter').forEach((filterButton) => {
+                    filterButton.classList.remove(...activeClasses);
+                    filterButton.classList.add(...inactiveClasses);
+                });
+
+                button.classList.remove(...inactiveClasses);
+                button.classList.add(...activeClasses);
+
+                cards.forEach((card) => {
+                    const isVisible = status === 'ALL' || card.dataset.orderStatus === status;
+                    card.classList.toggle('hidden', !isVisible);
+                    if (isVisible) {
+                        visibleCount += 1;
+                    }
+                });
+
+                if (noMatch) {
+                    noMatch.classList.toggle('hidden', visibleCount !== 0);
+                    noMatch.classList.toggle('flex', visibleCount === 0);
+                }
             }
 
             document.addEventListener("DOMContentLoaded", function () {

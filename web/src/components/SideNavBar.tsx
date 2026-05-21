@@ -108,6 +108,21 @@ export default function SideNavBar() {
           <span className="text-label-sm font-label-sm">Sản phẩm</span>
         </button>
 
+        {/* Orders */}
+        <button
+          onClick={() => navigate("/orders")}
+          className={`flex w-full items-center gap-3 px-4 py-3 transition-colors duration-200 ${
+            isActive("/orders")
+              ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4"
+              : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"
+          }`}
+        >
+          <span className="material-symbols-outlined" data-icon="receipt_long">
+            receipt_long
+          </span>
+          <span className="text-label-sm font-label-sm">Đơn hàng</span>
+        </button>
+
         {/* Employees */}
         <button
           onClick={() => navigate("/employees")}

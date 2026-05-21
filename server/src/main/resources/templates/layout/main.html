@@ -6,8 +6,8 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf" th:content="${_csrf?.token}" th:if="${_csrf}"/>
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}" th:if="${_csrf}"/>
     <title th:replace="${title}">Sly clothing</title>
     <link href="/favicon.png" rel="icon" type="image/png"/>
     <link href="/css/fontawesome/all.min.css" rel="stylesheet"/>
@@ -77,7 +77,7 @@
                         </a>
                         <div class="ms-2 overflow-hidden">
                             <a th:href="@{/products/{id}(id=${item.productId})}"
-                               th:text="${item.productName + ' ' + item.sizeName}">
+                               th:text="${item.productName + (item.sizeName != null ? ' ' + item.sizeName : '')}">
                             </a>
                             <p>
                                 <span th:text="${item.quantity}"></span> &times;
@@ -87,7 +87,7 @@
                             </p>
                         </div>
                         <form class="ms-auto" method="post"
-                              th:action="@{/cart/items/{id}/remove(id=${item.productSizeId})}">
+                              th:action="@{/cart/items/{id}/remove(id=${item.itemId})}">
                             <button class="cursor-pointer" type="submit" title="Xóa sản phẩm">
                                 <i class="fa fa-remove"></i>
                             </button>
@@ -151,6 +151,10 @@
         <a class="duration-200 hover:text-red-500" href="/products">
             <i class="fa fa-caret-right"></i>
             <span>Xem Danh sách sản phẩm</span>
+        </a>
+        <a class="duration-200 hover:text-red-500" href="/orders" sec:authorize="isAuthenticated()">
+            <i class="fa fa-caret-right"></i>
+            <span>Lịch sử đơn hàng</span>
         </a>
         <div>
             <h3 class="font-bold">Phân loại theo:</h3>

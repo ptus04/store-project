@@ -37,28 +37,29 @@ public class CartController {
     }
 
     @PostMapping("/items")
-    public String addItem(@RequestParam UUID productSizeId,
+    public String addItem(@RequestParam UUID productId,
+                          @RequestParam(required = false) UUID productSizeId,
                           @RequestParam(defaultValue = "1") int quantity,
                           HttpSession session,
                           HttpServletRequest request,
                           RedirectAttributes redirectAttributes) {
         try {
-            cartService.addItem(session, productSizeId, quantity);
+            cartService.addItem(session, productId, productSizeId, quantity);
             redirectAttributes.addFlashAttribute("success", "Đã thêm sản phẩm vào giỏ hàng");
-            return "redirect:/cart";
+            return redirectBack(request);
         } catch (CartStockException | EntityNotFoundException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return redirectBack(request);
         }
     }
 
-    @PostMapping("/items/{productSizeId}/update")
-    public String updateItem(@PathVariable UUID productSizeId,
+    @PostMapping("/items/{itemId}/update")
+    public String updateItem(@PathVariable UUID itemId,
                              @RequestParam int quantity,
                              HttpSession session,
                              RedirectAttributes redirectAttributes) {
         try {
-            cartService.updateItemQuantity(session, productSizeId, quantity);
+            cartService.updateItemQuantity(session, itemId, quantity);
             redirectAttributes.addFlashAttribute("success", "Đã cập nhật giỏ hàng");
         } catch (CartStockException | EntityNotFoundException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -66,11 +67,11 @@ public class CartController {
         return "redirect:/cart";
     }
 
-    @PostMapping("/items/{productSizeId}/remove")
-    public String removeItem(@PathVariable UUID productSizeId,
+    @PostMapping("/items/{itemId}/remove")
+    public String removeItem(@PathVariable UUID itemId,
                              HttpSession session,
                              RedirectAttributes redirectAttributes) {
-        cartService.removeItem(session, productSizeId);
+        cartService.removeItem(session, itemId);
         redirectAttributes.addFlashAttribute("success", "Đã xóa sản phẩm khỏi giỏ hàng");
         return "redirect:/cart";
     }

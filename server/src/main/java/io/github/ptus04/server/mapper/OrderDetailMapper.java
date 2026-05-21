@@ -9,7 +9,9 @@ import org.mapstruct.*;
 
 import java.util.UUID;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE,
+        componentModel = MappingConstants.ComponentModel.SPRING,
+        uses = ProductMapper.class)
 public interface OrderDetailMapper {
     @Mapping(target = "product", source = "productId")
     OrderDetail toEntity(OrderDetailCreateRequest orderDetailCreateRequest, @Context ProductRepository productRepository);

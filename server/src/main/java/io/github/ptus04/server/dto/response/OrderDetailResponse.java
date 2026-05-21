@@ -10,6 +10,7 @@ import java.util.UUID;
 /**
  * DTO for {@link io.github.ptus04.server.entity.OrderDetail}
  */
-public record OrderDetailResponse(UUID id, @Size(max = 4) String productSize, @NotNull Integer quantity,
-                                  @NotNull BigDecimal price, @NotNull BigDecimal subtotal) implements Serializable {
+public record OrderDetailResponse(UUID id, ProductResponse product, @Size(max = 4) String productSize,
+                                  @NotNull Integer quantity, @NotNull BigDecimal price,
+                                  @NotNull BigDecimal subtotal) implements Serializable {
 }

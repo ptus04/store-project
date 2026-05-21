@@ -158,7 +158,8 @@
                 </p>
             </div>
 
-            <form method="post" th:action="@{/cart/items}">
+            <form data-cart-form method="post" th:action="@{/cart/items}" th:attr="data-product-stock=${product.inStock()}">
+                <input name="productId" th:value="${product.id()}" type="hidden">
                 <div class="mb-6 rounded border border-gray-200 bg-white p-4">
                     <p class="mb-2 font-semibold">Chọn kích cỡ</p>
                     <div class="flex flex-wrap gap-2" th:if="${!#lists.isEmpty(product.productSizes())}">
@@ -182,7 +183,7 @@
                         </label>
                     </div>
                     <p class="text-gray-500" th:unless="${!#lists.isEmpty(product.productSizes())}">
-                        Chưa cập nhật kích cỡ cho sản phẩm này.
+                        Sản phẩm này không cần chọn kích cỡ.
                     </p>
                 </div>
 
@@ -193,7 +194,7 @@
                         <button class="h-10 w-10 rounded border border-gray-300 text-xl font-bold hover:border-red-500 hover:text-red-500"
                                 type="button"
                                 data-quantity-minus
-                                th:disabled="${product.isOutOfStock() || #lists.isEmpty(product.productSizes())}">
+                                th:disabled="${product.isOutOfStock()}">
                             −
                         </button>
                         <input class="h-10 w-20 rounded border border-gray-300 text-center focus:outline-red-500"
@@ -202,19 +203,20 @@
                                min="1"
                                name="quantity"
                                required
-                               th:max="${product.firstAvailableStock() > 0 ? product.firstAvailableStock() : 1}"
-                               th:disabled="${product.isOutOfStock() || #lists.isEmpty(product.productSizes())}"
+                               th:max="${#lists.isEmpty(product.productSizes()) ? (product.inStock() > 0 ? product.inStock() : 1) : (product.firstAvailableStock() > 0 ? product.firstAvailableStock() : 1)}"
+                               th:disabled="${product.isOutOfStock()}"
                                th:value="${1}"
                                type="number">
                         <button class="h-10 w-10 rounded border border-gray-300 text-xl font-bold hover:border-red-500 hover:text-red-500"
                                 type="button"
                                 data-quantity-plus
-                                th:disabled="${product.isOutOfStock() || #lists.isEmpty(product.productSizes())}">
+                                th:disabled="${product.isOutOfStock()}">
                             +
                         </button>
                     </div>
                     <p class="mt-2 text-sm text-gray-500">
-                        Vui lòng chọn size và số lượng trước khi thêm vào giỏ hàng.
+                        <span th:if="${!#lists.isEmpty(product.productSizes())}">Vui lòng chọn size và số lượng trước khi thêm vào giỏ hàng.</span>
+                        <span th:unless="${!#lists.isEmpty(product.productSizes())}">Vui lòng chọn số lượng trước khi thêm vào giỏ hàng.</span>
                         <span th:if="${!product.isOutOfStock() && !#lists.isEmpty(product.productSizes())}">
                         Còn <span data-selected-stock th:text="${product.firstAvailableStock()}">0</span> sản phẩm cho size đang chọn.
                     </span>
@@ -242,7 +244,7 @@
                             type="submit"
                             title="Thêm sản phẩm vào giỏ hàng"
                             data-add-cart-button
-                            th:disabled="${product.isOutOfStock() || #lists.isEmpty(product.productSizes())}">
+                            th:disabled="${product.isOutOfStock()}">
                         Thêm giỏ hàng
                     </button>
                     <a class="rounded border border-gray-300 px-5 py-3 font-semibold hover:border-red-500 hover:text-red-500"
@@ -254,6 +256,7 @@
 
             <script>
                 document.addEventListener("DOMContentLoaded", () => {
+                    const form = document.querySelector("[data-cart-form]");
                     const sizeInputs = Array.from(document.querySelectorAll("[data-size-input]"));
                     const quantityInput = document.querySelector("[data-quantity-input]");
                     const minusButton = document.querySelector("[data-quantity-minus]");
@@ -261,6 +264,7 @@
                     const addButton = document.querySelector("[data-add-cart-button]");
                     const stockLabel = document.querySelector("[data-selected-stock]");
                     const quantityBySize = new Map();
+                    const productStock = Number.parseInt(form?.dataset.productStock || "0", 10);
                     let currentSizeId = null;
 
                     if (!(quantityInput instanceof HTMLInputElement)
@@ -275,6 +279,9 @@
                     };
 
                     const parseStock = (sizeInput) => {
+                        if (sizeInputs.length === 0) {
+                            return Number.isFinite(productStock) && productStock > 0 ? productStock : 0;
+                        }
                         const stock = Number.parseInt(sizeInput?.dataset.sizeStock || "0", 10);
                         return Number.isFinite(stock) && stock > 0 ? stock : 0;
                     };
@@ -316,7 +323,7 @@
                         }
 
                         currentSizeId = selectedSize?.value || null;
-                        const stock = selectedSize ? parseStock(selectedSize) : 0;
+                        const stock = selectedSize || sizeInputs.length === 0 ? parseStock(selectedSize) : 0;
                         const hasStock = stock > 0;
                         const restoredQuantity = currentSizeId ? quantityBySize.get(currentSizeId) : undefined;
 

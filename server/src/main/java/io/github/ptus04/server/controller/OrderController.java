@@ -2,6 +2,7 @@ package io.github.ptus04.server.controller;
 
 import io.github.ptus04.server.sepay.config.SePayProperties;
 import io.github.ptus04.server.dto.internal.Cart;
+import io.github.ptus04.server.dto.request.OrderCancelRequest;
 import io.github.ptus04.server.dto.request.OrderCreateRequest;
 import io.github.ptus04.server.dto.request.OrderDetailCreateRequest;
 import io.github.ptus04.server.dto.request.OrderShippingAddressCreateRequest;
@@ -19,11 +20,13 @@ import io.github.ptus04.server.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
@@ -38,6 +41,49 @@ public class OrderController {
     private final UserAddressService userAddressService;
     private final CartMapper cartMapper;
     private final SePayProperties sePayProperties;
+
+    @GetMapping
+    public String getOrderHistoryPage(@RequestParam(defaultValue = "0") int page,
+                                      @RequestParam(defaultValue = "10") int size,
+                                      @RequestParam(required = false) String query,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails,
+                                      Model model) {
+        Page<OrderResponse> orders = orderService.searchOrdersByUserId(userDetails.getId(), query, page, size);
+        model.addAttribute("orders", orders);
+        model.addAttribute("query", query);
+        return "order/index";
+    }
+
+    @GetMapping("{id}")
+    public String getOrderDetailPage(@PathVariable UUID id,
+                                     @AuthenticationPrincipal CustomUserDetails userDetails,
+                                     Model model) {
+        OrderResponse order = orderService.getOrderByIdForUser(id, userDetails.getId());
+        model.addAttribute("order", order);
+        model.addAttribute("canCancel", order.status() == OrderStatusEnum.UNPAID);
+        model.addAttribute("cancelRequest", new OrderCancelRequest(null));
+        return "order/detail";
+    }
+
+    @PostMapping("{id}/cancel")
+    public String cancelOrder(@PathVariable UUID id,
+                              @Valid @ModelAttribute OrderCancelRequest cancelRequest,
+                              BindingResult bindingResult,
+                              @AuthenticationPrincipal CustomUserDetails userDetails,
+                              RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("error", "Lý do hủy đơn không được vượt quá 255 ký tự");
+            return "redirect:/orders/" + id;
+        }
+
+        try {
+            orderService.cancelOrder(id, userDetails.getId(), cancelRequest.cancellationReason());
+            redirectAttributes.addFlashAttribute("success", "Đã hủy đơn hàng");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+        }
+        return "redirect:/orders/" + id;
+    }
 
     @PostMapping
     public String createOrder(@Valid @ModelAttribute OrderCreateRequest orderCreateRequest,
@@ -131,6 +177,7 @@ public class OrderController {
         String bank = sePayProperties.getBank();
         String amount = order.total().toString();
         String transferContent = order.orderCode();
+        // TODO: Bổ sung luồng xác nhận thanh toán thật tại đây sau khi chốt cổng thanh toán/webhook.
         String qrCodeUrl = UriComponentsBuilder
                 .fromUriString("https://qr.sepay.vn/img?acc={acccountNumber}&bank={bank}&amount={amount}&des={orderCode}")
                 .buildAndExpand(accountNumber, bank, amount, transferContent)

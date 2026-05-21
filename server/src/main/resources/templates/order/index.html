@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi"
+      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
+      xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lịch sử đơn hàng | SLY</title>
+</head>
+<body>
+<main class="container mx-auto px-3 pt-5 pb-8">
+    <nav class="mb-4 text-sm text-gray-500">
+        <a class="hover:text-red-500" href="/">Trang chủ</a>
+        <span class="mx-1">/</span>
+        <span>Lịch sử đơn hàng</span>
+    </nav>
+
+    <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold">Lịch sử đơn hàng</h1>
+            <p class="mt-1 text-sm text-gray-500">Theo dõi các đơn hàng bạn đã đặt tại SLY.</p>
+        </div>
+
+        <form class="flex min-w-72 gap-2" method="get" action="/orders">
+            <label class="grow">
+                <span class="hidden">Từ khóa tìm kiếm đơn hàng</span>
+                <input class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-red-500"
+                       name="query"
+                       placeholder="Mã đơn, tên, SĐT hoặc sản phẩm"
+                       th:value="${query}"
+                       type="search">
+            </label>
+            <button class="rounded bg-black px-4 py-2 font-semibold text-white hover:bg-red-500" type="submit">
+                <i class="fa fa-search"></i>
+                <span class="hidden sm:inline">Tìm</span>
+            </button>
+        </form>
+    </div>
+
+    <div class="mb-6 rounded border border-green-200 bg-green-50 p-4 text-green-700" th:if="${success}">
+        <p th:text="${success}">Đã cập nhật đơn hàng</p>
+    </div>
+    <div class="mb-6 rounded border border-red-200 bg-red-50 p-4 text-red-700" th:if="${error}">
+        <p th:text="${error}">Không thể cập nhật đơn hàng</p>
+    </div>
+
+    <section class="rounded border border-gray-200 bg-white p-6 text-center" th:if="${orders.empty}">
+        <p class="mb-4 text-gray-600">Chưa có đơn hàng phù hợp.</p>
+        <a class="inline-flex rounded bg-red-500 px-5 py-3 font-semibold text-white hover:bg-red-400"
+           href="/products">
+            Tiếp tục mua sắm
+        </a>
+    </section>
+
+    <section class="overflow-hidden rounded border border-gray-200 bg-white" th:unless="${orders.empty}">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="border-b border-gray-200 bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+                <tr>
+                    <th class="px-4 py-3">Mã đơn</th>
+                    <th class="px-4 py-3">Ngày đặt</th>
+                    <th class="px-4 py-3">Trạng thái</th>
+                    <th class="px-4 py-3 text-right">Tổng tiền</th>
+                    <th class="px-4 py-3 text-right">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                <tr class="hover:bg-gray-50" th:each="order : ${orders.content}">
+                    <td class="px-4 py-4 font-semibold" th:text="${order.orderCode}">DH0001</td>
+                    <td class="px-4 py-4 text-gray-600"
+                        th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">
+                        01/01/2026 10:00
+                    </td>
+                    <td class="px-4 py-4">
+                        <span class="rounded-full px-3 py-1 text-xs font-semibold"
+                              th:classappend="${order.status.name() == 'CANCELLED' || order.status.name() == 'REFUNDED'} ? ' bg-red-50 text-red-700' : (${order.status.name() == 'COMPLETED'} ? ' bg-green-50 text-green-700' : ' bg-yellow-50 text-yellow-700')"
+                              th:switch="${order.status.name()}">
+                            <span th:case="'UNPAID'">Chờ thanh toán</span>
+                            <span th:case="'PAID'">Đã thanh toán</span>
+                            <span th:case="'PACKAGING'">Đang đóng gói</span>
+                            <span th:case="'SHIPPING'">Đang giao</span>
+                            <span th:case="'COMPLETED'">Hoàn tất</span>
+                            <span th:case="'CANCELLED'">Đã hủy</span>
+                            <span th:case="'REFUNDED'">Đã hoàn tiền</span>
+                        </span>
+                    </td>
+                    <td class="px-4 py-4 text-right font-bold text-red-600"
+                        th:text="${#numbers.formatDecimal(order.total, 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                        0 ₫
+                    </td>
+                    <td class="px-4 py-4 text-right">
+                        <a class="rounded border border-gray-300 px-3 py-2 font-semibold hover:border-red-500 hover:text-red-500"
+                           th:href="@{/orders/{id}(id=${order.id})}">
+                            Xem chi tiết
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div class="mt-6 flex items-center justify-center gap-2 font-bold" th:if="${orders.totalPages > 1}">
+        <a class="rounded px-3 py-2 hover:bg-gray-200"
+           th:if="${orders.hasPrevious()}"
+           th:href="@{/orders(page=${orders.number - 1}, query=${query})}">
+            &lsaquo;
+        </a>
+        <span class="rounded bg-red-500 px-3 py-2 text-white"
+              th:text="${orders.number + 1} + ' / ' + ${orders.totalPages}">
+        </span>
+        <a class="rounded px-3 py-2 hover:bg-gray-200"
+           th:if="${orders.hasNext()}"
+           th:href="@{/orders(page=${orders.number + 1}, query=${query})}">
+            &rsaquo;
+        </a>
+    </div>
+</main>
+</body>
+</html>

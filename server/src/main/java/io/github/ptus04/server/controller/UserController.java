@@ -3,6 +3,7 @@ package io.github.ptus04.server.controller;
 import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.mapper.UserMapper;
 import io.github.ptus04.server.security.CustomUserDetails;
+import io.github.ptus04.server.service.OrderService;
 import io.github.ptus04.server.service.UserService;
 import io.github.ptus04.server.dto.request.UserAddressUpdateRequest;
 import io.github.ptus04.server.service.UserAddressService;
@@ -20,11 +21,13 @@ public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
     private final UserAddressService userAddressService;
+    private final OrderService orderService;
 
     @GetMapping
     public String getProfilePage(Model model, @AuthenticationPrincipal CustomUserDetails details) {
         model.addAttribute("user", userService.getUserById(details.getId()));
         model.addAttribute("addresses", userAddressService.getAddresses(details.getId()));
+        model.addAttribute("orders", orderService.searchOrdersByUserId(details.getId(), null, 0, 10));
         if (!model.containsAttribute("addressRequest")) {
             model.addAttribute("addressRequest", UserAddressUpdateRequest.builder().build());
         }

@@ -62,8 +62,8 @@
                             Tên sản phẩm
                         </a>
                         <p class="mt-1 text-sm text-gray-500">
-                            Size <span th:text="${item.sizeName}">M</span>
-                            <span class="mx-1">·</span>
+                            <span th:if="${item.sizeName != null}">Size <span th:text="${item.sizeName}">M</span></span>
+                            <span class="mx-1" th:if="${item.sizeName != null}">·</span>
                             Còn <span th:text="${item.inStock}">0</span> sản phẩm
                         </p>
                         <p class="mt-2 font-bold text-red-600"
@@ -75,12 +75,12 @@
                     <div class="flex flex-wrap items-center gap-2 md:justify-end">
                         <form class="flex items-center gap-2"
                               method="post"
-                              th:action="@{/cart/items/{id}/update(id=${item.productSizeId})}">
-                            <label class="hidden" th:for="${'cart-quantity-' + item.productSizeId}">Số lượng</label>
+                              th:action="@{/cart/items/{id}/update(id=${item.itemId})}">
+                            <label class="hidden" th:for="${'cart-quantity-' + item.itemId}">Số lượng</label>
                             <input class="h-10 w-20 rounded border border-gray-300 text-center focus:outline-red-500"
                                    min="1"
                                    name="quantity"
-                                   th:id="${'cart-quantity-' + item.productSizeId}"
+                                   th:id="${'cart-quantity-' + item.itemId}"
                                    th:max="${item.inStock > 0 ? item.inStock : 1}"
                                    th:value="${item.quantity}"
                                    type="number"
@@ -94,7 +94,7 @@
                         </form>
 
                         <form method="post"
-                              th:action="@{/cart/items/{id}/remove(id=${item.productSizeId})}">
+                              th:action="@{/cart/items/{id}/remove(id=${item.itemId})}">
                             <button class="rounded px-3 py-2 text-red-600 hover:bg-red-50"
                                     title="Xóa sản phẩm khỏi giỏ hàng"
                                     type="submit">
