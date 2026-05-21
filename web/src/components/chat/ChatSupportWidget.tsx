@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useSupportChat } from "./useSupportChat";
+import { useSupportChat, getSenderName } from "./useSupportChat";
 
 export default function ChatSupportWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -123,18 +123,11 @@ export default function ChatSupportWidget() {
                   ) : (
                     (messages[selectedSession] || []).map((msg, index) => {
                       const isStaff = msg.sender === "STAFF";
-                      let senderName = "Khách hàng";
-                      if (isStaff) {
-                        senderName = "Bạn";
-                      } else if (msg.sender === "AI") {
-                        senderName = "Chatbot (AI)";
-                      } else if (msg.sender === "USER") {
-                        senderName =
-                          activeSession?.customerName &&
-                          activeSession.customerName !== "Khách vãng lai"
-                            ? activeSession.customerName
-                            : "Khách hàng";
-                      }
+                      const senderName = getSenderName(
+                        msg,
+                        activeSession,
+                        "Bạn",
+                      );
 
                       return (
                         <div

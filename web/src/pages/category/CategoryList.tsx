@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Modal from "@components/ui/Modal";
 import ConfirmModal from "@components/ui/ConfirmModal";
 
@@ -36,27 +36,30 @@ export default function CategoryList() {
   const API_URL = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  async function fetchCategories() {
+  const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`${API_URL}/api/categories`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) {
-        throw new Error("Không thể tải danh sách danh mục");
+        setError("Không thể tải danh sách danh mục");
+        return;
       }
       const data: Category[] = await response.json();
       setCategories(data);
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch categories");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch categories",
+      );
     } finally {
       setLoading(false);
     }
-  }
+  }, [API_URL, token]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   function handleOpenModal(category?: Category) {
     setSubmitError("");
@@ -100,15 +103,18 @@ export default function CategoryList() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(
+        setSubmitError(
           errorData.message || errorData.detail || "Lỗi khi lưu danh mục",
         );
+        return;
       }
 
       await fetchCategories();
       handleCloseModal();
-    } catch (err: any) {
-      setSubmitError(err.message || "Lỗi khi lưu danh mục");
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : "Lỗi khi lưu danh mục",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -142,15 +148,18 @@ export default function CategoryList() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(
+        setDeleteError(
           errorData.message || errorData.detail || "Lỗi khi xóa danh mục",
         );
+        return;
       }
 
       await fetchCategories();
       closeDeleteModal();
-    } catch (err: any) {
-      setDeleteError(err.message || "Lỗi khi xóa danh mục");
+    } catch (err) {
+      setDeleteError(
+        err instanceof Error ? err.message : "Lỗi khi xóa danh mục",
+      );
     } finally {
       setIsDeleting(false);
     }
@@ -354,7 +363,9 @@ export default function CategoryList() {
         title="Xóa danh mục"
         message={
           <>
-            Bạn có chắc chắn muốn xóa danh mục <strong>{categoryToDelete?.name}</strong>? Hành động này không thể hoàn tác.
+            Bạn có chắc chắn muốn xóa danh mục{" "}
+            <strong>{categoryToDelete?.name}</strong>? Hành động này không thể
+            hoàn tác.
           </>
         }
         confirmText="Xóa"
