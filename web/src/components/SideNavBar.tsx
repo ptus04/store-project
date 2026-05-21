@@ -135,8 +135,8 @@ export default function SideNavBar() {
               : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"
           }`}
         >
-          <span className="material-symbols-outlined" data-icon="group">
-            group
+          <span className="material-symbols-outlined" data-icon="campaign">
+            campaign
           </span>
           <span className="text-label-sm font-label-sm">Tin nổi bật</span>
         </button>

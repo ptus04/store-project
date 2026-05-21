@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import OrderStatsChart from "@components/dashboard/OrderStatsChart.tsx";
+import RevenueStatsChart from "@components/dashboard/RevenueStatsChart.tsx";
+
 
 interface DashboardStats {
   totalCustomers: number;
@@ -115,6 +117,7 @@ export default function Dashboard() {
         </div>
 
         <OrderStatsChart />
+        <RevenueStatsChart />
       </div>
     </main>
   );
