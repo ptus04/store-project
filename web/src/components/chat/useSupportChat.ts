@@ -18,6 +18,22 @@ export interface SupportSession {
   staffName?: string | null;
 }
 
+export function getSenderName(
+  msg: ChatMessage,
+  activeSession: SupportSession | undefined,
+  staffLabel: string,
+): string {
+  if (msg.sender === "STAFF") return staffLabel;
+  if (msg.sender === "AI") return "Chatbot (AI)";
+  if (msg.sender === "USER") {
+    return activeSession?.customerName &&
+      activeSession.customerName !== "Khách vãng lai"
+      ? activeSession.customerName
+      : "Khách hàng";
+  }
+  return "Khách hàng";
+}
+
 function getCurrentStaffName() {
   try {
     const userStr = localStorage.getItem("user");

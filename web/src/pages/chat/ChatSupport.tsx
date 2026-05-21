@@ -1,5 +1,8 @@
 import { useEffect, useRef } from "react";
-import { useSupportChat } from "@components/chat/useSupportChat.ts";
+import {
+  useSupportChat,
+  getSenderName,
+} from "@components/chat/useSupportChat.ts";
 
 export default function ChatSupport() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -148,6 +151,11 @@ export default function ChatSupport() {
                 ) : (
                   (messages[selectedSession] || []).map((msg, index) => {
                     const isStaff = msg.sender === "STAFF";
+                    const senderName = getSenderName(
+                      msg,
+                      activeSession,
+                      "Bạn (Nhân viên)",
+                    );
 
                     return (
                       <div
@@ -157,7 +165,7 @@ export default function ChatSupport() {
                         className={`flex max-w-[70%] flex-col ${isStaff ? "ml-auto items-end" : "mr-auto items-start"}`}
                       >
                         <span className="mr-1 mb-1 ml-1 text-[10px] font-medium text-neutral-400">
-                          {isStaff ? "Bạn (Nhân viên)" : "Khách hàng"}
+                          {senderName}
                         </span>
                         <div
                           className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${

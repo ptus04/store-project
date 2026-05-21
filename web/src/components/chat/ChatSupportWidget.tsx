@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useSupportChat } from "./useSupportChat";
+import { useSupportChat, getSenderName } from "./useSupportChat";
 
 export default function ChatSupportWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -123,6 +123,11 @@ export default function ChatSupportWidget() {
                   ) : (
                     (messages[selectedSession] || []).map((msg, index) => {
                       const isStaff = msg.sender === "STAFF";
+                      const senderName = getSenderName(
+                        msg,
+                        activeSession,
+                        "Bạn",
+                      );
 
                       return (
                         <div
@@ -136,7 +141,7 @@ export default function ChatSupportWidget() {
                           }`}
                         >
                           <span className="mr-1 mb-0.5 ml-1 text-[9px] font-medium text-neutral-400">
-                            {isStaff ? "Bạn" : "Khách hàng"}
+                            {senderName}
                           </span>
                           <div
                             className={`rounded-2xl px-3.5 py-2 text-xs leading-relaxed shadow-sm ${

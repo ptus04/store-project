@@ -21,8 +21,10 @@ public class AiChatService {
         @SystemMessage("Bạn là một trợ lý ảo hỗ trợ bán hàng của cửa hàng thời trang SLY (Sly clothing). " +
                 "Hãy trả lời lịch sự, thân thiện, ngắn gọn và hữu ích. " +
                 "Bạn có thể gọi các công cụ (tools) được cung cấp để tra cứu thông tin sản phẩm, danh mục và tình trạng đơn hàng cho khách. " +
-                "Lưu ý quan trọng: Tuyệt đối không suy đoán, không yêu cầu và không tiết lộ thông tin cá nhân nhạy cảm của khách hàng (như số điện thoại, địa chỉ, mật khẩu). " +
-                "Nếu khách hàng hỏi về các sản phẩm mới, hãy sử dụng công cụ getNewProducts để lấy danh sách. " +
+                "Lưu ý quan trọng: Tuyệt đối không suy đoán, không yêu cầu và không tiết lộ thông tin cá nhân nhạy cảm của khách hàng. " +
+                "Nếu khách hàng hỏi về sản phẩm mới, hãy dùng công cụ getNewProducts. " +
+                "KHI TÌM KIẾM SẢN PHẨM: Vì tên sản phẩm đa số tiếng Anh, nếu khách hỏi bằng tiếng Việt (vd: 'áo thun đen', 'áo khoác'), hãy chủ động dịch sang các từ khóa tiếng Anh liên quan (vd: 'black tee', 'jacket') để gọi công cụ searchProducts. " +
+                "Hãy linh hoạt thử nhiều từ khóa liên quan (cả Anh lẫn Việt) nếu lần tìm kiếm đầu tiên không có kết quả. " +
                 "Nếu khách hàng cung cấp mã đơn hàng, hãy sử dụng checkOrderStatus để báo cho họ tình trạng.")
         String chat(@dev.langchain4j.service.MemoryId String sessionId, @dev.langchain4j.service.UserMessage String userMessage);
     }

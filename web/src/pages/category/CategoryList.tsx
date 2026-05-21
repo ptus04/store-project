@@ -354,7 +354,9 @@ export default function CategoryList() {
         title="Xóa danh mục"
         message={
           <>
-            Bạn có chắc chắn muốn xóa danh mục <strong>{categoryToDelete?.name}</strong>? Hành động này không thể hoàn tác.
+            Bạn có chắc chắn muốn xóa danh mục{" "}
+            <strong>{categoryToDelete?.name}</strong>? Hành động này không thể
+            hoàn tác.
           </>
         }
         confirmText="Xóa"
