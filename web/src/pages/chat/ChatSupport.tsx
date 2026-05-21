@@ -148,6 +148,18 @@ export default function ChatSupport() {
                 ) : (
                   (messages[selectedSession] || []).map((msg, index) => {
                     const isStaff = msg.sender === "STAFF";
+                    let senderName = "Khách hàng";
+                    if (isStaff) {
+                      senderName = "Bạn (Nhân viên)";
+                    } else if (msg.sender === "AI") {
+                      senderName = "Chatbot (AI)";
+                    } else if (msg.sender === "USER") {
+                      senderName =
+                        activeSession?.customerName &&
+                        activeSession.customerName !== "Khách vãng lai"
+                          ? activeSession.customerName
+                          : "Khách hàng";
+                    }
 
                     return (
                       <div
@@ -157,7 +169,7 @@ export default function ChatSupport() {
                         className={`flex max-w-[70%] flex-col ${isStaff ? "ml-auto items-end" : "mr-auto items-start"}`}
                       >
                         <span className="mr-1 mb-1 ml-1 text-[10px] font-medium text-neutral-400">
-                          {isStaff ? "Bạn (Nhân viên)" : "Khách hàng"}
+                          {senderName}
                         </span>
                         <div
                           className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${

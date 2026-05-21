@@ -36,7 +36,7 @@ public class AiChatConfig {
         @Tool("Tìm kiếm sản phẩm theo tên hoặc từ khóa")
         @SuppressWarnings("unused")
         public List<ChatProductDto> searchProducts(String keyword) {
-            return productService.getProductsPageWithFilters(0, 5, "createdAt", null, keyword, null, null, false)
+            return productService.getProductsPageWithFilters(0, 10, "createdAt", null, keyword, null, null, false)
                     .getContent().stream()
                     .map(ChatProductDto::fromProductResponse)
                     .collect(Collectors.toList());

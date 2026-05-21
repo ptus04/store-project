@@ -123,6 +123,18 @@ export default function ChatSupportWidget() {
                   ) : (
                     (messages[selectedSession] || []).map((msg, index) => {
                       const isStaff = msg.sender === "STAFF";
+                      let senderName = "Khách hàng";
+                      if (isStaff) {
+                        senderName = "Bạn";
+                      } else if (msg.sender === "AI") {
+                        senderName = "Chatbot (AI)";
+                      } else if (msg.sender === "USER") {
+                        senderName =
+                          activeSession?.customerName &&
+                          activeSession.customerName !== "Khách vãng lai"
+                            ? activeSession.customerName
+                            : "Khách hàng";
+                      }
 
                       return (
                         <div
@@ -136,7 +148,7 @@ export default function ChatSupportWidget() {
                           }`}
                         >
                           <span className="mr-1 mb-0.5 ml-1 text-[9px] font-medium text-neutral-400">
-                            {isStaff ? "Bạn" : "Khách hàng"}
+                            {senderName}
                           </span>
                           <div
                             className={`rounded-2xl px-3.5 py-2 text-xs leading-relaxed shadow-sm ${
