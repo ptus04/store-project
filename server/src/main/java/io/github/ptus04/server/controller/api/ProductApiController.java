@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -39,22 +40,23 @@ public class ProductApiController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductResponse> createNewProduct(@Valid @RequestBody ProductCreateRequest createProductRequest) {
+    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductCreateRequest createProductRequest) {
         ProductResponse product = productService.createNewProduct(createProductRequest);
-        return ResponseEntity.created(URI.create("/api/products/" + product.id())).body(product);
+        URI location = UriComponentsBuilder.fromPath("/api/products/{id}").buildAndExpand(product.id()).toUri();
+        return ResponseEntity.created(location).body(product);
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<ProductResponse> createNewProduct(
-            @PathVariable String id,
+    public ResponseEntity<ProductResponse> updateProduct(
+            @PathVariable UUID id,
             @RequestBody ProductUpdateRequest productUpdateRequest) {
-        ProductResponse product = productService.updateProduct(UUID.fromString(id), productUpdateRequest);
+        ProductResponse product = productService.updateProduct(id, productUpdateRequest);
         return ResponseEntity.ok(product);
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<ProductResponse> deleteProduct(@PathVariable String id) {
-        ProductResponse product = productService.deleteProduct(UUID.fromString(id));
+    public ResponseEntity<ProductResponse> deleteProduct(@PathVariable UUID id) {
+        ProductResponse product = productService.deleteProduct(id);
         return ResponseEntity.ok(product);
     }
 }

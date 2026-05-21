@@ -55,8 +55,14 @@ public final class ProductSpecifications {
         if (queryText == null || queryText.isBlank()) {
             return null;
         }
-        String normalized = queryText.trim().toLowerCase();
-        return (root, query, builder) -> builder.like(builder.lower(root.get("name")), "%" + normalized + "%");
+        String[] words = queryText.trim().toLowerCase().split("\\s+");
+        return (root, query, builder) -> {
+            jakarta.persistence.criteria.Predicate[] predicates = new jakarta.persistence.criteria.Predicate[words.length];
+            for (int i = 0; i < words.length; i++) {
+                predicates[i] = builder.like(builder.lower(root.get("name")), "%" + words[i] + "%");
+            }
+            return builder.and(predicates);
+        };
     }
 
     public static Specification<Product> priceAtLeast(BigDecimal minPrice) {

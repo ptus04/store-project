@@ -89,7 +89,7 @@ public class OrderServiceImpl implements OrderService {
                             "Sản phẩm " + product.getName() + " (" + productSize.getName() + ") không đủ hàng tồn kho!");
                 }
                 productSize.setInStock(productSize.getInStock() - detail.quantity());
-                product.setInStock(product.getInStock() - detail.quantity());
+                product.recalculateProductInStock();
             }
         }
 

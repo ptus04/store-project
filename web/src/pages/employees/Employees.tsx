@@ -1,5 +1,6 @@
 import type { FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Employee {
   id: string;
@@ -49,6 +50,8 @@ const ROLE_BADGE_COLORS: Record<string, string> = {
   ADMIN: "bg-red-100 text-red-800 border border-red-300",
   EMPLOYEE: "bg-blue-100 text-blue-800 border border-blue-300",
 };
+
+const ALLOWED_EMPLOYEE_ROLES = new Set<AccountRole>(["ADMIN", "EMPLOYEE"]);
 
 function parseJwtPayload(token: string | null): Record<string, unknown> {
   if (!token) return {};
@@ -175,6 +178,13 @@ export default function Employees() {
   const token = localStorage.getItem("token");
   const currentUser = useMemo(() => readCurrentUser(token), [token]);
   const isCurrentUserAdmin = currentUser.role === "ADMIN";
+  const navigate = useNavigate();
+
+  function logoutAndRedirect() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  }
 
   useEffect(() => {
     fetchEmployees();
@@ -194,13 +204,22 @@ export default function Employees() {
       });
 
       if (!response.ok) {
+        if (response.status === 403) {
+          // If server indicates current user is disabled, force logout
+          logoutAndRedirect();
+          return;
+        }
         setError("Không thể tải danh sách tài khoản");
         setEmployees([]);
         return;
       }
 
       const data: Employee[] = await response.json();
-      setEmployees(data);
+      setEmployees(
+        data.filter((employee) =>
+          ALLOWED_EMPLOYEE_ROLES.has(employee.role as AccountRole),
+        ),
+      );
       setError("");
     } catch (err) {
       console.error("Error fetching employees:", err);
@@ -388,6 +407,10 @@ export default function Employees() {
       });
 
       if (!response.ok) {
+        if (response.status === 403) {
+          logoutAndRedirect();
+          return;
+        }
         const errorData = await response.json().catch(() => ({}));
         handleServerError(errorData.message || "");
         return;
@@ -436,6 +459,10 @@ export default function Employees() {
       });
 
       if (!response.ok) {
+        if (response.status === 403) {
+          logoutAndRedirect();
+          return;
+        }
         setError("Không thể cập nhật trạng thái tài khoản");
         return;
       }
@@ -496,9 +523,7 @@ export default function Employees() {
                     <option value="ADMIN">Quản trị viên</option>
                     <option value="EMPLOYEE">Nhân viên</option>
                   </select>
-                  <span className="material-symbols-outlined text-secondary pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
-                    expand_more
-                  </span>
+                  {/* removed dropdown icon to simplify UI */}
                 </div>
 
                 <div className="group relative">
@@ -511,12 +536,10 @@ export default function Employees() {
                     <option value="ACTIVE_FIRST">Hoạt động trước</option>
                     <option value="DISABLED_FIRST">Đã vô hiệu trước</option>
                   </select>
-                  <span className="material-symbols-outlined text-secondary pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
-                    expand_more
-                  </span>
+                  {/* removed dropdown icon to simplify UI */}
                 </div>
 
-                <div className="relative min-w-[260px] flex-1">
+                <div className="relative min-w-65 flex-1">
                   <input
                     type="text"
                     value={searchTerm}
@@ -524,9 +547,7 @@ export default function Employees() {
                     placeholder="Tìm theo tên, SĐT hoặc email"
                     className="border-outline/20 focus:border-primary focus:ring-primary/20 w-full rounded-lg border bg-white px-4 py-3 pr-10 shadow-md transition-all outline-none"
                   />
-                  <span className="material-symbols-outlined text-secondary pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
-                    search
-                  </span>
+                  {/* removed search icon to simplify UI */}
                 </div>
 
                 {isCurrentUserAdmin && (
@@ -904,7 +925,7 @@ function EmployeeTable({
       <table className="w-full">
         <thead>
           <tr className="border-primary/20 from-primary/5 to-primary/10 border-b-2 bg-linear-to-r">
-            <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
+            <th className="w-48 text-secondary px-4 py-4 text-left text-sm font-bold tracking-wide uppercase">
               Họ Tên
             </th>
             <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
@@ -913,7 +934,7 @@ function EmployeeTable({
             <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
               Email
             </th>
-            <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
+            <th className="w-56 text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
               Vai Trò
             </th>
             <th className="text-secondary px-6 py-4 text-left text-sm font-bold tracking-wide uppercase">
@@ -1025,7 +1046,8 @@ function EmployeeRow({
       </td>
       <td className="px-6 py-4 text-sm">
         <span
-          className={`inline-block rounded-full px-3 py-1 text-xs font-bold whitespace-nowrap ${ROLE_BADGE_COLORS[employee.role] || "border bg-gray-100 text-gray-800"}`}
+          style={{ maxWidth: 180 }}
+          className={`inline-block truncate rounded-full px-3 py-1 text-xs font-bold ${ROLE_BADGE_COLORS[employee.role] || "border bg-gray-100 text-gray-800"}`}
         >
           {ROLE_LABELS[employee.role] || employee.role}
         </span>
@@ -1033,19 +1055,20 @@ function EmployeeRow({
       <td className="px-6 py-4 text-sm">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            {isCurrentUserAdmin ? (
-              <button
-                type="button"
-                onClick={() => void toggleDisableAccount(employee)}
-                disabled={!canToggle}
-                className={`focus:ring-primary/30 relative inline-flex h-6 w-11 items-center rounded-full border transition-all focus:ring-2 focus:outline-none ${isDisabled ? "border-rose-300 bg-rose-500" : "border-emerald-300 bg-emerald-500"} ${canToggle ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}
-                title={title}
-              >
-                <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${isDisabled ? "translate-x-1" : "translate-x-5"}`}
-                />
-              </button>
-            ) : (
+                {isCurrentUserAdmin ? (
+                  <button
+                    type="button"
+                    onClick={() => void toggleDisableAccount(employee)}
+                    disabled={!canToggle}
+                    title={title}
+                    className={`focus:ring-primary/30 relative inline-flex h-6 w-11 items-center rounded-full border transition-all focus:ring-2 focus:outline-none ${isDisabled ? "border-rose-300 bg-rose-500" : "border-emerald-300 bg-emerald-500"} ${canToggle ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}
+                    style={canToggle ? undefined : { cursor: "not-allowed" }}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${isDisabled ? "translate-x-1" : "translate-x-5"}`}
+                    />
+                  </button>
+                ) : (
               <span
                 className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${isDisabled ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}
               >

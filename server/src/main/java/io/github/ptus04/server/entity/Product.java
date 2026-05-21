@@ -1,14 +1,12 @@
 package io.github.ptus04.server.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.*;
 import org.hibernate.generator.EventType;
 import org.jspecify.annotations.NonNull;
 
@@ -71,11 +69,13 @@ public class Product {
     @NonNull
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
+    @BatchSize(size = 5)
     private Set<ProductImage> productImages = new LinkedHashSet<>();
 
     @NonNull
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
+    @BatchSize(size = 3)
     private Set<ProductSize> productSizes = new LinkedHashSet<>();
 
     @NonNull
@@ -85,5 +85,14 @@ public class Product {
             inverseJoinColumns = @JoinColumn(name = "category_id"))
     @OrderBy("id ASC")
     private Set<Category> categories = new LinkedHashSet<>();
+
+    /**
+     * Nếu SP có size thì tính tổng số lượng tồn kho từ các size, nếu không thì dùng số lượng tồn kho do người dùng nhập
+     */
+    public void recalculateProductInStock() {
+        if (!productSizes.isEmpty()) {
+            setInStock(productSizes.stream().mapToInt(ProductSize::getInStock).sum());
+        }
+    }
 
 }

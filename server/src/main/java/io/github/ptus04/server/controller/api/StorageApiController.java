@@ -15,7 +15,7 @@ public class StorageApiController {
     private final StorageService storageService;
 
     @GetMapping(path = "/{containerName}/sas")
-    public ResponseEntity<StorageSasResponse> getBlobUploadUrl(@PathVariable String containerName) {
+    public ResponseEntity<StorageSasResponse> createBlobUploadUrl(@PathVariable String containerName) {
         return ResponseEntity.ok().body(storageService.createBlobUploadUrl(containerName));
     }
 

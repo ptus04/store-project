@@ -17,11 +17,11 @@
                th:href="@{${item.link()}}">
                 <picture>
                     <source media="(orientation: portrait)"
-                            th:srcset="@{${imageContainerUrl} + 'carousel/' + ${item.portraitImage()}}"/>
+                            th:srcset="@{${carouselContainerUrl} + ${item.portraitImage()}}"/>
                     <img class="h-full w-full object-cover"
                          loading="lazy"
                          th:alt="${item.title()}"
-                         th:src="@{${imageContainerUrl} + 'carousel/' + ${item.landscapeImage()}}"/>
+                         th:src="@{${carouselContainerUrl} + ${item.landscapeImage()}}"/>
                 </picture>
 
                 <div class="absolute right-0 bottom-0 left-0 bg-linear-to-t from-black to-75% pt-9 pr-4 pb-6 pl-4 text-white"
@@ -65,14 +65,16 @@
     <section class="container mx-auto px-3 pt-5">
         <h1 class="text-2xl">Sản phẩm mới</h1>
         <div class="flex flex-wrap">
-            <div class="w-full p-2 text-center md:w-1/4 lg:w-1/5" th:each="product:${newProducts}">
-                <a class="relative" th:href="@{/products/{id}(id=${product.id()})}">
-                    <div class="relative">
+            <div class="w-full p-2 text-center md:w-1/4 lg:w-1/5 flex flex-col justify-between"
+                 th:each="product:${newProducts}">
+                <a class="relative flex flex-col justify-between h-full"
+                   th:href="@{/products/{id}(id=${product.id()})}">
+                    <div class="relative flex flex-1">
                         <p class="absolute top-1/10 left-1/10 rounded-full bg-red-500 px-3 py-1 text-white"
                            th:if="${product.discount() != 0}"
                            th:text="${#numbers.formatDecimal(product.discount() * 100, 0, 0)} + '%'">
                         </p>
-                        <img class="w-full"
+                        <img class="w-full object-contain"
                              loading="lazy"
                              th:alt="${product.name()}"
                              th:src="@{${imageContainerUrl} + ${product.productImages().get(0).file()}}"/>
@@ -94,7 +96,7 @@
                        th:text="${#numbers.formatDecimal(product.price() * (1 - (product.discount())), 0, 'POINT', 0, 'COMMA') + ' ₫'}">
                     </p>
                 </div>
-                <p class="m-0 font-bold"
+                <p class="m-0 font-bold mt-5"
                    th:if="${product.discount() == 0}"
                    th:text="${#numbers.formatDecimal(product.price(), 0, 'POINT', 0, 'COMMA') + ' ₫'}">
                 </p>

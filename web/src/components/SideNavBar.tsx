@@ -98,6 +98,16 @@ export default function SideNavBar() {
           <span className="text-label-sm font-label-sm">Danh mục</span>
         </button>
 
+        <button
+          onClick={() => navigate("/products")}
+          className={`${location.pathname.startsWith("/products") || location.pathname.startsWith("/product") ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4" : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"} flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200`}
+        >
+          <span className="material-symbols-outlined" data-icon="inventory">
+            inventory_2
+          </span>
+          <span className="text-label-sm font-label-sm">Sản phẩm</span>
+        </button>
+
         {/* Orders */}
         <button
           onClick={() => navigate("/orders")}
@@ -130,7 +140,6 @@ export default function SideNavBar() {
 
         <button
           onClick={() => navigate("/customer")}
-          // className="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200"
           className={`flex w-full items-center gap-3 px-4 py-3 transition-colors duration-200 ${
             isActive("/customer")
               ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4"
@@ -141,6 +150,20 @@ export default function SideNavBar() {
             group
           </span>
           <span className="text-label-sm font-label-sm">Khách hàng</span>
+        </button>
+
+        <button
+          onClick={() => navigate("/carousel")}
+          className={`flex w-full items-center gap-3 px-4 py-3 transition-colors duration-200 ${
+            isActive("/carousel")
+              ? "bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed border-primary border-l-4"
+              : "text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest"
+          }`}
+        >
+          <span className="material-symbols-outlined" data-icon="campaign">
+            campaign
+          </span>
+          <span className="text-label-sm font-label-sm">Tin nổi bật</span>
         </button>
       </div>
 
