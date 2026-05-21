@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,14 +16,21 @@ import java.util.UUID;
 public class Cart implements Serializable {
     private List<CartItem> items = new ArrayList<>();
 
-    public Optional<CartItem> findItem(UUID productSizeId) {
+    public Optional<CartItem> findItem(UUID productId, UUID productSizeId) {
         return items.stream()
-                .filter(item -> item.getProductSizeId().equals(productSizeId))
+                .filter(item -> Objects.equals(item.getProductId(), productId)
+                        && Objects.equals(item.getProductSizeId(), productSizeId))
                 .findFirst();
     }
 
-    public void removeItem(UUID productSizeId) {
-        items.removeIf(item -> item.getProductSizeId().equals(productSizeId));
+    public Optional<CartItem> findItemByItemId(UUID itemId) {
+        return items.stream()
+                .filter(item -> item.getItemId().equals(itemId))
+                .findFirst();
+    }
+
+    public void removeItem(UUID itemId) {
+        items.removeIf(item -> item.getItemId().equals(itemId));
     }
 
     public int getTotalQuantity() {

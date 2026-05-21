@@ -6,6 +6,7 @@ import io.github.ptus04.server.entity.Product;
 import io.github.ptus04.server.entity.ProductSize;
 import io.github.ptus04.server.exception.CartStockException;
 import io.github.ptus04.server.repository.ProductSizeRepository;
+import io.github.ptus04.server.repository.ProductRepository;
 import io.github.ptus04.server.service.CartService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class CartServiceImpl implements CartService {
     private static final String CART_SESSION_KEY = "cart";
 
+    private final ProductRepository productRepository;
     private final ProductSizeRepository productSizeRepository;
 
     @Override
@@ -38,18 +40,19 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional(readOnly = true)
-    public Cart addItem(HttpSession session, UUID productSizeId, int quantity) {
+    public Cart addItem(HttpSession session, UUID productId, UUID productSizeId, int quantity) {
         validatePositiveQuantity(quantity);
 
-        ProductSize productSize = getProductSize(productSizeId);
+        Product product = getProduct(productId);
+        ProductSize productSize = getProductSize(product, productSizeId);
         Cart cart = getCart(session);
-        int currentQuantity = cart.findItem(productSizeId)
+        int currentQuantity = cart.findItem(product.getId(), productSizeId)
                 .map(CartItem::getQuantity)
                 .orElse(0);
         int nextQuantity = currentQuantity + quantity;
 
-        validateStock(productSize, nextQuantity);
-        CartItem item = cart.findItem(productSizeId)
+        validateStock(product, productSize, nextQuantity);
+        CartItem item = cart.findItem(product.getId(), productSizeId)
                 .orElseGet(() -> {
                     CartItem newItem = new CartItem();
                     newItem.setProductSizeId(productSizeId);
@@ -57,7 +60,7 @@ public class CartServiceImpl implements CartService {
                     return newItem;
                 });
 
-        fillItem(item, productSize);
+        fillItem(item, product, productSize);
         item.setQuantity(nextQuantity);
         session.setAttribute(CART_SESSION_KEY, cart);
         return cart;
@@ -65,32 +68,52 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional(readOnly = true)
-    public Cart updateItemQuantity(HttpSession session, UUID productSizeId, int quantity) {
+    public Cart updateItemQuantity(HttpSession session, UUID itemId, int quantity) {
         validatePositiveQuantity(quantity);
 
-        ProductSize productSize = getProductSize(productSizeId);
-        validateStock(productSize, quantity);
-
         Cart cart = getCart(session);
-        CartItem item = cart.findItem(productSizeId)
+        CartItem item = cart.findItemByItemId(itemId)
                 .orElseThrow(() -> new EntityNotFoundException("Cart item not found"));
-        fillItem(item, productSize);
+        Product product = getProduct(item.getProductId());
+        ProductSize productSize = getProductSize(product, item.getProductSizeId());
+        validateStock(product, productSize, quantity);
+        fillItem(item, product, productSize);
         item.setQuantity(quantity);
         session.setAttribute(CART_SESSION_KEY, cart);
         return cart;
     }
 
     @Override
-    public Cart removeItem(HttpSession session, UUID productSizeId) {
+    public Cart removeItem(HttpSession session, UUID itemId) {
         Cart cart = getCart(session);
-        cart.removeItem(productSizeId);
+        cart.removeItem(itemId);
         session.setAttribute(CART_SESSION_KEY, cart);
         return cart;
     }
 
-    private ProductSize getProductSize(UUID productSizeId) {
-        return productSizeRepository.findById(productSizeId)
+    private Product getProduct(UUID productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+    }
+
+    private ProductSize getProductSize(Product product, UUID productSizeId) {
+        if (product.getProductSizes().isEmpty()) {
+            if (productSizeId != null) {
+                throw new EntityNotFoundException("Product size not found");
+            }
+            return null;
+        }
+
+        if (productSizeId == null) {
+            throw new EntityNotFoundException("Product size is required");
+        }
+
+        ProductSize productSize = productSizeRepository.findById(productSizeId)
                 .orElseThrow(() -> new EntityNotFoundException("Product size not found"));
+        if (!productSize.getProduct().getId().equals(product.getId())) {
+            throw new EntityNotFoundException("Product size not found");
+        }
+        return productSize;
     }
 
     private void validatePositiveQuantity(int quantity) {
@@ -99,22 +122,22 @@ public class CartServiceImpl implements CartService {
         }
     }
 
-    private void validateStock(ProductSize productSize, int quantity) {
-        int inStock = productSize.getInStock();
+    private void validateStock(Product product, ProductSize productSize, int quantity) {
+        int inStock = productSize == null ? product.getInStock() : productSize.getInStock();
         if (inStock <= 0) {
-            throw CartStockException.outOfStock(productSize.getName());
+            throw CartStockException.outOfStock(productSize == null ? product.getName() : productSize.getName());
         }
         if (quantity > inStock) {
-            throw CartStockException.insufficientStock(productSize.getName(), inStock);
+            throw CartStockException.insufficientStock(productSize == null ? product.getName() : productSize.getName(), inStock);
         }
     }
 
-    private void fillItem(CartItem item, ProductSize productSize) {
-        Product product = productSize.getProduct();
+    private void fillItem(CartItem item, Product product, ProductSize productSize) {
         item.setProductId(product.getId());
         item.setProductName(product.getName());
-        item.setSizeName(productSize.getName());
-        item.setInStock(productSize.getInStock());
+        item.setProductSizeId(productSize == null ? null : productSize.getId());
+        item.setSizeName(productSize == null ? null : productSize.getName());
+        item.setInStock(productSize == null ? product.getInStock() : productSize.getInStock());
         item.setUnitPrice(calculateUnitPrice(product));
         item.setImageFile(product.getProductImages()
                 .stream()

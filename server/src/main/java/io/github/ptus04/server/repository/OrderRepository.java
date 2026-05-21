@@ -1,6 +1,9 @@
 package io.github.ptus04.server.repository;
 
 import io.github.ptus04.server.entity.Order;
+import io.github.ptus04.server.enums.OrderStatusEnum;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -35,4 +38,75 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     );
 
     Optional<Order> findByOrderCode(String orderCode);
+
+    Optional<Order> findByIdAndUser_Id(UUID id, UUID userId);
+    @Query("""
+        SELECT o
+        FROM Order o
+        WHERE (
+            :status IS NULL
+            OR o.status = :status
+        )
+        AND (
+            :search IS NULL
+            OR :search = ''
+            OR LOWER(o.orderCode) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR LOWER(o.user.name) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR LOWER(o.user.phone) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR LOWER(COALESCE(o.user.email, '')) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR LOWER(o.orderShippingAddress.name) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR LOWER(o.orderShippingAddress.phone) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR (
+                :phoneSearch IS NOT NULL
+                AND :phoneSearch <> ''
+                AND (
+                    REPLACE(REPLACE(REPLACE(o.user.phone, ' ', ''), '-', ''), '.', '') LIKE CONCAT('%', :phoneSearch, '%')
+                    OR REPLACE(REPLACE(REPLACE(o.orderShippingAddress.phone, ' ', ''), '-', ''), '.', '') LIKE CONCAT('%', :phoneSearch, '%')
+                )
+            )
+            OR EXISTS (
+                SELECT d.id
+                FROM OrderDetail d
+                WHERE d.order = o
+                  AND LOWER(d.product.name) LIKE LOWER(CONCAT('%', :search, '%'))
+            )
+        )
+       """)
+    Page<Order> searchOrders(@Param("status") OrderStatusEnum status,
+                             @Param("search") String search,
+                             @Param("phoneSearch") String phoneSearch,
+                             Pageable pageable);
+
+    @Query("""
+                SELECT o
+                FROM Order o
+                WHERE o.user.id = :userId
+                  AND (
+                    :search IS NULL OR :search = ''
+                    OR LOWER(o.orderCode) LIKE LOWER(CONCAT('%', :search, '%'))
+                    OR LOWER(o.user.name) LIKE LOWER(CONCAT('%', :search, '%'))
+                    OR LOWER(o.user.phone) LIKE LOWER(CONCAT('%', :search, '%'))
+                    OR LOWER(COALESCE(o.user.email, '')) LIKE LOWER(CONCAT('%', :search, '%'))
+                    OR LOWER(o.orderShippingAddress.name) LIKE LOWER(CONCAT('%', :search, '%'))
+                    OR LOWER(o.orderShippingAddress.phone) LIKE LOWER(CONCAT('%', :search, '%'))
+                    OR (
+                        :phoneSearch IS NOT NULL
+                        AND :phoneSearch <> ''
+                        AND (
+                            REPLACE(REPLACE(REPLACE(o.user.phone, ' ', ''), '-', ''), '.', '') LIKE CONCAT('%', :phoneSearch, '%')
+                            OR REPLACE(REPLACE(REPLACE(o.orderShippingAddress.phone, ' ', ''), '-', ''), '.', '') LIKE CONCAT('%', :phoneSearch, '%')
+                        )
+                    )
+                    OR EXISTS (
+                        SELECT d.id
+                        FROM OrderDetail d
+                        WHERE d.order = o
+                          AND LOWER(d.product.name) LIKE LOWER(CONCAT('%', :search, '%'))
+                    )
+                  )
+            """)
+    Page<Order> searchOrdersByUserId(@Param("userId") UUID userId,
+                                     @Param("search") String search,
+                                     @Param("phoneSearch") String phoneSearch,
+                                     Pageable pageable);
 }

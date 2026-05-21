@@ -19,6 +19,10 @@ public class CartItem implements Serializable {
     private int quantity;
     private int inStock;
 
+    public UUID getItemId() {
+        return productSizeId != null ? productSizeId : productId;
+    }
+
     public BigDecimal getSubtotal() {
         return unitPrice.multiply(BigDecimal.valueOf(quantity));
     }

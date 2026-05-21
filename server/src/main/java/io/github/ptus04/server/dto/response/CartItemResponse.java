@@ -8,6 +8,7 @@ import java.util.UUID;
  * DTO for Cart Item
  */
 public record CartItemResponse(
+        UUID itemId,
         UUID productId,
         UUID productSizeId,
         String productName,
