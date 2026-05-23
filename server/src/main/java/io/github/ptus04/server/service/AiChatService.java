@@ -8,11 +8,15 @@ import dev.langchain4j.service.SystemMessage;
 import io.github.ptus04.server.config.AiChatConfig.ProductTools;
 import io.github.ptus04.server.entity.ChatMessage;
 import io.github.ptus04.server.repository.ChatMessageRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class AiChatService {
+    private static final int MAX_RETRY_ATTEMPTS = 3;
+    private static final long INITIAL_BACKOFF_MS = 500L;
 
     private final Assistant assistant;
     private final ChatMessageRepository chatMessageRepository;
@@ -56,8 +60,7 @@ public class AiChatService {
         userMsg.setContent(message);
         chatMessageRepository.save(userMsg);
 
-        // Generate AI reply
-        String reply = assistant.chat(sessionId, message);
+        String reply = generateReplyWithRetry(sessionId, message);
 
         // Save AI reply
         ChatMessage aiMsg = new ChatMessage();
@@ -67,5 +70,36 @@ public class AiChatService {
         chatMessageRepository.save(aiMsg);
 
         return reply;
+    }
+
+    private String generateReplyWithRetry(String sessionId, String message) {
+        RuntimeException lastException = null;
+
+        for (int attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+            try {
+                return assistant.chat(sessionId, message);
+            } catch (RuntimeException ex) {
+                lastException = ex;
+                if (attempt == MAX_RETRY_ATTEMPTS) {
+                    break;
+                }
+
+                long backoffMs = INITIAL_BACKOFF_MS * (1L << (attempt - 1));
+                log.warn("AI chat request failed on attempt {}/{}. Retrying in {} ms.",
+                        attempt, MAX_RETRY_ATTEMPTS, backoffMs, ex);
+                sleepBeforeRetry(backoffMs);
+            }
+        }
+
+        throw lastException;
+    }
+
+    private void sleepBeforeRetry(long backoffMs) {
+        try {
+            Thread.sleep(backoffMs);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Retry interrupted", ex);
+        }
     }
 }
