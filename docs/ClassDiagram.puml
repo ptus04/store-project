@@ -61,11 +61,11 @@ class OrderShippingAddress {
   + toAddressString(): String
 }
 enum OrderStatusEnum << enumeration >> {
-  + SHIPPING
-  + COMPLETED
   + UNPAID
   + PAID
   + PACKAGING
+  + SHIPPING
+  + COMPLETED
   + REFUNDED
   + CANCELLED
 }
@@ -142,9 +142,9 @@ enum UserGenderEnum << enumeration >> {
   + FEMALE
 }
 enum UserRoleEnum << enumeration >> {
+  + CUSTOMER
   + EMPLOYEE
   + ADMIN
-  + CUSTOMER
 }
 
 Category        "categories\n0..*" -- "products\n0..*" Product
