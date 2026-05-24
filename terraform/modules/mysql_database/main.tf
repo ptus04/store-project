@@ -1,6 +1,8 @@
 resource "random_string" "administrator_login" {
-  length           = 10
-  override_special = "_"
+  length  = 12
+  special = false
+  numeric = false
+  upper   = false
 }
 
 resource "random_password" "administrator_password" {
@@ -29,6 +31,6 @@ resource "azurerm_mysql_flexible_server_firewall_rule" "store" {
   name                = "allow-app"
   resource_group_name = var.resource_group_name
   server_name         = azurerm_mysql_flexible_server.store.name
-  start_ip_address    = "10.0.0.0"
+  start_ip_address    = "20.0.0.0"
   end_ip_address      = "239.0.0.0"
 }
