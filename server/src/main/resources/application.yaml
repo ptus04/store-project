@@ -48,6 +48,20 @@ custom:
     bank: ${SEPAY_BANK}
     username: ${SEPAY_USERNAME}
     password: ${SEPAY_PASSWORD}
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    capacity: ${RATE_LIMIT_CAPACITY:120}
+    window: ${RATE_LIMIT_WINDOW:1m}
+    policies:
+      - path-prefix: /api/auth/login
+        capacity: ${RATE_LIMIT_AUTH_CAPACITY:10}
+        window: ${RATE_LIMIT_AUTH_WINDOW:1m}
+      - path-prefix: /api/chat
+        capacity: ${RATE_LIMIT_CHAT_CAPACITY:20}
+        window: ${RATE_LIMIT_CHAT_WINDOW:1m}
+      - path-prefix: /api/support
+        capacity: ${RATE_LIMIT_SUPPORT_CAPACITY:60}
+        window: ${RATE_LIMIT_SUPPORT_WINDOW:1m}
 
 jwt:
   secret: ${JWT_SECRET}
