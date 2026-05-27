@@ -25,6 +25,16 @@ spring:
     azure:
       storage:
         connection-string: ${AZURE_STORAGE_CONNECTION_STRING}
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    listener:
+      simple:
+        retry:
+          enabled: true
+          multiplier: 2.0
 custom:
   twilio:
     account-sid: ${TWILIO_ACCOUNT_SID}

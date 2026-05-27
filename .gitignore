@@ -299,4 +299,4 @@ sonarlint.xml
 copilot.data.migration.ask2agent.xml
 db-forest-config.xml
 .idea/data_source_mapping.xml
-docs/private/**
+.docs/private/**

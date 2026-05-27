@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: store-server
+  threads:
+    virtual:
+      enabled: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    listener:
+      simple:
+        retry:
+          enabled: true
+          multiplier: 2.0
+
+management:
+  endpoint:
+    health:
+      show-components: always
+      show-details: always
+
+server:
+  port: 8081
