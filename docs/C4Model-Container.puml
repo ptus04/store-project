@@ -2,14 +2,15 @@
 !include <C4/C4_Container>
 
 title SLY Clothing Store Project - Container Diagram
+
 Person(guest, "Guest", "Khách vãng lai")
 Person(customer, "Customer", "Khách hàng")
 Person(employee, "Employee", "Nhân viên bán hàng")
 Person(admin, "Admin", "Chủ cửa hàng")
 
-System_Boundary(storeSystem, "Store System") {
+System_Boundary(storeSystem, "SLY Store System") {
     Container(webAdmin, "Web Admin", "React and TypeScript", "Giao diện web admin")
-    Container(webCustomer, "Server", "Spring Boot with Thymeleaf", "Giao diện khách hàng và REST API Server")
+    Container(server, "Server", "Spring Boot with Thymeleaf", "Giao diện khách hàng và REST API Server")
 }
 
 System_Ext(sepay, "SePay Payment Gateway", "Cổng thanh toán")
@@ -18,19 +19,22 @@ System_Ext(twilio, "Twilio Verify", "Dịch vụ xác thực SMS")
 
 System_Boundary(azure, "Azure Managed Services") {
     ContainerDb_Ext(azureMySQL, "SQL Database", "Azure Database for MySQL", "Cơ sở dữ liệu")
-    ContainerDb_Ext(azureBlob, "Object storage", "Azure Blob Storage", "Lưu trữ hình ảnh")
+    Container_Ext(azureBlob, "Object storage", "Azure Blob Storage", "Lưu trữ hình ảnh")
     ContainerDb_Ext(azureRedis, "Redis Cache", "Azure Managed Redis", "Lưu trữ Session / Cache")
 }
 
-Rel(guest, webCustomer, "Xem sản phẩm", "HTTPS")
-Rel(customer, webCustomer, "Đặt hàng, chat", "HTTPS / WSS")
-Rel(employee, webAdmin, "Xử lý đơn hàng, chat tư vấn", "HTTPS / WSS")
+Rel(guest, server, "Xem sản phẩm", "HTTPS")
+Rel(customer, server, "Đặt hàng, chat", "HTTPS / WSS")
+Rel(employee, webAdmin, "Xử lý đơn hàng, chat", "HTTPS / WSS")
 Rel(admin, webAdmin, "Quản lý sản phẩm", "HTTPS / WSS")
-Rel(webAdmin, webCustomer, "Gọi REST API", "HTTPS")
-Rel(webCustomer, azureRedis, "Session, cache", "HTTPS")
-Rel(webCustomer, azureMySQL, "CRUD dữ liệu", "JDBC / ORM")
-Rel(webCustomer, azureBlob, "Upload/download hình ảnh", "Azure SDK / HTTPS")
-Rel(webCustomer, gmail, "Gửi email xác nhận", "SMTP")
-Rel(sepay, webCustomer, "Gửi Webhook thanh toán", "HTTPS POST")
-Rel(webCustomer, twilio, "Gửi OTP")
+
+Rel(webAdmin, server, "Gọi REST API", "HTTPS")
+
+Rel(server, azureRedis, "Session, cache", "HTTPS")
+Rel(server, azureMySQL, "CRUD dữ liệu", "JDBC / ORM")
+Rel(server, azureBlob, "Upload/download hình ảnh", "Azure SDK / HTTPS")
+Rel(server, gmail, "Gửi email xác nhận", "SMTP")
+Rel(server, twilio, "Gửi OTP", "Twilio SDK / HTTPS")
+
+Rel_U(sepay, server, "Gửi Webhook thanh toán", "HTTPS POST")
 @enduml

@@ -1,0 +1,63 @@
+@startuml C4Model-Deployment
+!include <C4/C4_Deployment>
+
+!include <azure/AzureCommon>
+!include <azure/Management/AzureResourceGroups>
+!include <azure/Compute/AzureAppServicePlan>
+!include <azure/Compute/AzureAppService>
+!include <azure/Databases/AzureDatabaseForMySQL>
+!include <azure/Databases/AzureRedisCache>
+!include <azure/Storage/AzureStorage>
+!include <azure/Storage/AzureBlobStorage>
+
+!include <logos/docker-icon>
+!include <logos/twilio-icon>
+!include <logos/google-gmail>
+
+!include <tupadr3/common>
+!include <office/Concepts/globe_internet>
+
+title SLY Clothing Store Project - Deployment Diagram
+
+Node(internet, "<$globe_internet,color=#4285F4>\nInternet", "Users and Browsers")
+Node(dockerhub, "<$docker-icon,color=#4285F4>\nDocker Hub", "Image registry")
+Node(sepay, "<img:https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHAkUmtCLwnn7w7YdFtAgI1dLbECX5dY4DmA&s{scale=0.25}>\nSePay Payment Gateway", "Cổng thanh toán")
+Node(gmail, "<$google-gmail,color=#4285F4>\nGmail SMTP Service", "Dịch vụ email")
+Node(twilio, "<$twilio-icon,color=#4285F4>\nTwilio Verify", "Dịch vụ xác thực SMS")
+
+AzureResourceGroups(azure_rg, "Azure Resource Group", "Southeast Asia") {
+  AzureAppServicePlan(app_service_plan, "App Service Plan", "B2 (Linux)") {
+    AzureAppService(server, "Server", "Docker container", "phungtu081/store:latest")
+    AzureAppService(web_admin, "Web Admin", "Docker container", "phungtu081/store-admin:latest")
+  }
+
+  AzureDatabaseForMySQL(mysql_node, "Azure Database for MySQL\n(Flexible Server)", "MySQL 8.0") {
+    AzureDatabaseForMySQL(mysql_db, "storedb", "MySQL")
+  }
+
+  AzureRedisCache(redis_cache, "Azure Managed Redis", "Balanced_B0")
+
+  AzureStorage(storage_account, "Azure Storage Account", "Storage Account") {
+    AzureBlobStorage(storage_blob, "Blob containers", "Blob container", "images, carousel")
+  }
+}
+
+Rel(internet, web_admin, "HTTPS", "Browser")
+Rel(internet, server, "HTTPS", "Browser")
+
+Rel_L(web_admin, server, "HTTPS", "Gọi API")
+
+Rel(server, storage_blob, "PUT/GET", "HTTPS / Azure Storage SDK")
+Rel(web_admin, storage_blob, "PUT/GET", "HTTPS")
+
+Rel(server, mysql_db, "JDBC", "TLS/SSL")
+Rel(server, redis_cache, "rediss", "TLS/SSL")
+Rel(app_service_plan, dockerhub, "pull images")
+
+Rel_U(server, gmail, "Gửi email xác nhận", "SMTP")
+Rel_U(server, twilio, "Gửi OTP", "Twilio SDK / HTTPS")
+Rel(sepay, server, "Gửi Webhook thanh toán", "HTTPS POST")
+
+@enduml
+
+
