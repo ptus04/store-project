@@ -1,9 +1,9 @@
-package io.github.ptus04.server.sepay.config;
+package io.github.ptus04.invoiceservice.config;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties(SePayProperties.class)
-public class SePayConfig {
+@EnableConfigurationProperties(SePayInvoiceProperties.class)
+public class SePayInvoiceConfig {
 }

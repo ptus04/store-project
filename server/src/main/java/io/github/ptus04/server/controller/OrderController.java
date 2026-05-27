@@ -1,11 +1,8 @@
 package io.github.ptus04.server.controller;
 
-import io.github.ptus04.server.sepay.config.SePayProperties;
+import io.github.ptus04.server.config.SePayQRProperties;
 import io.github.ptus04.server.dto.internal.Cart;
-import io.github.ptus04.server.dto.request.OrderCancelRequest;
-import io.github.ptus04.server.dto.request.OrderCreateRequest;
-import io.github.ptus04.server.dto.request.OrderDetailCreateRequest;
-import io.github.ptus04.server.dto.request.OrderShippingAddressCreateRequest;
+import io.github.ptus04.server.dto.request.*;
 import io.github.ptus04.server.dto.response.CartResponse;
 import io.github.ptus04.server.dto.response.OrderResponse;
 import io.github.ptus04.server.dto.response.UserAddressResponse;
@@ -15,11 +12,14 @@ import io.github.ptus04.server.enums.OrderStatusEnum;
 import io.github.ptus04.server.mapper.CartMapper;
 import io.github.ptus04.server.security.CustomUserDetails;
 import io.github.ptus04.server.service.OrderService;
+import io.github.ptus04.server.service.TransactionService;
 import io.github.ptus04.server.service.UserAddressService;
 import io.github.ptus04.server.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -29,9 +29,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Controller
 @RequestMapping("/orders")
 @RequiredArgsConstructor
@@ -40,7 +43,8 @@ public class OrderController {
     private final UserService userService;
     private final UserAddressService userAddressService;
     private final CartMapper cartMapper;
-    private final SePayProperties sePayProperties;
+    private final SePayQRProperties sePayQRProperties;
+    private final TransactionService transactionService;
 
     @GetMapping
     public String getOrderHistoryPage(@RequestParam(defaultValue = "0") int page,
@@ -172,23 +176,57 @@ public class OrderController {
             return "redirect:/orders/";
         }
 
-        String accountNumber = sePayProperties.getAccountNumber();
-        String accountName = sePayProperties.getAccountName();
-        String bank = sePayProperties.getBank();
+        String accountNumber = sePayQRProperties.getAccountNumber();
+        String accountName = sePayQRProperties.getAccountName();
+        String bank = sePayQRProperties.getBank();
         String amount = order.total().toString();
         String transferContent = order.orderCode();
-        // TODO: Bổ sung luồng xác nhận thanh toán thật tại đây sau khi chốt cổng thanh toán/webhook.
+
         String qrCodeUrl = UriComponentsBuilder
                 .fromUriString("https://qr.sepay.vn/img?acc={acccountNumber}&bank={bank}&amount={amount}&des={orderCode}")
                 .buildAndExpand(accountNumber, bank, amount, transferContent)
                 .toUriString();
 
-        model.addAttribute("qrCodeUrl", qrCodeUrl);
+        model.addAttribute("orderId", order.id());
+        model.addAttribute("bank", bank);
         model.addAttribute("accountName", accountName);
         model.addAttribute("accountNumber", accountNumber);
-        model.addAttribute("amount", amount);
         model.addAttribute("transferContent", transferContent);
+        model.addAttribute("amount", amount);
+        model.addAttribute("qrCodeUrl", qrCodeUrl);
 
         return "order/qr-payment";
+    }
+
+    @GetMapping("{orderId}/status")
+    @ResponseBody
+    public String getQrPaymentPage(@PathVariable UUID orderId,
+                                          @AuthenticationPrincipal CustomUserDetails userDetails) throws BadRequestException {
+        OrderResponse order = orderService.getOrderById(orderId);
+
+        if (!userDetails.getId().equals(order.user().id())) {
+            throw new BadRequestException("Không tìm thấy đơn hàng");
+        }
+        return order.status().name();
+    }
+
+    // TODO: Remove in release
+    @GetMapping("{orderId}/test-payment")
+    public String getQrPaymentPage(@PathVariable UUID orderId,
+                                   @RequestParam BigDecimal amount) {
+        OrderResponse order = orderService.getOrderById(orderId);
+
+        transactionService.createTransaction(
+                new TransactionCreateRequest(
+                        order.orderCode(),
+                        "Test",
+                        "TestBanking",
+                        order.orderCode(),
+                        amount,
+                        LocalDateTime.now()
+                )
+        );
+
+        return "redirect:/orders/" + order.id();
     }
 }

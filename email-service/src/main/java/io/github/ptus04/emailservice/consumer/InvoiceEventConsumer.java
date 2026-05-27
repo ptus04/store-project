@@ -1,6 +1,6 @@
 package io.github.ptus04.emailservice.consumer;
 
-import event.InvoiceCreatedEvent;
+import io.github.ptus04.common.event.InvoiceCreatedEvent;
 import io.github.ptus04.emailservice.config.RabbitMQConfig;
 import io.github.ptus04.emailservice.service.EmailService;
 import lombok.RequiredArgsConstructor;
@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class InvoiceConsumer {
+public class InvoiceEventConsumer {
     private final EmailService emailService;
 
-    @RabbitListener(queues = RabbitMQConfig.INVOICE_QUEUE)
+    @RabbitListener(queues = RabbitMQConfig.SEND_INVOICE_QUEUE)
     public void consumeInvoiceCreatedEvent(InvoiceCreatedEvent invoiceCreatedEvent) {
         emailService.sendInvoiceEmail(
                 invoiceCreatedEvent.email(),

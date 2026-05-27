@@ -1,17 +1,9 @@
 spring:
   application:
-    name: store-server
+    name: invoice-service
   threads:
     virtual:
       enabled: true
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
   rabbitmq:
     host: ${RABBITMQ_HOST}
     port: ${RABBITMQ_PORT}
@@ -23,5 +15,12 @@ spring:
           enabled: true
           multiplier: 2.0
 
+sepay:
+  username: ${SEPAY_USERNAME}
+  password: ${SEPAY_PASSWORD}
+  auth-url: ${SEPAY_INVOICE_AUTH_URL}
+  create-url: ${SEPAY_INVOICE_CREATE_URL}
+  check-url: ${SEPAY_INVOICE_CHECK_URL}
+
 server:
-  port: 8082
+  port: 8081

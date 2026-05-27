@@ -8,6 +8,11 @@
 </head>
 <body>
 <main class="container mx-auto p-4 sm:p-8">
+    <div id="paymentSuccessNotice"
+         class="fixed right-4 top-4 z-50 hidden rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700 shadow">
+        Thanh toán thành công! Đang chuyển hướng đến trang chi tiết đơn hàng...
+    </div>
+
     <div class="mx-auto max-w-4xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm lg:p-10">
 
         <!-- Header -->
@@ -23,7 +28,8 @@
             <!-- Left Side: QR Code Container -->
             <div class="flex w-full max-w-xs flex-col items-center gap-4 rounded-xl border border-gray-100 bg-gray-50 p-6">
                 <div class="text-xl font-bold text-blue-800">
-                    <i class="fa fa-university mr-2"></i>MB Bank
+                    <i class="fa fa-university mr-2"></i>
+                    <span th:text="${bank}"></span>
                 </div>
 
                 <!-- QR Code Block -->
@@ -31,9 +37,11 @@
                     <img class="h-full w-full object-contain" th:src="${qrCodeUrl}" alt="Mã QR Thanh Toán"/>
                 </div>
 
-                <p class="text-center text-xs text-gray-500 mt-2">
-                    Vui lòng làm mới lại trang sau khi thanh toán.
-                </p>
+                <div id="paymentCheckingIndicator" class="mt-2 flex items-center gap-2 text-xs text-gray-500"
+                     aria-live="polite">
+                    <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></span>
+                    <span id="paymentStatusText">Đang chờ thanh toán đơn hàng...</span>
+                </div>
             </div>
 
             <!-- Right Side: Transfer Information Form -->
@@ -88,16 +96,6 @@
                         * Bắt buộc ghi đúng nội dung để hệ thống xác nhận tự động.
                     </span>
                 </div>
-
-                <!-- Call to Actions -->
-                <div class="mt-4 flex flex-col gap-3">
-                    <!-- TODO: Bổ sung gọi API kiểm tra trạng thái thanh toán thật tại đây. -->
-                    <button class="my-btn-primary flex items-center justify-center gap-2 w-full py-3"
-                            onclick="window.location.reload()">
-                        <i class="fa-solid fa-rotate-right"></i>
-                        <span>Kiểm tra trạng thái</span>
-                    </button>
-                </div>
             </div>
 
         </div>
@@ -107,6 +105,15 @@
         const transferContent = /*[[${transferContent}]]*/ null;
         const accountNumber = /*[[${accountNumber}]]*/ null;
         const amount = /*[[${amount}]]*/ null;
+        const orderStatusUrl = /*[[@{/orders/{id}/status(id=${orderId})}]]*/ "";
+        const orderDetailUrl = /*[[@{/orders/{id}(id=${orderId})}]]*/ "";
+
+        const paymentCheckingIndicator = document.getElementById("paymentCheckingIndicator");
+        const paymentStatusText = document.getElementById("paymentStatusText");
+        const paymentSuccessNotice = document.getElementById("paymentSuccessNotice");
+
+        let pollingIntervalId = null;
+        let isRedirecting = false;
 
         function copyTransferContent() {
             navigator.clipboard.writeText(transferContent);
@@ -119,6 +126,59 @@
         function copyAmount() {
             navigator.clipboard.writeText(amount);
         }
+
+        function handlePaymentSuccess() {
+            if (isRedirecting) {
+                return;
+            }
+
+            isRedirecting = true;
+
+            if (pollingIntervalId) {
+                clearInterval(pollingIntervalId);
+            }
+
+            paymentSuccessNotice?.classList.remove("hidden");
+
+            if (paymentCheckingIndicator) {
+                paymentCheckingIndicator.classList.remove("text-gray-500");
+                paymentCheckingIndicator.classList.add("text-green-700");
+            }
+
+            if (paymentStatusText) {
+                paymentStatusText.textContent = "Đã thanh toán đơn hàng";
+            }
+
+            setTimeout(() => {
+                window.location.href = orderDetailUrl;
+            }, 1500);
+        }
+
+        async function pollOrderStatus() {
+            if (isRedirecting) {
+                return;
+            }
+
+            try {
+                const response = await fetch(orderStatusUrl, {
+                    method: "GET",
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const status = await response.text();
+                if (status !== "UNPAID") {
+                    handlePaymentSuccess();
+                }
+            } catch (_) {
+                // Keep polling silently to avoid interrupting the checkout experience.
+            }
+        }
+
+        pollOrderStatus();
+        pollingIntervalId = setInterval(pollOrderStatus, 3000);
     </script>
 </main>
 </body>

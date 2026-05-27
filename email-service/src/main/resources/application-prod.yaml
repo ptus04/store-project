@@ -1,9 +1,0 @@
-spring:
-  application:
-    name: store-server
-
-management:
-  endpoint:
-    health:
-      show-components: never
-      show-details: never

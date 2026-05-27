@@ -1,4 +1,4 @@
-package io.github.ptus04.emailservice.config;
+package io.github.ptus04.invoiceservice.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -10,23 +10,26 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-    public static final String SEND_INVOICE_QUEUE = "email.send-invoice";
+    public static final String CREATE_INVOICE_QUEUE = "invoice.create-invoice";
+    public static final String ORDER_EXCHANGE = "orders.topic";
+    public static final String ORDER_PAID_ROUTING_KEY = "order.paid";
+
     public static final String INVOICE_EXCHANGE = "invoices.topic";
     public static final String INVOICE_CREATED_ROUTING_KEY = "invoice.created";
 
     @Bean
-    public Queue sendInvoiceQueue() {
-        return QueueBuilder.durable(SEND_INVOICE_QUEUE).build();
+    public Queue createInvoiceQueue() {
+        return QueueBuilder.durable(CREATE_INVOICE_QUEUE).build();
     }
 
     @Bean
-    public TopicExchange invoiceExchange() {
-        return ExchangeBuilder.topicExchange(INVOICE_EXCHANGE).durable(true).build();
+    public TopicExchange ordersExchange() {
+        return ExchangeBuilder.topicExchange(ORDER_EXCHANGE).durable(true).build();
     }
 
     @Bean
-    public Binding bindingInvoiceCreated(Queue invoiceQueue, TopicExchange invoiceExchange) {
-        return BindingBuilder.bind(invoiceQueue).to(invoiceExchange).with(INVOICE_CREATED_ROUTING_KEY);
+    public Binding bindingOrderPaid(Queue invoiceQueue, TopicExchange invoiceExchange) {
+        return BindingBuilder.bind(invoiceQueue).to(invoiceExchange).with(ORDER_PAID_ROUTING_KEY);
     }
 
     @Bean

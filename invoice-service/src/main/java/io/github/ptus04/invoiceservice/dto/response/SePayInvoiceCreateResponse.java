@@ -1,14 +1,14 @@
-package io.github.ptus04.server.sepay.model;
+package io.github.ptus04.invoiceservice.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Getter;
 import lombok.Setter;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.annotation.JsonNaming;
 
 @Getter
 @Setter
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@tools.jackson.databind.annotation.JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class SePayInvoiceCreateResponse {
     private boolean success;
     private Data data;

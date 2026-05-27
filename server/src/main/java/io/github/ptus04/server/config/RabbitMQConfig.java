@@ -1,6 +1,6 @@
-package io.github.ptus04.emailservice.config;
+package io.github.ptus04.server.config;
 
-import org.springframework.amqp.core.*;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
@@ -10,24 +10,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-    public static final String SEND_INVOICE_QUEUE = "email.send-invoice";
-    public static final String INVOICE_EXCHANGE = "invoices.topic";
-    public static final String INVOICE_CREATED_ROUTING_KEY = "invoice.created";
-
-    @Bean
-    public Queue sendInvoiceQueue() {
-        return QueueBuilder.durable(SEND_INVOICE_QUEUE).build();
-    }
-
-    @Bean
-    public TopicExchange invoiceExchange() {
-        return ExchangeBuilder.topicExchange(INVOICE_EXCHANGE).durable(true).build();
-    }
-
-    @Bean
-    public Binding bindingInvoiceCreated(Queue invoiceQueue, TopicExchange invoiceExchange) {
-        return BindingBuilder.bind(invoiceQueue).to(invoiceExchange).with(INVOICE_CREATED_ROUTING_KEY);
-    }
+    public static final String ORDER_EXCHANGE = "orders.topic";
+    public static final String ORDER_PAID_ROUTING_KEY = "order.paid";
 
     @Bean
     public MessageConverter messageConverter() {
