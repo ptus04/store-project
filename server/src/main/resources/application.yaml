@@ -22,8 +22,6 @@ spring:
         retry:
           enabled: true
           multiplier: 2.0
-      direct:
-        acknowledge-mode: manual
 
 custom:
   security:

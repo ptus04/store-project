@@ -36,7 +36,7 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(message);
         } catch (MessagingException e) {
             log.atError()
-                    .setMessage("Failed to send email to {} for order {}")
+                    .setMessage("Failed to send invoice email to {} for order {}")
                     .addArgument(toEmail)
                     .addArgument(orderCode)
                     .setCause(e)
