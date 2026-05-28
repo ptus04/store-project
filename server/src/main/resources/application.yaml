@@ -43,6 +43,33 @@ custom:
       - path-prefix: /api/auth/login
         capacity: ${RATE_LIMIT_AUTH_CAPACITY:10}
         window: ${RATE_LIMIT_AUTH_WINDOW:1m}
+      - path-prefix: /auth/login
+        capacity: ${RATE_LIMIT_WEB_AUTH_CAPACITY:10}
+        window: ${RATE_LIMIT_WEB_AUTH_WINDOW:1m}
+      - path-prefix: /auth/register
+        capacity: ${RATE_LIMIT_REGISTER_CAPACITY:5}
+        window: ${RATE_LIMIT_REGISTER_WINDOW:10m}
+      - path-prefix: /auth/verify-phone
+        capacity: ${RATE_LIMIT_PHONE_OTP_CAPACITY:5}
+        window: ${RATE_LIMIT_PHONE_OTP_WINDOW:5m}
+      - path-prefix: /auth/change-password
+        capacity: ${RATE_LIMIT_CHANGE_PASSWORD_CAPACITY:5}
+        window: ${RATE_LIMIT_CHANGE_PASSWORD_WINDOW:5m}
+      - path-prefix: /api/users/change-password
+        capacity: ${RATE_LIMIT_API_CHANGE_PASSWORD_CAPACITY:5}
+        window: ${RATE_LIMIT_API_CHANGE_PASSWORD_WINDOW:5m}
+      - path-prefix: /api/users/profile/email/verify
+        capacity: ${RATE_LIMIT_EMAIL_OTP_VERIFY_CAPACITY:5}
+        window: ${RATE_LIMIT_EMAIL_OTP_VERIFY_WINDOW:5m}
+      - path-prefix: /api/users/profile
+        capacity: ${RATE_LIMIT_PROFILE_UPDATE_CAPACITY:30}
+        window: ${RATE_LIMIT_PROFILE_UPDATE_WINDOW:5m}
+      - path-prefix: /profile/update
+        capacity: ${RATE_LIMIT_WEB_PROFILE_UPDATE_CAPACITY:10}
+        window: ${RATE_LIMIT_WEB_PROFILE_UPDATE_WINDOW:5m}
+      - path-prefix: /api/test/email
+        capacity: ${RATE_LIMIT_EMAIL_CAPACITY:5}
+        window: ${RATE_LIMIT_EMAIL_WINDOW:5m}
       - path-prefix: /api/chat
         capacity: ${RATE_LIMIT_CHAT_CAPACITY:20}
         window: ${RATE_LIMIT_CHAT_WINDOW:1m}
