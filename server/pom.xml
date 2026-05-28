@@ -12,7 +12,7 @@
 
     <groupId>io.github.ptus04</groupId>
     <artifactId>server</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>server</name>
     <description>server</description>
 
@@ -72,7 +72,7 @@
             <groupId>com.azure.spring</groupId>
             <artifactId>spring-cloud-azure-starter-storage-blob</artifactId>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.thymeleaf.extras</groupId>
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
         </dependency>
@@ -129,7 +129,6 @@
             <version>${org.mapstruct.version}</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -157,6 +156,10 @@
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j</artifactId>
             <version>0.36.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
     </dependencies>
 

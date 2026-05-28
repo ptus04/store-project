@@ -84,7 +84,8 @@
                 </div>
             </article>
 
-            <section class="rounded border border-gray-200 bg-white p-4" th:if="${order.note != null && !#strings.isEmpty(order.note)}">
+            <section class="rounded border border-gray-200 bg-white p-4"
+                     th:if="${order.note != null && !#strings.isEmpty(order.note)}">
                 <h2 class="mb-2 font-bold">Ghi chú</h2>
                 <p class="whitespace-pre-line text-gray-700" th:text="${order.note}">Ghi chú đơn hàng</p>
             </section>
@@ -122,7 +123,7 @@
                 <p th:text="${order.orderShippingAddress.name + ' - ' + order.orderShippingAddress.phone}">
                     Người nhận
                 </p>
-                <p th:text="${order.orderShippingAddress.address + ', ' + order.orderShippingAddress.ward + ', ' + order.orderShippingAddress.district + ', ' + order.orderShippingAddress.city}">
+                <p th:text="${order.orderShippingAddress().toAddressString()}">
                     Địa chỉ
                 </p>
             </div>

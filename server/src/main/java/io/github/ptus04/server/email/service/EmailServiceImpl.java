@@ -1,15 +1,15 @@
-package io.github.ptus04.server.service.impl;
+package io.github.ptus04.server.email.service;
 
-import io.github.ptus04.server.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -19,6 +19,8 @@ import java.util.random.RandomGenerator;
 
 @Slf4j
 @RequiredArgsConstructor
+@Profile("prod")
+@Primary
 @Service
 public class EmailServiceImpl implements EmailService {
     private static final String EMAIL_OTP_KEY_PREFIX = "email:otp:";
@@ -31,22 +33,25 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    @Async
     @Override
-    public void sendOrderEmail(String email, String orderCode, String invoiceLink) {
+    public void sendInvoiceEmail(String toEmail, String orderCode, String invoiceLink) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setFrom(fromEmail);
-            helper.setTo(email);
-            helper.setSubject("Đặt hàng thành công - Đơn hàng #" + orderCode);
-            helper.setText(buildHtml(orderCode, invoiceLink), true);
+            helper.setTo(toEmail);
+            helper.setSubject("Thanh toán đơn hàng #" + orderCode + " thành công");
+            helper.setText(buildInvoiceHtmlString(orderCode, invoiceLink), true);
 
             mailSender.send(message);
-
         } catch (MessagingException e) {
-
+            log.atError()
+                    .setMessage("Failed to send invoice email to {} for order {}")
+                    .addArgument(toEmail)
+                    .addArgument(orderCode)
+                    .setCause(e)
+                    .log();
         }
     }
 
@@ -102,7 +107,7 @@ public class EmailServiceImpl implements EmailService {
         return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
     }
 
-    private String buildHtml(String orderCode, String invoiceLink) {
+    private String buildInvoiceHtmlString(String orderCode, String invoiceLink) {
         return """
                 <!DOCTYPE html>
                 <html lang="vi">
@@ -135,8 +140,8 @@ public class EmailServiceImpl implements EmailService {
                   </div>
                 </div>
                 </body>
-                </html> 
-                """.formatted(orderCode, invoiceLink, invoiceLink);
+                </html>
+                """.formatted(orderCode, invoiceLink);
     }
 
     private String buildEmailOtpHtml(String otp) {

@@ -39,8 +39,6 @@ resource "azurerm_linux_web_app" "store" {
     application_stack {
       docker_image_name = "phungtu081/store:latest"
     }
-    # health_check_path = ""
-    always_on = false
   }
 
   app_settings = {
@@ -81,8 +79,6 @@ resource "azurerm_linux_web_app" "store_admin" {
     application_stack {
       docker_image_name = "phungtu081/store-admin:latest"
     }
-    # health_check_path = ""
-    always_on = false
   }
 
   app_settings = {

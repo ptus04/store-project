@@ -1,4 +1,4 @@
-package io.github.ptus04.server.sepay.model;
+package io.github.ptus04.server.invoice.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

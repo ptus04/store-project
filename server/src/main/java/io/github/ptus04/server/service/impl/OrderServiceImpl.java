@@ -16,6 +16,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -31,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -126,6 +129,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "orders", key = "#id")
     public OrderResponse getOrderById(UUID id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đơn hàng!"));
@@ -159,7 +163,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "products", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "products", allEntries = true),
+            @CacheEvict(value = "orders", key = "#id")
+    })
     public OrderResponse cancelOrder(UUID id, UUID userId, String cancellationReason) {
         Order order = orderRepository.findByIdAndUser_Id(id, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đơn hàng!"));
@@ -225,6 +232,7 @@ public class OrderServiceImpl implements OrderService {
                     .ifPresent(size -> size.setInStock(size.getInStock() + restoredQuantity));
         }
     }
+
     @Override
     @Transactional(readOnly = true)
     public Page<OrderResponse> searchOrders(OrderStatusEnum status, String search, int page, int size) {
@@ -233,6 +241,7 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.searchOrders(status, normalizedSearch, normalizePhoneSearch(normalizedSearch), pageRequest)
                 .map(orderMapper::toOrderResponse);
     }
+
     private void validateStatusTransition(OrderStatusEnum currentStatus, OrderStatusEnum nextStatus) {
         List<OrderStatusEnum> allowedStatuses = ALLOWED_STATUS_TRANSITIONS.getOrDefault(currentStatus, List.of());
         if (!allowedStatuses.contains(nextStatus)) {
@@ -248,7 +257,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "products", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "products", allEntries = true),
+            @CacheEvict(value = "orders", key = "#id")
+    })
     public OrderResponse updateOrderStatus(UUID id, OrderStatusEnum status) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đơn hàng!"));

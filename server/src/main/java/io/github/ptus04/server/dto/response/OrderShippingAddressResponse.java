@@ -14,4 +14,11 @@ public record OrderShippingAddressResponse(UUID orderId, @NotNull @Size(max = 12
                                            @NotNull @Size(max = 32) String district,
                                            @NotNull @Size(max = 128) String ward,
                                            @NotNull @Size(max = 128) String address) implements Serializable {
+    public String toAddressString() {
+        if (district == null || district.isBlank()) {
+            return address + ", " + ward + ", " + city;
+        } else {
+            return address + ", " + ward + ", " + district + ", " + city;
+        }
+    }
 }
