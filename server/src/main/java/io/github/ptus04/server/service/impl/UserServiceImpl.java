@@ -11,6 +11,7 @@ import io.github.ptus04.server.exception.BusinessConstraintViolationException;
 import io.github.ptus04.server.exception.PhoneExistedException;
 import io.github.ptus04.server.mapper.UserMapper;
 import io.github.ptus04.server.repository.UserRepository;
+import io.github.ptus04.server.service.EmailService;
 import io.github.ptus04.server.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Override
     public UserResponse getUserById(UUID id) {
@@ -40,14 +42,39 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse updateProfile(UUID id, UserProfileUpdateRequest request) {
         User user = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        String currentEmail = normalizeEmail(user.getEmail());
+        String requestedEmail = normalizeEmail(request.email());
 
         validateAndSetPhone(user, request.phone(), id);
 
         user.setName(request.name());
-        user.setEmail(StringUtils.hasText(request.email()) ? request.email() : null);
+        user.setEmail(requestedEmail);
+        if (!emailsEqual(currentEmail, requestedEmail)) {
+            validateEmailAvailable(requestedEmail, id);
+            user.setEmailVerifiedAt(null);
+            if (StringUtils.hasText(requestedEmail)) {
+                emailService.sendEmailVerificationOtp(requestedEmail);
+            }
+        }
         user.setGender(request.gender());
         user.setBirthDate(request.birthDate());
 
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+
+    @Override
+    public UserResponse verifyProfileEmail(UUID id, String otp) {
+        User user = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        if (!StringUtils.hasText(user.getEmail())) {
+            throw new BusinessConstraintViolationException("Tài khoản chưa có email");
+        }
+
+        boolean verified = emailService.verifyEmailOtp(user.getEmail(), otp);
+        if (!verified) {
+            throw new BusinessConstraintViolationException("Mã OTP email không chính xác hoặc đã hết hạn");
+        }
+
+        user.setEmailVerifiedAt(Instant.now());
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
@@ -186,5 +213,28 @@ public class UserServiceImpl implements UserService {
             user.setPhone(newPhone);
             user.setPhoneVerifiedAt(null);
         }
+    }
+
+    private String normalizeEmail(String email) {
+        return StringUtils.hasText(email) ? email.trim().toLowerCase() : null;
+    }
+
+    private boolean emailsEqual(String currentEmail, String requestedEmail) {
+        if (currentEmail == null) {
+            return requestedEmail == null;
+        }
+        return currentEmail.equals(requestedEmail);
+    }
+
+    private void validateEmailAvailable(String email, UUID userId) {
+        if (!StringUtils.hasText(email)) {
+            return;
+        }
+
+        userRepository.findByEmail(email)
+                .filter(existed -> !existed.getId().equals(userId))
+                .ifPresent(existed -> {
+                    throw new BusinessConstraintViolationException("Email đang được sử dụng");
+                });
     }
 }

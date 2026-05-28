@@ -18,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -25,6 +26,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RateLimitingFilter extends OncePerRequestFilter {
     private static final String KEY_PREFIX = "rate_limit:";
+    private static final List<String> PROTECTED_PATH_PREFIXES = List.of(
+            "/api/",
+            "/auth/login",
+            "/auth/register",
+            "/auth/verify-phone",
+            "/auth/change-password",
+            "/profile/update"
+    );
 
     private final StringRedisTemplate redisTemplate;
     private final RateLimitProperties properties;
@@ -32,7 +41,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !properties.isEnabled() || !request.getRequestURI().startsWith("/api/");
+        return !properties.isEnabled() || PROTECTED_PATH_PREFIXES.stream()
+                .noneMatch(prefix -> request.getRequestURI().startsWith(prefix));
     }
 
     @Override
@@ -102,8 +112,15 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     private void writeTooManyRequestsResponse(HttpServletRequest request, HttpServletResponse response, long ttlSeconds)
             throws IOException {
         response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setHeader("Retry-After", String.valueOf(ttlSeconds));
+
+        if (!request.getRequestURI().startsWith("/api/")) {
+            response.setContentType(MediaType.TEXT_PLAIN_VALUE);
+            response.getWriter().write("Too many requests. Please try again later.");
+            return;
+        }
+
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         ApiErrorResponse<?> body = new ApiErrorResponse<>(
                 HttpStatus.TOO_MANY_REQUESTS,
