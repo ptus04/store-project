@@ -1,4 +1,4 @@
-package io.github.ptus04.server.dto;
+package io.github.ptus04.server.chat.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

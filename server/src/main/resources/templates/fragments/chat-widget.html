@@ -148,6 +148,15 @@
                 .replaceAll("'", "&#039;");
         }
 
+        function formatMessageText(text) {
+            if (!text) return "";
+            let escaped = escapeHtml(text);
+            escaped = escaped.replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            escaped = escaped.replaceAll(/\[(.*?)]\((.*?)\)/g, '<a href="$2" class="text-neutral-950 font-semibold underline decoration-neutral-400 hover:decoration-neutral-950 transition-colors duration-200">$1</a>');
+            escaped = escaped.replaceAll('\n', '<br>');
+            return escaped;
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             // --- Configuration ---
             const CONFIG = {
@@ -520,11 +529,7 @@
                     }
 
                     hideTypingIndicator();
-                    // Format markdown-like bold text **text** to HTML
-                    const formattedHtml = escapeHtml(responseText)
-                        .replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replaceAll('\n', '<br>');
-
+                    const formattedHtml = formatMessageText(responseText);
                     appendMessage('AI', formattedHtml, true);
 
                     chatInput.disabled = false;
@@ -578,9 +583,7 @@
                             }
 
                             history.forEach(msg => {
-                                const formattedContent = msg.content
-                                    .replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                                    .replaceAll('\n', '<br>');
+                                const formattedContent = formatMessageText(msg.content);
                                 appendMessage(msg.sender, formattedContent, true, false);
                             });
                             resetUnreadBadge();
