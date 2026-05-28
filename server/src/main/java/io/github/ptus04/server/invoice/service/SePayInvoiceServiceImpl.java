@@ -80,7 +80,6 @@ public class SePayInvoiceServiceImpl implements InvoiceService {
         invoiceEventProducer.publishInvoiceCreatedEvent(
                 new InvoiceCreatedEvent(
                         orderPaidEvent.email(),
-                        orderPaidEvent.orderId(),
                         orderPaidEvent.orderCode(),
                         invoiceLink
                 )

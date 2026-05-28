@@ -8,6 +8,7 @@ interface UserProfile {
   role: string;
   gender: "MALE" | "FEMALE" | null;
   birthDate: string | null;
+  emailVerifiedAt: string | null;
   createdAt: string;
 }
 
@@ -43,6 +44,15 @@ function ProfileInfoDisplay({ profile }: { profile: UserProfile | null }) {
             <span className="text-gray-400 italic">Chưa cập nhật</span>
           )}
         </p>
+        {profile?.email && (
+          <p
+            className={`mt-1 text-xs font-semibold ${
+              profile.emailVerifiedAt ? "text-green-600" : "text-amber-600"
+            }`}
+          >
+            {profile.emailVerifiedAt ? "Email đã xác thực" : "Email chưa xác thực"}
+          </p>
+        )}
       </div>
 
       <div className="space-y-1">
@@ -110,9 +120,17 @@ function ProfileInfoTab({
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState("");
   const [updateSuccess, setUpdateSuccess] = useState("");
+  const [pendingEmailVerification, setPendingEmailVerification] =
+    useState(false);
+  const [emailOtp, setEmailOtp] = useState("");
+  const [verifyEmailLoading, setVerifyEmailLoading] = useState(false);
+  const [verifyEmailError, setVerifyEmailError] = useState("");
 
   const API_URL = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("token");
+  const shouldShowEmailVerification = Boolean(
+    profile?.email && !profile.emailVerifiedAt,
+  );
 
   useEffect(() => {
     if (profile && !isEditing) {
@@ -131,6 +149,7 @@ function ProfileInfoTab({
     setUpdateLoading(true);
     setUpdateError("");
     setUpdateSuccess("");
+    setVerifyEmailError("");
 
     try {
       const response = await fetch(`${API_URL}/api/users/profile`, {
@@ -155,6 +174,12 @@ function ProfileInfoTab({
         return;
       }
 
+      const emailChanged =
+        Boolean(email.trim()) &&
+        email.trim().toLowerCase() !==
+          (profile?.email || "").trim().toLowerCase();
+      const needsEmailVerification = Boolean(data.email && !data.emailVerifiedAt);
+
       setProfile(data);
       const localUserRaw = localStorage.getItem("user");
       if (localUserRaw) {
@@ -163,7 +188,13 @@ function ProfileInfoTab({
         localStorage.setItem("user", JSON.stringify(localUser));
       }
 
-      setUpdateSuccess("Cập nhật thông tin cá nhân thành công!");
+      setUpdateSuccess(
+        emailChanged && needsEmailVerification
+          ? "Cập nhật thông tin thành công. Mã OTP xác thực đã được gửi về Gmail của bạn."
+          : "Cập nhật thông tin cá nhân thành công!",
+      );
+      setPendingEmailVerification(needsEmailVerification);
+      setEmailOtp("");
       setIsEditing(false);
     } catch (err) {
       setUpdateError(
@@ -173,6 +204,43 @@ function ProfileInfoTab({
       );
     } finally {
       setUpdateLoading(false);
+    }
+  }
+
+  async function handleVerifyEmail(e: React.FormEvent) {
+    e.preventDefault();
+    if (!emailOtp.trim()) return;
+
+    setVerifyEmailLoading(true);
+    setVerifyEmailError("");
+
+    try {
+      const response = await fetch(`${API_URL}/api/users/profile/email/verify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ otp: emailOtp.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setVerifyEmailError(data.message || "Không thể xác thực email");
+        return;
+      }
+
+      setProfile(data);
+      setPendingEmailVerification(false);
+      setEmailOtp("");
+      setUpdateSuccess("Email đã được xác thực thành công!");
+    } catch (err) {
+      setVerifyEmailError(
+        err instanceof Error ? err.message : "Lỗi khi xác thực email",
+      );
+    } finally {
+      setVerifyEmailLoading(false);
     }
   }
 
@@ -203,6 +271,45 @@ function ProfileInfoTab({
         <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {updateError}
         </div>
+      )}
+
+      {(pendingEmailVerification || shouldShowEmailVerification) && (
+        <form
+          onSubmit={handleVerifyEmail}
+          className="rounded border border-amber-200 bg-amber-50 px-4 py-4"
+        >
+          <label
+            className="mb-2 block text-xs font-bold text-amber-800 uppercase"
+            htmlFor="emailOtp"
+          >
+            Mã OTP email
+          </label>
+          <p className="mb-3 text-sm text-amber-800">
+            Nhập mã OTP đã được gửi tới {profile?.email}.
+          </p>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <input
+              id="emailOtp"
+              inputMode="numeric"
+              maxLength={6}
+              className="w-full border border-amber-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-amber-500 disabled:opacity-50 sm:max-w-44"
+              value={emailOtp}
+              onChange={(e) => setEmailOtp(e.target.value)}
+              disabled={verifyEmailLoading}
+              placeholder="Nhập OTP"
+            />
+            <button
+              type="submit"
+              className="bg-gray-900 px-4 py-2 text-xs font-bold text-white uppercase transition-all hover:bg-gray-800 disabled:opacity-55"
+              disabled={verifyEmailLoading || !emailOtp.trim()}
+            >
+              {verifyEmailLoading ? "Đang xác thực..." : "Xác thực email"}
+            </button>
+          </div>
+          {verifyEmailError && (
+            <p className="mt-2 text-sm text-red-600">{verifyEmailError}</p>
+          )}
+        </form>
       )}
 
       {isEditing ? (
