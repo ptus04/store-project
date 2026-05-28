@@ -1,7 +1,7 @@
 package io.github.ptus04.server.producer;
 
-import io.github.ptus04.common.event.OrderPaidEvent;
-import io.github.ptus04.server.config.RabbitMQConfig;
+import io.github.ptus04.server.config.OrderRabbitMQConfig;
+import io.github.ptus04.server.event.OrderPaidEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -16,8 +16,8 @@ public class OrderEventProducer {
     public void publishOrderPaidEvent(OrderPaidEvent orderPaidEvent) {
         log.info("Publishing OrderPaidEvent for order code {}", orderPaidEvent.orderCode());
         amqpTemplate.convertAndSend(
-                RabbitMQConfig.ORDER_EXCHANGE,
-                RabbitMQConfig.ORDER_PAID_ROUTING_KEY,
+                OrderRabbitMQConfig.ORDER_EXCHANGE,
+                OrderRabbitMQConfig.ORDER_PAID_ROUTING_KEY,
                 orderPaidEvent
         );
     }

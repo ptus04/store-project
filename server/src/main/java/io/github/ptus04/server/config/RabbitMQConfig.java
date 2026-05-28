@@ -10,9 +10,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-    public static final String ORDER_EXCHANGE = "orders.topic";
-    public static final String ORDER_PAID_ROUTING_KEY = "order.paid";
-
     @Bean
     public MessageConverter messageConverter() {
         return new JacksonJsonMessageConverter();

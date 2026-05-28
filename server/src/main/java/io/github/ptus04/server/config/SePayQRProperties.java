@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "sepay")
+@ConfigurationProperties(prefix = "sepay.qr")
 public class SePayQRProperties {
     private String bank = "";
     private String accountNumber = "";

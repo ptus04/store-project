@@ -5,35 +5,25 @@ spring:
     redis:
       repositories:
         enabled: false
-  jpa:
-    open-in-view: true
   threads:
     virtual:
       enabled: true
-  web:
-    error:
-      include-exception: true
   mail:
     host: smtp.gmail.com
     port: 587
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-
-server:
-  http2:
-    enabled: true
-management:
-  endpoint:
-    health:
-      roles: ADMIN
-      show-components: when_authorized
-      show-details: when_authorized
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  rabbitmq:
+    listener:
+      simple:
+        retry:
+          enabled: true
+          multiplier: 2.0
+      direct:
+        acknowledge-mode: manual
 
 custom:
   security:
@@ -42,12 +32,11 @@ custom:
       allowed-methods: ${ALLOWED_METHODS}
       allowed-headers: ${ALLOWED_HEADERS}
       allow-credentials: ${ALLOW_CREDENTIALS}
-  sepay:
-    account-name: ${SEPAY_ACCOUNT_NAME}
-    account-number: ${SEPAY_ACCOUNT_NUMBER}
-    bank: ${SEPAY_BANK}
-    username: ${SEPAY_USERNAME}
-    password: ${SEPAY_PASSWORD}
+  twilio:
+    account-sid: ${TWILIO_ACCOUNT_SID}
+    auth-token: ${TWILIO_AUTH_TOKEN}
+    verify:
+      service-sid: ${TWILIO_VERIFY_SERVICE_SID}
   rate-limit:
     enabled: ${RATE_LIMIT_ENABLED:true}
     capacity: ${RATE_LIMIT_CAPACITY:120}
@@ -66,3 +55,15 @@ custom:
 jwt:
   secret: ${JWT_SECRET}
   expiration-ms: ${JWT_EXPIRATION_MS}
+
+sepay:
+  qr:
+    bank: ${SEPAY_BANK}
+    account-name: ${SEPAY_ACCOUNT_NAME}
+    account-number: ${SEPAY_ACCOUNT_NUMBER}
+  invoice:
+    username: ${SEPAY_USERNAME}
+    password: ${SEPAY_PASSWORD}
+    auth-url: ${SEPAY_INVOICE_AUTH_URL}
+    create-url: ${SEPAY_INVOICE_CREATE_URL}
+    check-url: ${SEPAY_INVOICE_CHECK_URL}

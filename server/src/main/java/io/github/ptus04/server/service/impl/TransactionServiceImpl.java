@@ -1,12 +1,12 @@
 package io.github.ptus04.server.service.impl;
 
-import io.github.ptus04.common.event.OrderPaidEvent;
 import io.github.ptus04.server.dto.request.TransactionCreateRequest;
 import io.github.ptus04.server.dto.response.TransactionCreateResponse;
 import io.github.ptus04.server.dto.response.TransactionResponse;
 import io.github.ptus04.server.entity.Order;
 import io.github.ptus04.server.entity.Transaction;
 import io.github.ptus04.server.enums.OrderStatusEnum;
+import io.github.ptus04.server.event.OrderPaidEvent;
 import io.github.ptus04.server.mapper.TransactionMapper;
 import io.github.ptus04.server.producer.OrderEventProducer;
 import io.github.ptus04.server.repository.OrderRepository;

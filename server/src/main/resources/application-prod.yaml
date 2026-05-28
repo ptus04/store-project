@@ -1,15 +1,4 @@
 spring:
-  web:
-    error:
-      include-exception: false
-  devtools:
-    add-properties: false
-  jpa:
-    open-in-view: true
-    show-sql: false
-    properties:
-      hibernate:
-        format_sql: false
   datasource:
     url: ${DATABASE_CONNECTION_STRING}
     username: ${DATABASE_USERNAME}
@@ -18,9 +7,6 @@ spring:
   data:
     redis:
       url: ${REDIS_CONNECTION_STRING}
-  docker:
-    compose:
-      enabled: false
   cloud:
     azure:
       storage:
@@ -30,14 +16,3 @@ spring:
     port: ${RABBITMQ_PORT}
     username: ${RABBITMQ_USERNAME}
     password: ${RABBITMQ_PASSWORD}
-    listener:
-      simple:
-        retry:
-          enabled: true
-          multiplier: 2.0
-custom:
-  twilio:
-    account-sid: ${TWILIO_ACCOUNT_SID}
-    auth-token: ${TWILIO_AUTH_TOKEN}
-    verify:
-      service-sid: ${TWILIO_VERIFY_SERVICE_SID}
