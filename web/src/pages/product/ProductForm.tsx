@@ -401,7 +401,9 @@ export default function ProductForm({
               />
             </div>
             <div>
-              <label className={sectionLabelClass}>Giảm giá (%)</label>
+              <label className={sectionLabelClass}>
+                Giảm giá (hệ thập phân)
+              </label>
               <input
                 type="number"
                 value={discount}
