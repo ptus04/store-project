@@ -132,8 +132,8 @@
             integrity="sha512-iKDtgDyTHjAitUDdLljGhenhPwrbBfqTKWO1mkhSFH3A7blITC9MhYon6SjnMhp4o0rADGw9yAC6EW4t5a4K3g=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-    <!-- Custom Chat JS -->
-    <script th:inline="javascript">
+    <!-- Custom Chat JS Helpers (Non-inlined to support clean RegExp literals and avoid Thymeleaf conflicts) -->
+    <script>
         function getTimestamp() {
             const now = new Date();
             return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
@@ -152,21 +152,17 @@
             if (!text) return "";
             let escaped = escapeHtml(text);
             escaped = escaped.replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            // Avoid Thymeleaf parsing '[(...)]' as inline expression by using dynamic RegExp construction.
-            // Using String.raw avoids double-escaping '\', and using negated character sets ([^\]] and [^)])
-            // prevents backtracking Denial of Service (ReDoS) vulnerability.
-            const part1 = String.raw`\[`;
-            const part2 = String.raw`([^\]]*)`;
-            const part3 = String.raw`\]\(`;
-            const part4 = String.raw`([^)]*)`;
-            const part5 = String.raw`\)`;
-            const linkRegex = new RegExp(part1 + part2 + part3 + part4 + part5, 'g');
-            escaped = escaped.replaceAll(linkRegex, (_, p1, p2) => {
+            // ReDoS-safe regular expression to parse Markdown links
+            escaped = escaped.replaceAll(/\[([^]]*)]\(([^)]*)\)/g, (_, p1, p2) => {
                 return '<a href="' + p2 + '" class="text-neutral-950 font-semibold underline decoration-neutral-400 hover:decoration-neutral-950 transition-colors duration-200">' + p1 + '</a>';
             });
             escaped = escaped.replaceAll('\n', '<br>');
             return escaped;
         }
+    </script>
+
+    <!-- Custom Chat JS Main Logic -->
+    <script th:inline="javascript">
 
         document.addEventListener('DOMContentLoaded', function () {
             // --- Configuration ---
