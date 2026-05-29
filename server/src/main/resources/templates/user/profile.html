@@ -17,6 +17,39 @@
             </div>
         </div>
 
+        <div th:if="${success}" class="rounded-2xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-semibold text-green-700"
+             th:text="${success}"></div>
+
+        <section th:if="${user.email != null and user.emailVerifiedAt == null}"
+                 class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
+            <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h2 class="text-sm font-bold text-amber-900">Xác thực email</h2>
+                    <p class="mt-1 text-sm text-amber-800">
+                        Nhập mã OTP đã được gửi tới <span class="font-semibold" th:text="${user.email}">email@example.com</span>.
+                    </p>
+                    <p th:if="${emailVerifyError}" class="mt-2 text-sm font-semibold text-red-600"
+                       th:text="${emailVerifyError}"></p>
+                </div>
+                <form th:action="@{/profile/email/verify}" method="post"
+                      class="flex w-full flex-col gap-3 sm:flex-row md:w-auto">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <input aria-label="Mã OTP email"
+                           class="w-full rounded-xl border border-amber-200 bg-white px-4 py-2.5 text-sm font-semibold tracking-[0.2em] text-gray-900 outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500 sm:w-40"
+                           inputmode="numeric"
+                           maxlength="6"
+                           name="otp"
+                           placeholder="Nhập OTP"
+                           required
+                           type="text"/>
+                    <button class="rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-black"
+                            type="submit">
+                        Xác thực
+                    </button>
+                </form>
+            </div>
+        </section>
+
         <!-- LAYOUT -->
         <div class="flex flex-col gap-8">
 

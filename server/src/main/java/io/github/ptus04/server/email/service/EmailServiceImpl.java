@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
@@ -11,13 +12,23 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+import java.util.random.RandomGenerator;
+
 @Slf4j
 @RequiredArgsConstructor
 @Profile("prod")
 @Primary
 @Service
 public class EmailServiceImpl implements EmailService {
+    private static final String EMAIL_OTP_KEY_PREFIX = "email:otp:";
+    private static final long EMAIL_OTP_TTL_SECONDS = 300;
+
+    private final RandomGenerator randomGenerator = new SecureRandom();
     private final JavaMailSender mailSender;
+    private final StringRedisTemplate redisTemplate;
 
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -36,12 +47,64 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(message);
         } catch (MessagingException e) {
             log.atError()
-                    .setMessage("Failed to send email to {} for order {}")
+                    .setMessage("Failed to send invoice email to {} for order {}")
                     .addArgument(toEmail)
                     .addArgument(orderCode)
                     .setCause(e)
                     .log();
         }
+    }
+
+    @Override
+    public long sendEmailVerificationOtp(String email) {
+        String normalizedEmail = normalizeEmail(email);
+        String key = EMAIL_OTP_KEY_PREFIX + normalizedEmail;
+        String value = redisTemplate.opsForValue().get(key);
+
+        if (value == null) {
+            String otp = String.format("%06d", randomGenerator.nextInt(0, 1_000_000));
+            redisTemplate.opsForValue().set(key, otp, EMAIL_OTP_TTL_SECONDS, TimeUnit.SECONDS);
+            sendEmailVerificationOtpMessage(normalizedEmail, otp);
+        }
+
+        Long expire = redisTemplate.getExpire(key);
+        return expire == null || expire < 0 ? EMAIL_OTP_TTL_SECONDS : expire;
+    }
+
+    @Override
+    public boolean verifyEmailOtp(String email, String otp) {
+        String key = EMAIL_OTP_KEY_PREFIX + normalizeEmail(email);
+        String value = redisTemplate.opsForValue().get(key);
+
+        if (value == null) {
+            return false;
+        }
+
+        boolean verified = value.equals(otp);
+        if (verified) {
+            redisTemplate.delete(key);
+        }
+        return verified;
+    }
+
+    private void sendEmailVerificationOtpMessage(String email, String otp) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(email);
+            helper.setSubject("Mã OTP xác thực email SLY");
+            helper.setText(buildEmailOtpHtml(otp), true);
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            log.warn("Could not send email verification OTP to {}", email, e);
+        }
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
     }
 
     private String buildInvoiceHtmlString(String orderCode, String invoiceLink) {
@@ -79,5 +142,34 @@ public class EmailServiceImpl implements EmailService {
                 </body>
                 </html>
                 """.formatted(orderCode, invoiceLink);
+    }
+
+    private String buildEmailOtpHtml(String otp) {
+        return """
+                <!DOCTYPE html>
+                <html lang="vi">
+                <head><meta charset="UTF-8"/>
+                <style>
+                  body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+                  .card { max-width: 560px; margin: auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+                  .header { background: #111827; color: #fff; padding: 24px; text-align: center; font-size: 20px; }
+                  .body { padding: 28px; color: #333; font-size: 15px; line-height: 1.8; }
+                  .code { font-size: 30px; font-weight: bold; color: #111827; letter-spacing: 6px; text-align: center; }
+                  .footer { background: #f0f0f0; text-align: center; padding: 14px; font-size: 12px; color: #777; }
+                </style>
+                </head>
+                <body>
+                <div class="card">
+                  <div class="header">Xác thực email SLY</div>
+                  <div class="body">
+                    <p>Mã OTP xác thực email của bạn là:</p>
+                    <p class="code">%s</p>
+                    <p>Mã có hiệu lực trong 5 phút. Vui lòng không chia sẻ mã này cho người khác.</p>
+                  </div>
+                  <div class="footer">SLY Store</div>
+                </div>
+                </body>
+                </html>
+                """.formatted(otp);
     }
 }

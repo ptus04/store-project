@@ -14,14 +14,12 @@ import io.github.ptus04.server.repository.TransactionRepository;
 import io.github.ptus04.server.service.TransactionService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
@@ -62,7 +60,8 @@ public class TransactionServiceImpl implements TransactionService {
                             orderDetail.getProduct().getId().toString(),
                             orderDetail.getProduct().getName(),
                             orderDetail.getQuantity(),
-                            orderDetail.getProduct().getPrice()
+                            orderDetail.getProduct().getPrice(),
+                            orderDetail.getProduct().getDiscount() * 100
                     ))
                     .toList();
 
