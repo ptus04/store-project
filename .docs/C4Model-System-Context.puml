@@ -9,7 +9,7 @@ Person(employee, "Employee", "Nhân viên bán hàng")
 Person(admin, "Admin", "Chủ cửa hàng")
 
 System(storeSystem, "SLY Store System", "Website bán thời trang SLY")
-System_Ext(sepay, "SePay Payment Gateway", "Cổng thanh toán")
+System_Ext(sepay, "SePay", "Cổng thanh toán")
 System_Ext(gmail, "Gmail SMTP Service", "Dịch vụ gửi email")
 System_Ext(twilio, "Twilio Verify", "Dịch vụ xác thực SMS")
 System_Ext(googleAi, "Google AI Studio", "Dịch vụ AI")
