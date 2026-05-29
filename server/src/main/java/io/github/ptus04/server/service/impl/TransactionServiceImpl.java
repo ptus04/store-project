@@ -60,7 +60,8 @@ public class TransactionServiceImpl implements TransactionService {
                             orderDetail.getProduct().getId().toString(),
                             orderDetail.getProduct().getName(),
                             orderDetail.getQuantity(),
-                            orderDetail.getProduct().getPrice()
+                            orderDetail.getProduct().getPrice(),
+                            orderDetail.getProduct().getDiscount() * 100
                     ))
                     .toList();
 
