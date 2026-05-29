@@ -152,7 +152,11 @@
             if (!text) return "";
             let escaped = escapeHtml(text);
             escaped = escaped.replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            escaped = escaped.replaceAll(/\[(.*?)]\((.*?)\)/g, '<a href="$2" class="text-neutral-950 font-semibold underline decoration-neutral-400 hover:decoration-neutral-950 transition-colors duration-200">$1</a>');
+            // Avoid Thymeleaf parsing '[(...)]' as inline expression by using dynamic RegExp construction
+            const linkRegex = new RegExp('\\[' + '(.*?)' + '\\]\\(' + '(.*?)' + '\\)', 'g');
+            escaped = escaped.replaceAll(linkRegex, (_, p1, p2) => {
+                return '<a href="' + p2 + '" class="text-neutral-950 font-semibold underline decoration-neutral-400 hover:decoration-neutral-950 transition-colors duration-200">' + p1 + '</a>';
+            });
             escaped = escaped.replaceAll('\n', '<br>');
             return escaped;
         }
