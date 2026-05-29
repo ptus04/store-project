@@ -80,12 +80,6 @@ public final class ProductSpecifications {
     }
 
     public static Specification<Product> onlyDeleted(boolean onlyDeleted) {
-        return (root, query, builder) -> {
-            if (onlyDeleted) {
-                return builder.isNotNull(root.get("deletedAt"));
-            } else {
-                return builder.isNull(root.get("deletedAt"));
-            }
-        };
+        return (root, query, builder) -> builder.equal(root.get("deletedAt").isNotNull(), onlyDeleted);
     }
 }
