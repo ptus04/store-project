@@ -1,0 +1,83 @@
+@startuml
+!include <C4/C4_Component>
+
+title Luồng đặt hàng và thanh toán
+
+Person(customer, "Customer", "Khách hàng")
+
+System_Ext(smtp, "SMTP Server", "Dịch vụ email")
+System_Ext(sepay, "SePay API", "Cổng thanh toán\nDịch vụ hóa đơn")
+
+System_Boundary(storeSystem, "SLY Store System") {
+    Container_Boundary(server, "Server") {
+        Component(authFilter, "Authentication Filter", "Spring Security")
+
+        Boundary(ctrlBoundary, "Controller") {
+            Component(orderCtrl, "Order Controller", "Spring MVC Controller")
+            Component(transactionCtrl, "Transaction Controller", "Spring MVC Controller")
+        }
+
+        Boundary(svcBoundary, "Service") {
+            Component(orderSvc, "Order Service", "Spring Service")
+            Component(transactionSvc, "Transaction Service", "Spring Service")
+            Component(invoiceSvc, "Invoice Service", "Spring Service")
+            Component(emailSvc, "Email Service", "Spring Service")
+        }
+
+        Boundary(repoBoundary, "Repository") {
+            Component(orderRepo, "Order Repository", "Spring Repository")
+            Component(transactionRepo, "Transaction Repository", "Spring Repository")
+        }
+
+        Boundary(consumerBoundary, "Event Consumer") {
+            Component(orderEventConsumer, "Order Event Consumer", "Spring Component")
+            Component(invoiceEventConsumer, "Invoice Event Consumer", "Spring Component")
+        }
+
+        Boundary(producerBoundary, "Event Producer") {
+            Component(orderEventProducer, "Order Event Producer", "Spring Component")
+            Component(invoiceEventProducer, "Invoice Event Producer", "Spring Component")
+        }
+    }
+
+    ContainerQueue(msgBroker, "Message Broker", "RabbitMQ") {
+        queue "OrderPaidEvent" as orderPaidQueue
+        queue "InvoiceCreatedEvent" as invoiceCreatedQueue
+    }
+
+    ContainerDb(azureMySQL, "MySQL Database", "Azure Database for MySQL", "Cơ sở dữ liệu")
+    ContainerDb(azureRedis, "Redis Cache", "Azure Managed Redis", "Lưu trữ Cache")
+}
+
+Rel(customer, orderCtrl, "Đặt hàng")
+Rel(orderCtrl, orderSvc, "Lưu đơn hàng")
+Rel(orderSvc, orderRepo, "")
+Rel(orderRepo, azureMySQL, "")
+Rel(orderSvc, azureRedis, "Lưu trạng thái đơn hàng")
+
+Rel(sepay, transactionCtrl, "Gửi webhook", "HTTP")
+Rel(transactionCtrl, transactionSvc, "Lưu giao dịch")
+Rel(transactionSvc, transactionRepo, "")
+Rel(transactionRepo, azureMySQL, "")
+Rel(transactionSvc, azureRedis, "Cập nhật trạng thái đơn hàng")
+Rel(transactionSvc, orderEventProducer, "")
+
+Rel(orderEventProducer, orderPaidQueue, "")
+Rel(orderPaidQueue, orderEventConsumer, "")
+
+Rel(orderEventConsumer, invoiceSvc, "Tạo hóa đơn")
+Rel_U(invoiceSvc, sepay, "Tạo hóa đơn", "HTTP")
+Rel(invoiceSvc, invoiceEventProducer, "")
+
+Rel(invoiceEventProducer, invoiceCreatedQueue, "")
+Rel(invoiceCreatedQueue, invoiceEventConsumer, "")
+
+Rel(invoiceEventConsumer, emailSvc, "")
+Rel(emailSvc, smtp, "Gửi hóa đơn", "SMTP")
+
+Lay_U(msgBroker, server)
+
+@enduml
+
+
+

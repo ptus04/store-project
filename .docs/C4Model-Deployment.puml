@@ -10,9 +10,6 @@
 !include <azure/Storage/AzureStorage>
 !include <azure/Storage/AzureBlobStorage>
 
-!include <logos/docker-icon>
-!include <logos/twilio-icon>
-!include <logos/google-gmail>
 !include <logos/rabbitmq-icon>
 
 !include <tupadr3/common>
@@ -21,11 +18,12 @@
 title SLY Clothing Store Project - Deployment Diagram
 
 Node(internet, "<$globe_internet,color=#4285F4>\nInternet", "Users and Browsers")
-Node(dockerhub, "<$docker-icon,color=#4285F4>\nDocker Hub", "Image registry")
-Node(sepay, "<img:https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHAkUmtCLwnn7w7YdFtAgI1dLbECX5dY4DmA&s{scale=0.25}>\nSePay Payment Gateway", "Cổng thanh toán")
-Node(gmail, "<$google-gmail,color=#4285F4>\nGmail SMTP Service", "Dịch vụ email")
-Node(twilio, "<$twilio-icon,color=#4285F4>\nTwilio Verify", "Dịch vụ xác thực SMS")
-Node(rabbitMq, "<$rabbitmq-icon,color=#4285F4>\nRabbitMQ", "Message Broker")
+Node(dockerhub, "<img:https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmg0SrXaYcnUt5NFG_V5fUN3FH8hOJyszTxQ&s{scale=0.25}>\nDocker Hub", "Image registry")
+Node(sepay, "<img:https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHAkUmtCLwnn7w7YdFtAgI1dLbECX5dY4DmA&s{scale=0.25}>\nSePay", "Cổng thanh toán")
+Node(gmail, "<img:https://images.icon-icons.com/2642/PNG/512/google_mail_gmail_logo_icon_159346.png{scale=0.15}>\nGmail SMTP Service", "Dịch vụ email")
+Node(twilio, "<img:https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_ASF9RYHvUXKB0y4yo93NQOL0A8UBL4zQTQ&s{scale=0.25}>\nTwilio Verify", "Dịch vụ xác thực SMS")
+Node(rabbitMq, "<$rabbitmq-icon,color=#FF5500>\nRabbitMQ", "Message Broker")
+Node(googleAi, "<img:https://www.gstatic.com/images/branding/productlogos/ai_studio/v1/web-96dp/logo_ai_studio_color_1x_web_96dp.png{scale=0.70}>\nGoogle AI Studio", "Dịch vụ AI")
 
 AzureResourceGroups(azure_rg, "Azure Resource Group", "Southeast Asia") {
   AzureAppServicePlan(app_service_plan, "App Service Plan", "B2 (Linux)") {
@@ -37,7 +35,9 @@ AzureResourceGroups(azure_rg, "Azure Resource Group", "Southeast Asia") {
     AzureDatabaseForMySQL(mysql_db, "storedb", "MySQL")
   }
 
-  AzureRedisCache(redis_cache, "Azure Managed Redis", "Balanced_B0")
+  AzureRedisCache(redis_cache, "Azure Managed Redis", "Balanced_B0"){
+    AzureRedisCache(redis_cache_instance, "store-redis", "Redis Cache")
+  }
 
   AzureStorage(storage_account, "Azure Storage Account", "Storage Account") {
     AzureBlobStorage(storage_blob, "Blob containers", "Blob container", "images, carousel")
@@ -53,7 +53,7 @@ Rel(server, storage_blob, "PUT/GET", "HTTP / Azure SDK")
 Rel(web_admin, storage_blob, "PUT/GET", "HTTP")
 
 Rel(server, mysql_db, "CRUD dữ liệu", "JDBC")
-Rel(server, redis_cache, "Cache", "Redis SDK")
+Rel(server, redis_cache_instance, "Cache", "Redis SDK")
 Rel(app_service_plan, dockerhub, "pull images", "HTTP")
 
 Rel_U(server, gmail, "Gửi email xác nhận", "SMTP")
@@ -61,6 +61,7 @@ Rel_U(server, twilio, "Gửi OTP", "Twilio SDK / HTTPS")
 Rel(sepay, server, "Gửi Webhook thanh toán", "HTTPS POST")
 Rel_U(server, rabbitMq, "Publish messages", "AMQP")
 Rel_U(rabbitMq, server, "Deliver messages", "AMQP")
+Rel(server, googleAi, "Gửi prompts")
 
 @enduml
 
