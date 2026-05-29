@@ -21,6 +21,7 @@ System_Boundary(storeSystem, "SLY Store System") {
 System_Ext(sepay, "SePay Payment Gateway", "Cổng thanh toán")
 System_Ext(gmail, "Gmail SMTP Service", "Dịch vụ email")
 System_Ext(twilio, "Twilio Verify", "Dịch vụ xác thực SMS")
+System_Ext(googleAi, "Google AI Studio", "Dịch vụ AI")
 
 Rel(webAdmin, server, "Gọi REST API", "HTTP")
 
@@ -36,6 +37,7 @@ Rel(server, gmail, "Gửi email", "SMTP")
 Rel(server, twilio, "Gửi OTP", "Twilio SDK")
 Rel(server, rabbitMq, "Publish messages", "AMQP")
 Rel_R(rabbitMq, server, "Deliver messages", "AMQP")
+Rel(server, googleAi, "Gửi prompts")
 
 Rel(sepay, server, "Gửi Webhook thanh toán", "HTTP POST")
 @enduml
