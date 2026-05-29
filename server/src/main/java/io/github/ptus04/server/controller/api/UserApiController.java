@@ -42,6 +42,15 @@ public class UserApiController {
         return ResponseEntity.ok(updatedUser);
     }
 
+    @PostMapping("/profile/email/verify")
+    public ResponseEntity<UserResponse> verifyProfileEmail(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody VerifyEmailRequest request
+    ) {
+        UserResponse updatedUser = userService.verifyProfileEmail(userDetails.getId(), request.otp());
+        return ResponseEntity.ok(updatedUser);
+    }
+
     @PutMapping("/change-password")
     public ResponseEntity<?> changePassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -68,5 +77,10 @@ public class UserApiController {
             @NotBlank(message = "Mật khẩu mới không được để trống")
             @Size(min = 6, message = "Mật khẩu mới phải có ít nhất 6 ký tự")
             String newPassword
+    ) {}
+
+    public record VerifyEmailRequest(
+            @NotBlank(message = "Mã OTP không được để trống")
+            String otp
     ) {}
 }

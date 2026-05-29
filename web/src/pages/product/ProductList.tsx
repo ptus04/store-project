@@ -479,7 +479,7 @@ export default function ProductList() {
                                   {p.price?.toLocaleString?.() ?? p.price} ₫
                                 </span>
                                 <span className="text-error text-xs font-bold">
-                                  -{p.discount}%
+                                  -{(p.discount ?? 0) * 100}%
                                 </span>
                               </div>
                               <span className="font-body-base text-body-base text-primary font-bold">

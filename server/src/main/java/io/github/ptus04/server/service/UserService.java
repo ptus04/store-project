@@ -16,6 +16,8 @@ public interface UserService {
 
     UserResponse updateProfile(UUID id, UserProfileUpdateRequest request);
 
+    UserResponse verifyProfileEmail(UUID id, String otp);
+
     long countByRole(UserRoleEnum role);
 
     List<UserResponse> getUsersByRole(UserRoleEnum role);

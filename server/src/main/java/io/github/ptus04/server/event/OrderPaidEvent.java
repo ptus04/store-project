@@ -13,6 +13,6 @@ public record OrderPaidEvent(
         String buyerAddress,
         List<OrderItem> items
 ) {
-    public record OrderItem(String itemCode, String itemName, int quantity, BigDecimal unitPrice) {
+    public record OrderItem(String itemCode, String itemName, int quantity, BigDecimal unitPrice, float discountTax) {
     }
 }

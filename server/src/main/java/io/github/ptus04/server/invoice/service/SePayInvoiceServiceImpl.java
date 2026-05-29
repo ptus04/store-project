@@ -51,6 +51,7 @@ public class SePayInvoiceServiceImpl implements InvoiceService {
             item.setItemName(orderItem.itemName());
             item.setQuantity(orderItem.quantity());
             item.setUnitPrice(orderItem.unitPrice());
+            item.setDiscountTax(orderItem.discountTax());
             items.add(item);
         }
 
@@ -80,7 +81,6 @@ public class SePayInvoiceServiceImpl implements InvoiceService {
         invoiceEventProducer.publishInvoiceCreatedEvent(
                 new InvoiceCreatedEvent(
                         orderPaidEvent.email(),
-                        orderPaidEvent.orderId(),
                         orderPaidEvent.orderCode(),
                         invoiceLink
                 )

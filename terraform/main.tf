@@ -42,30 +42,46 @@ resource "azurerm_linux_web_app" "store" {
   }
 
   app_settings = {
-    WEBSITES_PORT                   = "8080"
-    DOCKER_ENABLE_CI                = true
-    DATABASE_CONNECTION_STRING      = module.database.connection_string
-    DATABASE_USERNAME               = module.database.administrator_login
-    DATABASE_PASSWORD               = module.database.administrator_password
+    WEBSITES_PORT    = "8080"
+    DOCKER_ENABLE_CI = true
+
+    DATABASE_CONNECTION_STRING = module.database.connection_string
+    DATABASE_USERNAME          = module.database.administrator_login
+    DATABASE_PASSWORD          = module.database.administrator_password
+
     REDIS_CONNECTION_STRING         = module.redis.connection_string
     AZURE_STORAGE_CONNECTION_STRING = module.storage.connection_string
-    TWILIO_ACCOUNT_SID              = var.twilio_account_sid
-    TWILIO_AUTH_TOKEN               = var.twilio_auth_token
-    TWILIO_VERIFY_SERVICE_SID       = var.twilio_verify_service_sid
-    MAIL_USERNAME                   = var.mail_username
-    MAIL_PASSWORD                   = var.mail_password
-    JWT_SECRET                      = var.jwt_secret
-    JWT_EXPIRATION_MS               = var.jwt_expiration_ms
-    SEPAY_ACCOUNT_NAME              = var.sepay_account_name
-    SEPAY_ACCOUNT_NUMBER            = var.sepay_account_number
-    SEPAY_BANK                      = var.sepay_bank
-    SEPAY_USERNAME                  = var.sepay_username
-    SEPAY_PASSWORD                  = var.sepay_password
-    GEMINI_API_KEY                  = var.gemini_api_key
-    ALLOWED_ORIGINS                 = "https://ptus04-store-admin-app.azurewebsites.net"
-    ALLOWED_METHODS                 = "GET,POST,PUT,PATCH,DELETE"
-    ALLOWED_HEADERS                 = "Content-Type,Authorization"
-    ALLOW_CREDENTIALS               = true
+
+    TWILIO_ACCOUNT_SID        = var.twilio_account_sid
+    TWILIO_AUTH_TOKEN         = var.twilio_auth_token
+    TWILIO_VERIFY_SERVICE_SID = var.twilio_verify_service_sid
+
+    MAIL_USERNAME = var.mail_username
+    MAIL_PASSWORD = var.mail_password
+
+    JWT_SECRET        = var.jwt_secret
+    JWT_EXPIRATION_MS = var.jwt_expiration_ms
+
+    SEPAY_BANK               = var.sepay_bank
+    SEPAY_ACCOUNT_NAME       = var.sepay_account_name
+    SEPAY_ACCOUNT_NUMBER     = var.sepay_account_number
+    SEPAY_INVOICE_AUTH_URL   = var.sepay_invoice_auth_url
+    SEPAY_INVOICE_CREATE_URL = var.sepay_invoice_create_url
+    SEPAY_INVOICE_CHECK_URL  = var.sepay_invoice_check_url
+    SEPAY_USERNAME           = var.sepay_username
+    SEPAY_PASSWORD           = var.sepay_password
+
+    GEMINI_API_KEY = var.gemini_api_key
+
+    RABBITMQ_HOST     = var.rabbitmq_host
+    RABBITMQ_PORT     = var.rabbitmq_port
+    RABBITMQ_USERNAME = var.rabbitmq_username
+    RABBITMQ_PASSWORD = var.rabbitmq_password
+
+    ALLOWED_ORIGINS   = "https://ptus04-store-admin-app.azurewebsites.net"
+    ALLOWED_METHODS   = "GET,POST,PUT,PATCH,DELETE"
+    ALLOWED_HEADERS   = "Content-Type,Authorization"
+    ALLOW_CREDENTIALS = true
   }
 }
 
@@ -82,7 +98,7 @@ resource "azurerm_linux_web_app" "store_admin" {
   }
 
   app_settings = {
-    WEBSITES_PORT                   = "8080"
-    DOCKER_ENABLE_CI                = true
+    WEBSITES_PORT    = "8080"
+    DOCKER_ENABLE_CI = true
   }
 }

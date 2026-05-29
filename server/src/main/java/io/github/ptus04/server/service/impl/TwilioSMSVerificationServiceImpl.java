@@ -3,7 +3,10 @@ package io.github.ptus04.server.service.impl;
 import com.twilio.rest.verify.v2.service.Verification;
 import com.twilio.rest.verify.v2.service.VerificationCheck;
 import io.github.ptus04.server.config.TwilioProperties;
+import io.github.ptus04.server.event.OtpRequestedEvent;
+import io.github.ptus04.server.producer.SmsEventProducer;
 import io.github.ptus04.server.service.SMSVerificationService;
+import io.github.ptus04.server.util.PhoneNumberUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Primary;
@@ -20,22 +23,21 @@ import java.util.concurrent.TimeUnit;
 public class TwilioSMSVerificationServiceImpl implements SMSVerificationService {
     private final TwilioProperties twilioProperties;
     private final StringRedisTemplate redisTemplate;
+    private final SmsEventProducer smsEventProducer;
 
     @Override
     public long sendOtp(String phone) {
         String key = "twilio:otp:" + phone;
-        String value = redisTemplate.opsForValue().get(key);
-        if (value == null) {
-            Verification.creator(
-                    twilioProperties.getVerify().getServiceSid(),
-                    prefixWithVietnameseCode(phone),
-                    Verification.Channel.SMS.toString()
-            ).create();
-            redisTemplate.opsForValue().setIfAbsent(key, "sent");
-            redisTemplate.expire(key, 60, TimeUnit.SECONDS);
+        Long expire = redisTemplate.getExpire(key);
+        if (expire != null && expire > 0) {
+            return expire;
         }
 
-        return redisTemplate.getExpire(key);
+        redisTemplate.opsForValue().set(key, "sent", 60, TimeUnit.SECONDS);
+
+        smsEventProducer.publishOtpRequestedEvent(new OtpRequestedEvent(phone));
+
+        return 60;
     }
 
     @Override
@@ -43,13 +45,9 @@ public class TwilioSMSVerificationServiceImpl implements SMSVerificationService 
         VerificationCheck check = VerificationCheck
                 .creator(twilioProperties.getVerify().getServiceSid())
                 .setCode(otp)
-                .setTo(prefixWithVietnameseCode(phone))
+                .setTo(PhoneNumberUtils.prefixWithVietnameseCode(phone))
                 .create();
 
         return Objects.equals(check.getStatus(), Verification.Status.APPROVED.toString());
-    }
-
-    private String prefixWithVietnameseCode(String phoneNumber) {
-        return phoneNumber.startsWith("0") ? "+84" + phoneNumber.substring(1) : phoneNumber;
     }
 }

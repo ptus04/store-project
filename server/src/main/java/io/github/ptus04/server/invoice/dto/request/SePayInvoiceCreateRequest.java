@@ -56,5 +56,7 @@ public class SePayInvoiceCreateRequest {
         private int quantity;
         @JsonProperty("unit_price")
         private BigDecimal unitPrice;
+        @JsonProperty("discount_tax")
+        private float discountTax;
     }
 }
