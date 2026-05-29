@@ -29,7 +29,11 @@ public class LayoutControllerAdvice {
         if (httpServletRequest.getRequestURI().startsWith("/api")) {
             return null;
         }
-        return blobServiceClient.getBlobContainerClient("images").getBlobContainerUrl() + "/";
+        String url = blobServiceClient.getBlobContainerClient("images").getBlobContainerUrl();
+        if (url.contains("127.0.0.1") || url.contains("localhost")) {
+            return "/local-media/images/";
+        }
+        return url + "/";
     }
 
     @ModelAttribute("carouselContainerUrl")
@@ -37,6 +41,10 @@ public class LayoutControllerAdvice {
         if (httpServletRequest.getRequestURI().startsWith("/api")) {
             return null;
         }
-        return blobServiceClient.getBlobContainerClient("carousel").getBlobContainerUrl() + "/";
+        String url = blobServiceClient.getBlobContainerClient("carousel").getBlobContainerUrl();
+        if (url.contains("127.0.0.1") || url.contains("localhost")) {
+            return "/local-media/carousel/";
+        }
+        return url + "/";
     }
 }
