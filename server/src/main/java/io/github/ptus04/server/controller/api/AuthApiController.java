@@ -1,8 +1,8 @@
 package io.github.ptus04.server.controller.api;
 
 import io.github.ptus04.server.dto.request.UserLoginRequest;
-import io.github.ptus04.server.security.CustomUserDetails;
-import io.github.ptus04.server.security.JwtUtil;
+import io.github.ptus04.server.dto.internal.CustomUserDetails;
+import io.github.ptus04.server.util.JwtUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthApiController {
     private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
+    private final JwtUtils jwtUtils;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody UserLoginRequest userLoginRequest) {
@@ -55,7 +55,7 @@ public class AuthApiController {
                 .orElse("EMPLOYEE");
 
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-        String token = jwtUtil.generateToken(userDetails.getId(), userDetails.getName(), role);
+        String token = jwtUtils.generateToken(userDetails.getId(), userDetails.getName(), role);
 
         return ResponseEntity.ok(Map.of(
                 "token", token,

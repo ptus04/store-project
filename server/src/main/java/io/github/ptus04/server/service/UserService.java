@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
+
     UserResponse getUserById(UUID id);
 
     UserResponse updateProfile(UUID id, UserProfileUpdateRequest request);

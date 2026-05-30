@@ -8,26 +8,28 @@ import io.github.ptus04.server.entity.Transaction;
 import io.github.ptus04.server.enums.OrderStatusEnum;
 import io.github.ptus04.server.event.OrderPaidEvent;
 import io.github.ptus04.server.mapper.TransactionMapper;
-import io.github.ptus04.server.producer.OrderEventProducer;
 import io.github.ptus04.server.repository.OrderRepository;
 import io.github.ptus04.server.repository.TransactionRepository;
 import io.github.ptus04.server.service.TransactionService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
-    private final TransactionRepository transactionRepository;
-    private final OrderRepository orderRepository;
-    private final TransactionMapper transactionMapper;
-    private final OrderEventProducer orderEventProducer;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final RedisCacheManager cacheManager;
+    private final TransactionMapper transactionMapper;
+    private final OrderRepository orderRepository;
+    private final TransactionRepository transactionRepository;
 
     @Override
     @Transactional
@@ -40,9 +42,8 @@ public class TransactionServiceImpl implements TransactionService {
 
         if (!order.getStatus().equals(OrderStatusEnum.UNPAID)
                 || order.getTotal().compareTo(transactionCreateRequest.transferAmount()) != 0) {
-            TransactionResponse transactionResponse = transactionMapper.toTransactionResponse(
-                    transactionRepository.saveAndFlush(transaction)
-            );
+            TransactionResponse transactionResponse =
+                    transactionMapper.toTransactionResponse(transactionRepository.saveAndFlush(transaction));
             return new TransactionCreateResponse(false, transactionResponse);
         }
 
@@ -69,19 +70,18 @@ public class TransactionServiceImpl implements TransactionService {
                     order.getId().toString(),
                     order.getOrderCode(),
                     order.getUser().getId().toString(),
-                    order.getUser().getEmail(),
+                    email,
                     order.getUser().getName(),
                     order.getUser().getPhone(),
                     order.getOrderShippingAddress().toAddressString(),
                     orderItems
             );
 
-            orderEventProducer.publishOrderPaidEvent(orderPaidEvent);
+            applicationEventPublisher.publishEvent(orderPaidEvent);
         }
 
-        TransactionResponse transactionResponse = transactionMapper.toTransactionResponse(
-                transactionRepository.saveAndFlush(transaction)
-        );
+        TransactionResponse transactionResponse =
+                transactionMapper.toTransactionResponse(transactionRepository.saveAndFlush(transaction));
         return new TransactionCreateResponse(true, transactionResponse);
     }
 }

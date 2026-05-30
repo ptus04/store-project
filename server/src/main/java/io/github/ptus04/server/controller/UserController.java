@@ -2,7 +2,7 @@ package io.github.ptus04.server.controller;
 
 import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.mapper.UserMapper;
-import io.github.ptus04.server.security.CustomUserDetails;
+import io.github.ptus04.server.dto.internal.CustomUserDetails;
 import io.github.ptus04.server.service.OrderService;
 import io.github.ptus04.server.service.UserService;
 import io.github.ptus04.server.dto.request.UserAddressUpdateRequest;
