@@ -1,4 +1,4 @@
-package io.github.ptus04.server.chat.dto;
+package io.github.ptus04.server.dto.chat;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

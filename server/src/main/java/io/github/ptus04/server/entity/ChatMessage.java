@@ -1,4 +1,4 @@
-package io.github.ptus04.server.chat.entity;
+package io.github.ptus04.server.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

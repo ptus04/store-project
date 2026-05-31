@@ -132,8 +132,8 @@
             integrity="sha512-iKDtgDyTHjAitUDdLljGhenhPwrbBfqTKWO1mkhSFH3A7blITC9MhYon6SjnMhp4o0rADGw9yAC6EW4t5a4K3g=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-    <!-- Custom Chat JS Helpers (Non-inlined to support clean RegExp literals and avoid Thymeleaf conflicts) -->
-    <script>
+    <!-- Custom Chat JS -->
+    <script th:inline="javascript">
         function getTimestamp() {
             const now = new Date();
             return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
@@ -168,7 +168,6 @@
 
     <!-- Custom Chat JS Main Logic -->
     <script th:inline="javascript">
-
         document.addEventListener('DOMContentLoaded', function () {
             // --- Configuration ---
             const CONFIG = {
@@ -542,6 +541,7 @@
 
                     hideTypingIndicator();
                     const formattedHtml = formatMessageText(responseText);
+
                     appendMessage('AI', formattedHtml, true);
 
                     chatInput.disabled = false;

@@ -1,65 +1,63 @@
-package io.github.ptus04.server.chat.service.impl;
+package io.github.ptus04.server.service.impl;
 
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.SystemMessage;
-import io.github.ptus04.server.chat.config.AiChatConfig.ProductTools;
-import io.github.ptus04.server.chat.entity.ChatMessage;
-import io.github.ptus04.server.chat.repository.ChatMessageRepository;
-import io.github.ptus04.server.chat.service.AiChatService;
+import io.github.ptus04.server.config.AiChatConfig.ProductTools;
+import io.github.ptus04.server.entity.ChatMessage;
+import io.github.ptus04.server.repository.ChatMessageRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class AiChatServiceImpl implements AiChatService {
+public class AiChatService {
     private static final int MAX_RETRY_ATTEMPTS = 3;
     private static final long INITIAL_BACKOFF_MS = 500L;
 
     private final Assistant assistant;
     private final ChatMessageRepository chatMessageRepository;
 
-    interface Assistant {
-        @SystemMessage("""
-                Bạn là một trợ lý ảo hỗ trợ bán hàng thông minh của cửa hàng thời trang SLY (Sly clothing). Hãy trả lời lịch sự, thân thiện, ngắn gọn và hữu ích. Bạn có thể gọi các công cụ (tools) được cung cấp để tra cứu thông tin sản phẩm, danh mục và tình trạng đơn hàng cho khách. Lưu ý quan trọng: Tuyệt đối không suy đoán, không yêu cầu và không tiết lộ thông tin cá nhân nhạy cảm của khách hàng. Nếu khách hàng hỏi về sản phẩm mới, hãy dùng công cụ getNewProducts.
-                
-                KHI TÌM KIẾM SẢN PHẨM (BẮT BUỘC DỊCH Ý NGHĨA SANG TIẾNG ANH):
-                Vì toàn bộ sản phẩm và danh mục phân loại của shop SLY đều được đặt tên bằng tiếng Anh, nên khi khách hàng hỏi bằng tiếng Việt, bạn BẮT BUỘC phải chủ động dịch ý nghĩa các từ tiếng Việt sang các từ khóa tiếng Anh tương ứng trước khi truyền vào công cụ searchProducts. Bản đồ dịch từ khóa thời trang SLY (Việt -> Anh):
-                - Áo thun, áo phông -> dịch thành 'tee' hoặc 'polo' hoặc 'tops'
-                - Quần dài -> dịch thành 'pants' hoặc 'bottoms'
-                - Quần đùi, quần ngắn -> dịch thành 'shorts' hoặc 'bottoms'
-                - Áo khoác -> dịch thành 'jacket' hoặc 'outwear'
-                - Áo nỉ, áo hoodie, áo trùm đầu -> dịch thành 'hoodie' hoặc 'outwear'
-                - Ví, bóp -> dịch thành 'wallet' hoặc 'accessories'
-                - Balo, cặp -> dịch thành 'backpack' hoặc 'accessories'
-                - Nón, mũ -> dịch thành 'cap' hoặc 'accessories'
-                - Phụ kiện -> dịch thành 'accessories'
-                Ví dụ: Khách hỏi 'tìm cho mình cái ví' -> gọi searchProducts('wallet'). Khách hỏi 'muốn mua nón đen' -> gọi searchProducts('black cap'). Khách hỏi 'áo thun trắng' -> gọi searchProducts('white tee').
-                Hãy linh hoạt thử nhiều từ khóa liên quan (cả Anh lẫn Việt) nếu lần tìm kiếm đầu tiên không có kết quả.
-                
-                KHI LIỆT KÊ/ĐỀ CẬP SẢN PHẨM: Chỉ nêu tên sản phẩm mà KHÔNG dùng định dạng link Markdown. KHI TRA CỨU ĐƠN HÀNG: Khi gọi checkOrderStatus, hãy đọc kỹ trường 'status' của đơn hàng và giải nghĩa chính xác cho khách: UNPAID: Chưa thanh toán; PAID: Đã thanh toán (đang chờ xử lý); PACKAGING: Đang chuẩn bị đóng gói; SHIPPING: Đang giao hàng; COMPLETED: Đã hoàn thành (giao thành công); CANCELLED: Đã bị hủy; REFUNDED: Đã được hoàn tiền. Tuyệt đối không nhầm lẫn giữa các trạng thái này.""")
-        String chat(@dev.langchain4j.service.MemoryId String sessionId, @dev.langchain4j.service.UserMessage String userMessage);
-    }
-
-    public AiChatServiceImpl(@Value("${gemini.api-key:}") String apiKey, ProductTools productTools, ChatMessageRepository chatMessageRepository) {
+    public AiChatService(@Value("${gemini.api-key:}") String apiKey, ProductTools productTools, ChatMessageRepository chatMessageRepository) {
         this.chatMessageRepository = chatMessageRepository;
         String finalApiKey = resolveApiKey(apiKey);
         ChatLanguageModel model = OpenAiChatModel.builder()
                 .baseUrl("https://generativelanguage.googleapis.com/v1beta/openai/")
                 .apiKey(finalApiKey)
-                .modelName("gemini-3.5-flash")
+                .modelName("gemini-2.5-flash")
                 .logRequests(true)
                 .logResponses(true)
                 .build();
+
 
         this.assistant = AiServices.builder(Assistant.class)
                 .chatLanguageModel(model)
                 .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(20))
                 .tools(productTools)
                 .build();
+    }
+
+    public String generateReply(String sessionId, String message) {
+        // Save USER message
+        ChatMessage userMsg = new ChatMessage();
+        userMsg.setSessionId(sessionId);
+        userMsg.setSender("USER");
+        userMsg.setContent(message);
+        chatMessageRepository.save(userMsg);
+
+        String reply = generateReplyWithRetry(sessionId, message);
+
+        // Save AI reply
+        ChatMessage aiMsg = new ChatMessage();
+        aiMsg.setSessionId(sessionId);
+        aiMsg.setSender("AI");
+        aiMsg.setContent(reply);
+        chatMessageRepository.save(aiMsg);
+
+        return reply;
     }
 
     private static String resolveApiKey(String injectKey) {
@@ -112,27 +110,6 @@ public class AiChatServiceImpl implements AiChatService {
         return "dummy-key";
     }
 
-    @Override
-    public String generateReply(String sessionId, String message) {
-        // Save USER message
-        ChatMessage userMsg = new ChatMessage();
-        userMsg.setSessionId(sessionId);
-        userMsg.setSender("USER");
-        userMsg.setContent(message);
-        chatMessageRepository.save(userMsg);
-
-        String reply = generateReplyWithRetry(sessionId, message);
-
-        // Save AI reply
-        ChatMessage aiMsg = new ChatMessage();
-        aiMsg.setSessionId(sessionId);
-        aiMsg.setSender("AI");
-        aiMsg.setContent(reply);
-        chatMessageRepository.save(aiMsg);
-
-        return reply;
-    }
-
     private String generateReplyWithRetry(String sessionId, String message) {
         RuntimeException lastException = null;
 
@@ -160,5 +137,27 @@ public class AiChatServiceImpl implements AiChatService {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Retry interrupted", ex);
         }
+    }
+
+    interface Assistant {
+        @SystemMessage("""
+                Bạn là một trợ lý ảo hỗ trợ bán hàng thông minh của cửa hàng thời trang SLY (Sly clothing). Hãy trả lời lịch sự, thân thiện, ngắn gọn và hữu ích. Bạn có thể gọi các công cụ (tools) được cung cấp để tra cứu thông tin sản phẩm, danh mục và tình trạng đơn hàng cho khách. Lưu ý quan trọng: Tuyệt đối không suy đoán, không yêu cầu và không tiết lộ thông tin cá nhân nhạy cảm của khách hàng. Nếu khách hàng hỏi về sản phẩm mới, hãy dùng công cụ getNewProducts.
+                
+                KHI TÌM KIẾM SẢN PHẨM (BẮT BUỘC DỊCH Ý NGHĨA SANG TIẾNG ANH):
+                Vì toàn bộ sản phẩm và danh mục phân loại của shop SLY đều được đặt tên bằng tiếng Anh, nên khi khách hàng hỏi bằng tiếng Việt, bạn BẮT BUỘC phải chủ động dịch ý nghĩa các từ tiếng Việt sang các từ khóa tiếng Anh tương ứng trước khi truyền vào công cụ searchProducts. Bản đồ dịch từ khóa thời trang SLY (Việt -> Anh):
+                - Áo thun, áo phông -> dịch thành 'tee' hoặc 'polo' hoặc 'tops'
+                - Quần dài -> dịch thành 'pants' hoặc 'bottoms'
+                - Quần đùi, quần ngắn -> dịch thành 'shorts' hoặc 'bottoms'
+                - Áo khoác -> dịch thành 'jacket' hoặc 'outwear'
+                - Áo nỉ, áo hoodie, áo trùm đầu -> dịch thành 'hoodie' hoặc 'outwear'
+                - Ví, bóp -> dịch thành 'wallet' hoặc 'accessories'
+                - Balo, cặp -> dịch thành 'backpack' hoặc 'accessories'
+                - Nón, mũ -> dịch thành 'cap' hoặc 'accessories'
+                - Phụ kiện -> dịch thành 'accessories'
+                Ví dụ: Khách hỏi 'tìm cho mình cái ví' -> gọi searchProducts('wallet'). Khách hỏi 'muốn mua nón đen' -> gọi searchProducts('black cap'). Khách hỏi 'áo thun trắng' -> gọi searchProducts('white tee').
+                Hãy linh hoạt thử nhiều từ khóa liên quan (cả Anh lẫn Việt) nếu lần tìm kiếm đầu tiên không có kết quả.
+                
+                KHI LIỆT KÊ/ĐỀ CẬP SẢN PHẨM: Chỉ nêu tên sản phẩm mà KHÔNG dùng định dạng link Markdown. KHI TRA CỨU ĐƠN HÀNG: Khi gọi checkOrderStatus, hãy đọc kỹ trường 'status' của đơn hàng và giải nghĩa chính xác cho khách: UNPAID: Chưa thanh toán; PAID: Đã thanh toán (đang chờ xử lý); PACKAGING: Đang chuẩn bị đóng gói; SHIPPING: Đang giao hàng; COMPLETED: Đã hoàn thành (giao thành công); CANCELLED: Đã bị hủy; REFUNDED: Đã được hoàn tiền. Tuyệt đối không nhầm lẫn giữa các trạng thái này.""")
+        String chat(@dev.langchain4j.service.MemoryId String sessionId, @dev.langchain4j.service.UserMessage String userMessage);
     }
 }

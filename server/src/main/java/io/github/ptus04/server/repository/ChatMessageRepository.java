@@ -1,6 +1,6 @@
-package io.github.ptus04.server.chat.repository;
+package io.github.ptus04.server.repository;
 
-import io.github.ptus04.server.chat.entity.ChatMessage;
+import io.github.ptus04.server.entity.ChatMessage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
