@@ -1,0 +1,16 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "This package allows IntelliJ IDEA's support for Tailwind CSS.",
+  "private": true,
+  "license": "ISC",
+  "author": "github/ptus04",
+  "scripts": {
+    "build": "tailwindcss -i main.css -o ../resources/static/css/main.css --minify",
+    "watch": "tailwindcss -i main.css -o ../resources/static/css/main.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "tailwindcss": "^4.2.2"
+  }
+}

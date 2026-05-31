@@ -16,6 +16,7 @@ target/
 .idea
 *.iws
 *.iml
+!server.iml
 *.ipr
 
 ### NetBeans ###
@@ -30,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Project specific ###
+.env
+.env.prod
+application-test.yaml

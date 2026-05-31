@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi"
+      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}"
+      xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán đơn hàng | SLY</title>
+</head>
+<body>
+<main class="container mx-auto p-4 sm:p-8">
+    <div id="paymentSuccessNotice"
+         class="fixed right-4 top-4 z-50 hidden rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700 shadow">
+        Thanh toán thành công! Đang chuyển hướng đến trang chi tiết đơn hàng...
+    </div>
+
+    <div class="mx-auto max-w-4xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm lg:p-10">
+
+        <!-- Header -->
+        <div class="mb-8 text-center">
+            <h1 class="mb-2 text-3xl font-bold text-gray-800">Thanh toán đơn hàng</h1>
+            <p class="text-gray-500">
+                Vui lòng mở Ứng dụng ngân hàng và <strong>quét mã QR</strong> bên dưới để hoàn tất thanh toán.
+            </p>
+        </div>
+
+        <div class="flex flex-col items-center justify-center gap-10 md:flex-row md:items-stretch">
+
+            <!-- Left Side: QR Code Container -->
+            <div class="flex w-full max-w-xs flex-col items-center gap-4 rounded-xl border border-gray-100 bg-gray-50 p-6">
+                <div class="text-xl font-bold text-blue-800">
+                    <i class="fa fa-university mr-2"></i> MB Bank
+                </div>
+
+                <!-- QR Code Block -->
+                <div class="h-64 w-64 rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+                    <img class="h-full w-full object-contain" th:src="${qrCodeUrl}" alt="Mã QR Thanh Toán"/>
+                </div>
+
+                <div id="paymentCheckingIndicator" class="mt-2 flex items-center gap-2 text-xs text-gray-500"
+                     aria-live="polite">
+                    <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></span>
+                    <span id="paymentStatusText">Đang chờ thanh toán đơn hàng...</span>
+                </div>
+            </div>
+
+            <!-- Right Side: Transfer Information Form -->
+            <div class=" flex w-full max-w-sm flex-col gap-5 justify-center">
+                <h2 class="border-b border-gray-200 pb-3 text-xl font-bold text-gray-800">Thông tin chuyển khoản</h2>
+
+                <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-gray-500">Ngân hàng thụ hưởng</span>
+                    <span class="font-bold text-gray-800 uppercase">Ngân hàng Quân Đội (MB Bank)</span>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-gray-500">Chủ tài khoản</span>
+                    <span class="font-bold text-gray-800 uppercase" th:text="${accountName}"></span>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-gray-500">Số tài khoản</span>
+                    <div class="flex items-center justify-between rounded bg-gray-50 px-3 py-2 border border-gray-200">
+                        <span class="text-lg font-bold tracking-wider text-gray-800" th:text="${accountNumber}">
+                        </span>
+                        <button type="button" class="text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
+                                title="Sao chép số tài khoản" onclick="copyAccountNumber()">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-gray-500">Số tiền cần thanh toán</span>
+                    <div class="flex items-center justify-between rounded bg-gray-50 px-3 py-2 border border-gray-200">
+                        <span class="text-xl font-bold text-red-600"
+                              th:text="${#numbers.formatDecimal(amount, 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                        </span>
+                        <button type="button" class="text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
+                                title="Sao chép số tiền" onclick="copyAmount()">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-gray-500">Nội dung chuyển khoản</span>
+                    <div class="flex items-center justify-between rounded border border-yellow-300 bg-yellow-50 px-3 py-2">
+                        <span class="font-bold text-gray-800" th:text="${transferContent}"></span>
+                        <button type="button" class="text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
+                                title="Sao chép nội dung" onclick="copyTransferContent()">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                    <span class="mt-1 text-xs italic text-red-500">
+                        * Bắt buộc ghi đúng nội dung để hệ thống xác nhận tự động.
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const transferContent = /*[[${transferContent}]]*/ null;
+        const accountNumber = /*[[${accountNumber}]]*/ null;
+        const amount = /*[[${amount}]]*/ null;
+        const orderStatusUrl = /*[[@{/orders/{id}/status(id=${orderId})}]]*/ "";
+        const orderDetailUrl = /*[[@{/orders/{id}(id=${orderId})}]]*/ "";
+
+        const paymentCheckingIndicator = document.getElementById("paymentCheckingIndicator");
+        const paymentStatusText = document.getElementById("paymentStatusText");
+        const paymentSuccessNotice = document.getElementById("paymentSuccessNotice");
+
+        let pollingIntervalId = null;
+        let isRedirecting = false;
+
+        function copyTransferContent() {
+            navigator.clipboard.writeText(transferContent);
+        }
+
+        function copyAccountNumber() {
+            navigator.clipboard.writeText(accountNumber);
+        }
+
+        function copyAmount() {
+            navigator.clipboard.writeText(amount);
+        }
+
+        function handlePaymentSuccess() {
+            if (isRedirecting) {
+                return;
+            }
+
+            isRedirecting = true;
+
+            if (pollingIntervalId) {
+                clearInterval(pollingIntervalId);
+            }
+
+            paymentSuccessNotice?.classList.remove("hidden");
+
+            if (paymentCheckingIndicator) {
+                paymentCheckingIndicator.classList.remove("text-gray-500");
+                paymentCheckingIndicator.classList.add("text-green-700");
+            }
+
+            if (paymentStatusText) {
+                paymentStatusText.textContent = "Đã thanh toán đơn hàng";
+            }
+
+            setTimeout(() => {
+                window.location.href = orderDetailUrl;
+            }, 1500);
+        }
+
+        async function pollOrderStatus() {
+            if (isRedirecting) {
+                return;
+            }
+
+            try {
+                const response = await fetch(orderStatusUrl, {
+                    method: "GET",
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const status = await response.text();
+                if (status !== "UNPAID") {
+                    handlePaymentSuccess();
+                }
+            } catch (_) {
+                // Keep polling silently to avoid interrupting the checkout experience.
+            }
+        }
+
+        pollOrderStatus();
+        pollingIntervalId = setInterval(pollOrderStatus, 3000);
+    </script>
+</main>
+</body>
+</html>

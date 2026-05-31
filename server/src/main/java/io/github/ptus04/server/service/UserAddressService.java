@@ -1,0 +1,24 @@
+package io.github.ptus04.server.service;
+
+import io.github.ptus04.server.dto.request.UserAddressUpdateRequest;
+import io.github.ptus04.server.dto.response.UserAddressResponse;
+
+
+import java.util.List;
+import java.util.UUID;
+
+public interface UserAddressService {
+
+    List<UserAddressResponse> getAddresses(UUID userId);
+
+    void addAddress(UUID userId, UserAddressUpdateRequest request);
+
+    void updateAddress(UUID addressId, UserAddressUpdateRequest request);
+
+    void deleteAddress(UUID addressId);
+
+    void setDefaultAddress(UUID addressId);
+
+    UserAddressResponse getDefaultAddressByUserId(UUID userId);
+
+}

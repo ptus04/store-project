@@ -1,0 +1,66 @@
+package io.github.ptus04.server.controller.api;
+
+import io.github.ptus04.server.dto.request.UserLoginRequest;
+import io.github.ptus04.server.dto.internal.CustomUserDetails;
+import io.github.ptus04.server.util.JwtUtils;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+public class AuthApiController {
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody UserLoginRequest userLoginRequest) {
+        
+        Authentication auth;
+        try {
+            auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            userLoginRequest.phone(), userLoginRequest.password())
+            );
+        } catch (DisabledException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "Tài khoản của bạn đã bị vô hiệu hóa"));
+        }
+
+        boolean isAdminOrEmployee = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")
+                        || a.getAuthority().equals("ROLE_EMPLOYEE"));
+
+        if (!isAdminOrEmployee) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "Bạn không có quyền truy cập hệ thống quản trị"));
+        }
+
+        String role = auth.getAuthorities().stream()
+                .map(a -> a.getAuthority().replace("ROLE_", ""))
+                .filter(r -> r.equals("ADMIN") || r.equals("EMPLOYEE"))
+                .findFirst()
+                .orElse("EMPLOYEE");
+
+        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+        String token = jwtUtils.generateToken(userDetails.getId(), userDetails.getName(), role);
+
+        return ResponseEntity.ok(Map.of(
+                "token", token,
+                "name", userDetails.getName(),
+                "role", role
+        ));
+    }
+}

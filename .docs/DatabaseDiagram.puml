@@ -1,0 +1,143 @@
+@startuml
+
+left to right direction
+hide empty members
+
+entity carousel {
+   id: binary(16) <<PK>> <<generated>>
+   --
+   title: varchar(32)
+   content: varchar(64)
+   link: varchar(128)
+   landscape_image: varchar(128)
+   portrait_image: varchar(128)
+   created_at: timestamp <<generated>>
+   updated_at: timestamp <<generated>>
+}
+entity categories {
+   id: binary(16) <<PK>> <<generated>>
+   --
+   name: varchar(64) <unique>
+   created_at: timestamp <<generated>>
+   updated_at: timestamp <<generated>>
+}
+entity category_product {
+   category_id: binary(16) <<PK>> <<FK>>
+   product_id: binary(16) <<PK>> <<FK>>
+}
+entity order_details {
+   id: binary(16) <<PK>> <<generated>>
+   --
+   order_id: binary(16) <<FK>>
+   product_id: binary(16) <<FK>>
+   product_size: varchar(4)
+   quantity: int
+   price: decimal(18,2)
+   subtotal: decimal(18,2)
+}
+entity order_shipping_addresses {
+   order_id: binary(16) <<PK>> <<FK>>
+   --
+   name: varchar(128)
+   phone: varchar(10)
+   city: varchar(32)
+   district: varchar(32)
+   ward: varchar(128)
+   address: varchar(128)
+}
+entity orders {
+   id: binary(16) <<PK>> <<generated>>
+   --
+   user_id: binary(16) <<FK>>
+   order_code: varchar(20)
+   order_date: datetime
+   shipping_date: datetime
+   payment_method: enum('sepay')
+   status: enum('unpaid', 'paid', 'packaging', 'shipping', 'completed', 'cancelled', 'refunded')
+   total: decimal(18,2)
+   note: tinytext
+   cancellation_reason: tinytext
+   created_at: timestamp
+   updated_at: timestamp
+}
+entity product_images {
+   id: binary(16) <<PK>> <<generated>>
+   --
+   product_id: binary(16) <<FK>>
+   file: varchar(128)
+   created_at: timestamp <<generated>>
+}
+entity product_sizes {
+   id: binary(16) <<PK>> <<generated>>
+   --
+   product_id: binary(16) <<FK>>
+   name: varchar(4) <<unique>>
+   in_stock: int
+   created_at: timestamp <<generated>>
+   updated_at: timestamp <<generated>>
+}
+entity products {
+   id: binary(16) <<PK>> <<generated>>
+   --
+   name: varchar(255) <<unique>>
+   description: text
+   care_instructions: text
+   price: decimal(18,2)
+   in_stock: int
+   discount: float
+   price_discount: decimal(18,2)
+   created_at: timestamp <<generated>>
+   updated_at: timestamp <<generated>>
+   deleted_at: timestamp
+}
+entity transactions {
+   id: binary(16) <<PK>> <<generated>>
+   --
+   order_id: binary(16) <<FK>>
+   transaction_code: varchar(14)
+   reference_code: varchar(32)
+   gateway_name: varchar(32)
+   content: text
+   amount: decimal(18,2)
+   transaction_date: datetime
+   created_at: timestamp <<generated>>
+}
+entity user_addresses {
+   id: binary(16) <<PK>> <<generated>>
+   --
+   user_id: binary(16) <<FK>>
+   city: varchar(32)
+   district: varchar(32)
+   ward: varchar(32)
+   address: varchar(64)
+   is_default: tinyint(1)
+   created_at: timestamp <<generated>>
+   updated_at: timestamp <<generated>>
+}
+entity users {
+   id: binary(16) <<PK>> <<generated>>
+   --
+   name: varchar(128)
+   phone: varchar(10) <<unique>>
+   email: varchar(64) <<unique>>
+   password: varchar(255)
+   role: enum('customer', 'employee', 'admin')
+   gender: enum('male', 'female')
+   birth_date: date
+   phone_verified_at: timestamp
+   created_at: timestamp <<generated>>
+   updated_at: timestamp <<generated>>
+   disabled_at: timestamp
+}
+
+category_product          }o--||  categories       : "category_id:id"
+category_product          }o--||  products         : "product_id:id"
+order_details             }|--||  orders           : "order_id:id"
+order_details             }o--||  products         : "product_id:id"
+order_shipping_addresses  ||--o{  orders           : "order_id:id"
+orders                    }o--||  users            : "user_id:id"
+product_images            }|--||  products         : "product_id:id"
+product_sizes             }o--||  products         : "product_id:id"
+transactions              }o--||  orders           : "order_id:id"
+user_addresses            }o--||  users            : "user_id:id"
+@enduml

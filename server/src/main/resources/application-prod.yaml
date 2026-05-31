@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: ${DATABASE_CONNECTION_STRING}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      url: ${REDIS_CONNECTION_STRING}
+  cloud:
+    azure:
+      storage:
+        connection-string: ${AZURE_STORAGE_CONNECTION_STRING}
+
+  docker:
+    compose:
+      enabled: false
+  devtools:
+    add-properties: false

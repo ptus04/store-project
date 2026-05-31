@@ -1,0 +1,43 @@
+@startuml
+!include <C4/C4_Container>
+
+title SLY Clothing Store Project - Container Diagram
+
+Person(guest, "Guest", "Khách vãng lai")
+Person(customer, "Customer", "Khách hàng")
+Person(employee, "Employee", "Nhân viên bán hàng")
+Person(admin, "Admin", "Chủ cửa hàng")
+
+System_Boundary(storeSystem, "SLY Store System") {
+    Container(webAdmin, "Web Admin", "React and TypeScript", "Giao diện web admin")
+    Container(server, "Server", "Spring Boot with Thymeleaf", "Giao diện khách hàng và REST API Server")
+
+    Container(azureBlob, "Object storage", "Azure Blob Storage", "Lưu trữ hình ảnh")
+    ContainerDb(azureMySQL, "MySQL Database", "Azure Database for MySQL", "Cơ sở dữ liệu")
+    ContainerDb(azureRedis, "Redis Cache", "Azure Managed Redis", "Lưu trữ Session / Cache")
+    ContainerQueue(rabbitMq, "Message Broker", "RabbitMQ", "Luồng sự kiện bất đồng bộ")
+}
+
+System_Ext(sepay, "SePay", "Cổng thanh toán")
+System_Ext(gmail, "Gmail SMTP Service", "Dịch vụ email")
+System_Ext(twilio, "Twilio Verify", "Dịch vụ xác thực SMS")
+System_Ext(googleAi, "Google AI Studio", "Dịch vụ AI")
+
+Rel(webAdmin, server, "Gọi REST API", "HTTP")
+
+Rel(guest, server, "Xem sản phẩm", "HTTP")
+Rel(customer, server, "Đặt hàng, chat", "HTTP / WS")
+Rel(employee, webAdmin, "Xử lý đơn hàng, chat", "HTTP / WS")
+Rel(admin, webAdmin, "Quản lý sản phẩm", "HTTP / WS")
+
+Rel(server, azureBlob, "Quản lý hình ảnh", "Azure SDK / HTTP")
+Rel(server, azureRedis, "Cache", "Redis SDK")
+Rel(server, azureMySQL, "CRUD dữ liệu", "JDBC")
+Rel(server, gmail, "Gửi email", "SMTP")
+Rel(server, twilio, "Gửi OTP", "Twilio SDK")
+Rel(server, rabbitMq, "Publish messages", "AMQP")
+Rel_R(rabbitMq, server, "Deliver messages", "AMQP")
+Rel(server, googleAi, "Gửi prompts")
+
+Rel(sepay, server, "Gửi Webhook thanh toán", "HTTP POST")
+@enduml

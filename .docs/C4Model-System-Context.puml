@@ -1,0 +1,25 @@
+@startuml
+!include <C4/C4_Container>
+
+title SLY Clothing Store Project - System Context Diagram
+
+Person(guest, "Guest", "Khách vãng lai")
+Person(customer, "Customer", "Khách hàng")
+Person(employee, "Employee", "Nhân viên bán hàng")
+Person(admin, "Admin", "Chủ cửa hàng")
+
+System(storeSystem, "SLY Store System", "Website bán thời trang SLY")
+System_Ext(sepay, "SePay", "Cổng thanh toán")
+System_Ext(gmail, "Gmail SMTP Service", "Dịch vụ gửi email")
+System_Ext(twilio, "Twilio Verify", "Dịch vụ xác thực SMS")
+System_Ext(googleAi, "Google AI Studio", "Dịch vụ AI")
+
+Rel(guest, storeSystem, "Xem sản phẩm")
+Rel(customer, storeSystem, "Đặt hàng")
+Rel(employee, storeSystem, "Xử lý đơn hàng")
+Rel(admin, storeSystem, "Quản lý sản phẩm")
+Rel_U(sepay, storeSystem, "Gửi Webhook thanh toán")
+Rel(storeSystem, gmail, "Gửi email")
+Rel(storeSystem, twilio, "Gửi OTP")
+Rel(storeSystem, googleAi, "Gửi prompts")
+@enduml

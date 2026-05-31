@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: mainLayout(~{::title}, ~{::main})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Cập nhật thông tin | SLY</title>
+</head>
+<body>
+<main class="flex flex-col items-center justify-center min-h-screen py-10">
+    <form class="mt-4 flex flex-col gap-4 rounded-md border border-gray-300 bg-white p-6 shadow-sm"
+          style="width: 90%; max-width: 450px;"
+          action="/profile/update" method="post"
+          th:object="${updateProfileRequest}">
+        
+        <h2 class="text-center text-2xl font-semibold">CẬP NHẬT THÔNG TIN</h2>
+
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold" for="name">Tên khách hàng</label>
+            <input class="peer my-input"
+                   type="text"
+                   id="name"
+                   autocomplete="name"
+                   required
+                   th:field="*{name}"/>
+            <span class="hidden text-red-500 peer-invalid:block">Tên không được để trống</span>
+            <span th:errorclass="text-red-500" th:errors="*{name}"></span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold" for="phone">Số điện thoại</label>
+            <input class="peer my-input"
+                   type="tel"
+                   id="phone"
+                   autocomplete="tel"
+                   pattern="^0[2-9]\d{8}$"
+                   required
+                   th:field="*{phone}"/>
+            <span class="hidden text-red-500 peer-invalid:block">Số điện thoại không hợp lệ</span>
+            <span th:errorclass="text-red-500" th:errors="*{phone}"></span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold" for="email">Email</label>
+            <input class="peer my-input"
+                   type="email"
+                   id="email"
+                   autocomplete="email"
+                   th:field="*{email}"/>
+            <span class="hidden text-red-500 peer-invalid:block">Email không hợp lệ</span>
+            <span th:errorclass="text-red-500" th:errors="*{email}"></span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold">Giới tính</label>
+            <div class="flex gap-4">
+                <label class="flex items-center gap-2">
+                    <input type="radio" th:field="*{gender}" value="MALE" /> Nam
+                </label>
+                <label class="flex items-center gap-2">
+                    <input type="radio" th:field="*{gender}" value="FEMALE" /> Nữ
+                </label>
+            </div>
+            <span th:errorclass="text-red-500" th:errors="*{gender}"></span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold" for="birthDate">Ngày sinh</label>
+            <input class="my-input"
+                   type="date"
+                   id="birthDate"
+                   name="birthDate"
+                   th:value="${updateProfileRequest.birthDate != null ? #temporals.format(updateProfileRequest.birthDate, 'yyyy-MM-dd') : ''}"/>
+            <span th:errorclass="text-red-500" th:errors="*{birthDate}"></span>
+        </div>
+
+        <button class="my-btn-primary" type="submit">LƯU THAY ĐỔI</button>
+        <div class="text-center">
+            <a class="hover:text-red-500" th:href="@{/profile}">HỦY BỎ</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

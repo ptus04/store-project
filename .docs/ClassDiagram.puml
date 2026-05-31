@@ -1,0 +1,166 @@
+@startuml
+
+hide empty members
+top to bottom direction
+skinparam classAttributeIconSize 0
+
+class Carousel {
+  + Carousel()
+  - id: UUID
+  - title: String
+  - content: String
+  - link: String
+  - landscapeImage: String
+  - portraitImage: String
+  - createdAt: Instant
+  - updatedAt: Instant
+}
+class Category {
+  + Category()
+  - id: UUID
+  - name: String
+  - createdAt: Instant
+  - updatedAt: Instant
+}
+class Order {
+  + Order()
+  - id: UUID
+  - orderCode: String
+  - user: User
+  - orderDate: Instant
+  - shippingDate: Instant
+  - total: BigDecimal
+  - note: String
+  - cancellationReason: String
+  - createdAt: Instant
+  - updatedAt: Instant
+}
+class OrderDetail {
+  + OrderDetail()
+  - id: UUID
+  - order: Order
+  - productSize: String
+  - quantity: Integer
+  - price: BigDecimal
+  - subtotal: BigDecimal
+}
+enum OrderPaymentMethodEnum << enumeration >> {
+  + SEPAY
+}
+class OrderShippingAddress {
+  - orderId: UUID
+  - name: String
+  - phone: String
+  - city: String
+  - district: String
+  - ward: String
+  - address: String
+  --
+  + OrderShippingAddress()
+  --
+  + toAddressString(): String
+}
+enum OrderStatusEnum << enumeration >> {
+  + UNPAID
+  + PAID
+  + PACKAGING
+  + SHIPPING
+  + COMPLETED
+  + REFUNDED
+  + CANCELLED
+}
+class Product {
+  + Product()
+  - id: UUID
+  - name: String
+  - description: String
+  - careInstructions: String
+  - price: BigDecimal
+  - inStock: Integer
+  - discount: Float
+  - priceDiscount: BigDecimal
+  - createdAt: Instant
+  - updatedAt: Instant
+  - deletedAt: Instant
+}
+class ProductSize {
+  + ProductSize()
+  - id: UUID
+  - name: String
+  - inStock: Integer
+  - createdAt: Instant
+  - updatedAt: Instant
+}
+class ProductImage {
+  + ProductImage()
+  - id: UUID
+  - file: String
+  - createdAt: Instant
+}
+
+class Transaction {
+  + Transaction()
+  - id: UUID
+  - transactionCode: String
+  - referenceCode: String
+  - gatewayName: String
+  - content: String
+  - amount: BigDecimal
+  - transactionDate: LocalDateTime
+  - createdAt: Instant
+}
+class User {
+  - id: UUID
+  - name: String
+  - phone: String
+  - email: String
+  - password: String
+  - gender: UserGenderEnum
+  - birthDate: LocalDate
+  - phoneVerifiedAt: Instant
+  - createdAt: Instant
+  - updatedAt: Instant
+  - disabledAt: Instant
+  --
+  + User()
+  --
+  + isPhoneVerified(): boolean
+}
+class UserAddress {
+  + UserAddress()
+  - id: UUID
+  - city: String
+  - district: String
+  - ward: String
+  - address: String
+  - isDefault: Boolean
+  - createdAt: Instant
+  - updatedAt: Instant
+}
+enum UserGenderEnum << enumeration >> {
+  + MALE
+  + FEMALE
+}
+enum UserRoleEnum << enumeration >> {
+  + CUSTOMER
+  + EMPLOYEE
+  + ADMIN
+}
+
+Category        "categories\n0..*" -- "products\n0..*" Product
+
+Product         "product\n1" -- "productSizes\n0..*" ProductSize
+Product         "product\n1" -- "productImages\n1..*" ProductImage
+Product         "product\n1" -- "orderDetails\n0..*" OrderDetail
+
+Order           "order 1..*" *-- "1" OrderDetail
+Order           "1" *-- "orderShippingAddress\n1" OrderShippingAddress
+Order           "1" *-- "transactions\n0..*" Transaction
+Order           "0..*" --> "paymentMethod\n1" OrderPaymentMethodEnum
+Order           "0..*" --> "status\n1" OrderStatusEnum
+
+User            "1" *-- "orders\n0..*" Order
+User            "1" *-- "\n0..*" UserAddress
+User            "0..*" --> "gender\n1" UserGenderEnum
+User            "0..*" --> "role\n1" UserRoleEnum
+@enduml

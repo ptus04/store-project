@@ -1,9 +1,90 @@
 spring:
   application:
-    name: server
-  main:
-    lazy-initialization: true
+    name: store-server
+  data:
+    redis:
+      repositories:
+        enabled: false
+  threads:
+    virtual:
+      enabled: true
   jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+    open-in-view: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+cors:
+  allowed-origins: ${ALLOWED_ORIGINS}
+  allowed-methods: ${ALLOWED_METHODS}
+  allowed-headers: ${ALLOWED_HEADERS}
+  allow-credentials: ${ALLOW_CREDENTIALS}
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-ms: ${JWT_EXPIRATION_MS}
+
+sepay:
+  qr:
+    bank: ${SEPAY_BANK}
+    account-name: ${SEPAY_ACCOUNT_NAME}
+    account-number: ${SEPAY_ACCOUNT_NUMBER}
+  invoice:
+    username: ${SEPAY_USERNAME}
+    password: ${SEPAY_PASSWORD}
+    auth-url: ${SEPAY_INVOICE_AUTH_URL}
+    create-url: ${SEPAY_INVOICE_CREATE_URL}
+    check-url: ${SEPAY_INVOICE_CHECK_URL}
+
+twilio:
+  account-sid: ${TWILIO_ACCOUNT_SID}
+  auth-token: ${TWILIO_AUTH_TOKEN}
+  verify:
+    service-sid: ${TWILIO_VERIFY_SERVICE_SID}
+
+rate-limit:
+  enabled: ${RATE_LIMIT_ENABLED:true}
+  capacity: ${RATE_LIMIT_CAPACITY:120}
+  window: ${RATE_LIMIT_WINDOW:1m}
+  policies:
+    - path-prefix: /api/auth/login
+      capacity: ${RATE_LIMIT_AUTH_CAPACITY:10}
+      window: ${RATE_LIMIT_AUTH_WINDOW:1m}
+    - path-prefix: /auth/login
+      capacity: ${RATE_LIMIT_WEB_AUTH_CAPACITY:10}
+      window: ${RATE_LIMIT_WEB_AUTH_WINDOW:1m}
+    - path-prefix: /auth/register
+      capacity: ${RATE_LIMIT_REGISTER_CAPACITY:5}
+      window: ${RATE_LIMIT_REGISTER_WINDOW:10m}
+    - path-prefix: /auth/verify-phone
+      capacity: ${RATE_LIMIT_PHONE_OTP_CAPACITY:5}
+      window: ${RATE_LIMIT_PHONE_OTP_WINDOW:5m}
+    - path-prefix: /auth/change-password
+      capacity: ${RATE_LIMIT_CHANGE_PASSWORD_CAPACITY:5}
+      window: ${RATE_LIMIT_CHANGE_PASSWORD_WINDOW:5m}
+    - path-prefix: /api/users/change-password
+      capacity: ${RATE_LIMIT_API_CHANGE_PASSWORD_CAPACITY:5}
+      window: ${RATE_LIMIT_API_CHANGE_PASSWORD_WINDOW:5m}
+    - path-prefix: /api/users/profile/email/verify
+      capacity: ${RATE_LIMIT_EMAIL_OTP_VERIFY_CAPACITY:5}
+      window: ${RATE_LIMIT_EMAIL_OTP_VERIFY_WINDOW:5m}
+    - path-prefix: /api/users/profile
+      capacity: ${RATE_LIMIT_PROFILE_UPDATE_CAPACITY:30}
+      window: ${RATE_LIMIT_PROFILE_UPDATE_WINDOW:5m}
+    - path-prefix: /profile/update
+      capacity: ${RATE_LIMIT_WEB_PROFILE_UPDATE_CAPACITY:10}
+      window: ${RATE_LIMIT_WEB_PROFILE_UPDATE_WINDOW:5m}
+    - path-prefix: /api/test/email
+      capacity: ${RATE_LIMIT_EMAIL_CAPACITY:5}
+      window: ${RATE_LIMIT_EMAIL_WINDOW:5m}
+    - path-prefix: /api/chat
+      capacity: ${RATE_LIMIT_CHAT_CAPACITY:20}
+      window: ${RATE_LIMIT_CHAT_WINDOW:1m}
+    - path-prefix: /api/support
+      capacity: ${RATE_LIMIT_SUPPORT_CAPACITY:60}
+      window: ${RATE_LIMIT_SUPPORT_WINDOW:1m}
