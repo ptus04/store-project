@@ -153,7 +153,12 @@
             let escaped = escapeHtml(text);
             escaped = escaped.replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             // ReDoS-safe regular expression to parse Markdown links
-            escaped = escaped.replaceAll(/\[([^]]*)]\(([^)]*)\)/g, (_, p1, p2) => {
+            // Dynamically constructed to prevent Thymeleaf from interpreting square brackets as template expressions
+            const bracketOpen = '[';
+            const bracketClose = ']';
+            const regexStr = '\\' + bracketOpen + '([^' + bracketClose + ']*)\\' + bracketClose + '\\(([^)]*)\\)';
+            const mdLinkRegex = new RegExp(regexStr, 'g');
+            escaped = escaped.replaceAll(mdLinkRegex, (_, p1, p2) => {
                 return '<a href="' + p2 + '" class="text-neutral-950 font-semibold underline decoration-neutral-400 hover:decoration-neutral-950 transition-colors duration-200">' + p1 + '</a>';
             });
             escaped = escaped.replaceAll('\n', '<br>');

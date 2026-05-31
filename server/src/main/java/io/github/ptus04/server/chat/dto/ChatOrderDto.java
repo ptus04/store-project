@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public record ChatOrderDto(
         String orderCode,
-        Instant orderDate,
+        String orderDate,
         String status,
         String paymentMethod,
         BigDecimal total,
@@ -29,7 +29,7 @@ public record ChatOrderDto(
 
         return new ChatOrderDto(
                 response.orderCode(),
-                response.orderDate(),
+                response.orderDate() != null ? response.orderDate().toString() : null,
                 response.status() != null ? response.status().name() : "UNKNOWN",
                 response.paymentMethod() != null ? response.paymentMethod().name() : "UNKNOWN",
                 response.total(),
