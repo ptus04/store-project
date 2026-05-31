@@ -14,8 +14,11 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        module: [server, web]
-        image-name: [phungtu081/store-server, phungtu081/store-web]
+        include:
+          - module: server
+            image-name: phungtu081/store-server
+          - module: web
+            image-name: phungtu081/store-web
 
     steps:
       - name: Checkout repository
