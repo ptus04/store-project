@@ -1,8 +1,8 @@
-package io.github.ptus04.server.chat.config;
+package io.github.ptus04.server.config;
 
 import dev.langchain4j.agent.tool.Tool;
-import io.github.ptus04.server.chat.dto.ChatOrderDto;
-import io.github.ptus04.server.chat.dto.ChatProductDto;
+import io.github.ptus04.server.dto.chat.ChatOrderDto;
+import io.github.ptus04.server.dto.chat.ChatProductDto;
 import io.github.ptus04.server.dto.response.CategoryResponse;
 import io.github.ptus04.server.service.CategoryService;
 import io.github.ptus04.server.service.OrderService;

@@ -1,12 +1,9 @@
-package io.github.ptus04.server.chat.controller;
+package io.github.ptus04.server.controller;
 
-import io.github.ptus04.server.chat.dto.ChatMessageDto;
-import io.github.ptus04.server.chat.dto.SupportSessionDto;
-import io.github.ptus04.server.chat.entity.ChatMessage;
-import io.github.ptus04.server.chat.event.ChatMessageEvent;
-import io.github.ptus04.server.chat.producer.ChatEventProducer;
-import io.github.ptus04.server.chat.repository.ChatMessageRepository;
-import lombok.RequiredArgsConstructor;
+import io.github.ptus04.server.dto.ChatMessageDto;
+import io.github.ptus04.server.dto.SupportSessionDto;
+import io.github.ptus04.server.entity.ChatMessage;
+import io.github.ptus04.server.repository.ChatMessageRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -18,15 +15,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequiredArgsConstructor
 public class ChatSupportController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatMessageRepository chatMessageRepository;
-    private final ChatEventProducer chatEventProducer;
     
     // Map to keep track of active customer support sessions and their details
     private static final Map<String, SupportSessionDto> activeSessions = new ConcurrentHashMap<>();
+
+    public ChatSupportController(SimpMessagingTemplate messagingTemplate, ChatMessageRepository chatMessageRepository) {
+        this.messagingTemplate = messagingTemplate;
+        this.chatMessageRepository = chatMessageRepository;
+    }
 
     @PostMapping("/api/support/request")
     public ResponseEntity<?> requestSupport(@RequestBody Map<String, String> payload) {
@@ -132,11 +132,6 @@ public class ChatSupportController {
             }
         }
 
-        // Publish event to RabbitMQ for asynchronous handling
-        chatEventProducer.publishChatMessageEvent(new ChatMessageEvent(message));
-    }
-
-    public void processIncomingMessage(ChatMessageDto message) {
         // Save to database
         ChatMessage dbMsg = new ChatMessage();
         dbMsg.setSessionId(message.getSessionId());

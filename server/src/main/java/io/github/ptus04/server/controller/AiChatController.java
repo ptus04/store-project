@@ -1,8 +1,8 @@
-package io.github.ptus04.server.chat.controller;
+package io.github.ptus04.server.controller;
 
-import io.github.ptus04.server.chat.dto.ChatRequest;
-import io.github.ptus04.server.chat.dto.ChatResponse;
-import io.github.ptus04.server.chat.service.AiChatService;
+import io.github.ptus04.server.dto.request.ChatRequest;
+import io.github.ptus04.server.dto.response.ChatResponse;
+import io.github.ptus04.server.service.impl.AiChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

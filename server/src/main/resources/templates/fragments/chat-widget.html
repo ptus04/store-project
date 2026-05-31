@@ -132,8 +132,8 @@
             integrity="sha512-iKDtgDyTHjAitUDdLljGhenhPwrbBfqTKWO1mkhSFH3A7blITC9MhYon6SjnMhp4o0rADGw9yAC6EW4t5a4K3g=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-    <!-- Custom Chat JS Helpers (Non-inlined to support clean RegExp literals and avoid Thymeleaf conflicts) -->
-    <script>
+    <!-- Custom Chat JS -->
+    <script th:inline="javascript">
         function getTimestamp() {
             const now = new Date();
             return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
@@ -147,22 +147,6 @@
                 .replaceAll('"', "&quot;")
                 .replaceAll("'", "&#039;");
         }
-
-        function formatMessageText(text) {
-            if (!text) return "";
-            let escaped = escapeHtml(text);
-            escaped = escaped.replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            // ReDoS-safe regular expression to parse Markdown links
-            escaped = escaped.replaceAll(/\[([^]]*)]\(([^)]*)\)/g, (_, p1, p2) => {
-                return '<a href="' + p2 + '" class="text-neutral-950 font-semibold underline decoration-neutral-400 hover:decoration-neutral-950 transition-colors duration-200">' + p1 + '</a>';
-            });
-            escaped = escaped.replaceAll('\n', '<br>');
-            return escaped;
-        }
-    </script>
-
-    <!-- Custom Chat JS Main Logic -->
-    <script th:inline="javascript">
 
         document.addEventListener('DOMContentLoaded', function () {
             // --- Configuration ---
@@ -536,7 +520,11 @@
                     }
 
                     hideTypingIndicator();
-                    const formattedHtml = formatMessageText(responseText);
+                    // Format markdown-like bold text **text** to HTML
+                    const formattedHtml = escapeHtml(responseText)
+                        .replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replaceAll('\n', '<br>');
+
                     appendMessage('AI', formattedHtml, true);
 
                     chatInput.disabled = false;
@@ -590,7 +578,9 @@
                             }
 
                             history.forEach(msg => {
-                                const formattedContent = formatMessageText(msg.content);
+                                const formattedContent = msg.content
+                                    .replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                    .replaceAll('\n', '<br>');
                                 appendMessage(msg.sender, formattedContent, true, false);
                             });
                             resetUnreadBadge();
