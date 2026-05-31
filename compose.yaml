@@ -16,7 +16,7 @@ services:
     volumes:
       - azurite_data:/data
     healthcheck:
-      test: nc 127.0.0.1 10000 -z
+      test: [ "CMD", "nc", "-z", "127.0.0.1", "10000" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,6 +32,8 @@ services:
       - '3306:3306'
     volumes:
       - mysql_data:/var/lib/mysql
+    env_file:
+      - ./server/.env
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD" ]
       interval: 10s
@@ -52,7 +54,9 @@ services:
       retries: 5
 
   server:
-    image: 'phungtu081/store'
+    build:
+      context: ./server
+    image: phungtu081/store-local:latest
     ports:
       - '8080:8080'
     env_file:
@@ -64,18 +68,25 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      test: [ "CMD", "wget", "--no-verbose", "--spider", "http://localhost:8080/actuator/health" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
 
   web-admin:
-    image: 'phungtu081/store-admin'
+    build:
+      context: ./web
+      args:
+        - VITE_API_URL=http://host.docker.internal:8080
+        - VITE_IMAGE_CONTAINER_URL=http://host.docker.internal:10000/devstoreaccount1/images" --build-arg
+        - VITE_STORAGE_URL=http://host.docker.internal:10000/devstoreaccount1/carousel
+    image: phungtu081/store-admin-local:latest
     ports:
       - '8081:8080'
-    env_file:
-      - ./web/.env
+    depends_on:
+      server:
+        condition: service_healthy
 
 volumes:
   azurite_data:
