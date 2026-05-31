@@ -168,7 +168,7 @@ export default function ChatSupport() {
                           {senderName}
                         </span>
                         <div
-                          className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
+                          className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap shadow-sm ${
                             isStaff
                               ? "rounded-tr-sm bg-black text-white"
                               : "rounded-tl-sm border border-neutral-200 bg-white text-neutral-800"

@@ -50,7 +50,7 @@ export default function ChatSupportWidget() {
       </button>
 
       {isOpen && (
-        <div className="fixed right-6 bottom-24 z-50 flex h-[560px] w-[380px] max-w-[90vw] flex-col rounded-2xl border border-neutral-200 bg-white shadow-2xl transition-all duration-300 md:w-[420px]">
+        <div className="fixed right-6 bottom-24 z-50 flex h-140 w-95 max-w-[90vw] flex-col rounded-2xl border border-neutral-200 bg-white shadow-2xl transition-all duration-300 md:w-105">
           <div className="flex items-center justify-between rounded-t-2xl border-b border-neutral-100 bg-neutral-900 px-4 py-3.5 text-white">
             <div className="flex items-center gap-2">
               {selectedSession && (
@@ -144,7 +144,7 @@ export default function ChatSupportWidget() {
                             {senderName}
                           </span>
                           <div
-                            className={`rounded-2xl px-3.5 py-2 text-xs leading-relaxed shadow-sm ${
+                            className={`rounded-2xl px-3.5 py-2 text-xs leading-relaxed whitespace-pre-wrap shadow-sm ${
                               isStaff
                                 ? "rounded-tr-sm bg-black text-white"
                                 : "rounded-tl-sm border border-neutral-200 bg-white text-neutral-800"
@@ -204,7 +204,7 @@ export default function ChatSupportWidget() {
                       <p className="mt-2 text-xs font-medium text-neutral-700">
                         Không có yêu cầu hỗ trợ nào
                       </p>
-                      <p className="mt-0.5 max-w-[200px] text-[10px] text-neutral-400">
+                      <p className="mt-0.5 max-w-50 text-[10px] text-neutral-400">
                         Khi có khách hàng cần hỗ trợ, họ sẽ xuất hiện tại đây.
                       </p>
                     </div>
@@ -234,7 +234,7 @@ export default function ChatSupportWidget() {
                           className="flex w-full flex-col gap-1 rounded-xl border border-neutral-100 bg-white p-3 text-left shadow-sm transition-all hover:border-neutral-300 hover:shadow"
                         >
                           <div className="flex items-center justify-between">
-                            <span className="max-w-[180px] truncate text-[11px] font-bold text-neutral-800">
+                            <span className="max-w-45 truncate text-[11px] font-bold text-neutral-800">
                               {session.customerName &&
                               session.customerName !== "Khách vãng lai"
                                 ? session.customerName

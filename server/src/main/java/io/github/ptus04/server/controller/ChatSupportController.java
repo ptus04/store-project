@@ -2,8 +2,13 @@ package io.github.ptus04.server.controller;
 
 import io.github.ptus04.server.dto.ChatMessageDto;
 import io.github.ptus04.server.dto.SupportSessionDto;
+import io.github.ptus04.server.chat.event.LocalChatMessageReceivedEvent;
 import io.github.ptus04.server.entity.ChatMessage;
 import io.github.ptus04.server.repository.ChatMessageRepository;
+import io.github.ptus04.server.service.ChatSessionManager;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -11,22 +16,17 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @RestController
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class ChatSupportController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatMessageRepository chatMessageRepository;
-    
-    // Map to keep track of active customer support sessions and their details
-    private static final Map<String, SupportSessionDto> activeSessions = new ConcurrentHashMap<>();
-
-    public ChatSupportController(SimpMessagingTemplate messagingTemplate, ChatMessageRepository chatMessageRepository) {
-        this.messagingTemplate = messagingTemplate;
-        this.chatMessageRepository = chatMessageRepository;
-    }
+    private final ChatSessionManager chatSessionManager;
+    private final ApplicationEventPublisher eventPublisher;
 
     @PostMapping("/api/support/request")
     public ResponseEntity<?> requestSupport(@RequestBody Map<String, String> payload) {
@@ -45,7 +45,7 @@ public class ChatSupportController {
         boolean isActive = activeParam == null || !activeParam.equalsIgnoreCase("false");
 
         final String finalCustomerName = customerName;
-        SupportSessionDto session = activeSessions.computeIfAbsent(sessionId, id -> 
+        SupportSessionDto session = chatSessionManager.computeIfAbsent(sessionId, id -> 
             new SupportSessionDto(id, true, "Khách hàng yêu cầu kết nối với nhân viên...", finalCustomerName, null)
         );
         session.setActive(isActive);
@@ -73,7 +73,7 @@ public class ChatSupportController {
             return ResponseEntity.badRequest().body("SessionId is required");
         }
 
-        SupportSessionDto session = activeSessions.get(sessionId);
+        SupportSessionDto session = chatSessionManager.getSession(sessionId);
         if (session == null) {
             return ResponseEntity.notFound().build();
         }
@@ -97,7 +97,7 @@ public class ChatSupportController {
 
     @GetMapping("/api/support/sessions")
     public ResponseEntity<?> getActiveSessions() {
-        return ResponseEntity.ok(activeSessions.values());
+        return ResponseEntity.ok(chatSessionManager.getActiveSessions());
     }
 
     @GetMapping("/api/chat/history/{sessionId}")
@@ -115,13 +115,13 @@ public class ChatSupportController {
             if (senderName == null || senderName.trim().isEmpty()) {
                 senderName = "Nhân viên";
             }
-            SupportSessionDto session = activeSessions.get(message.getSessionId());
+            SupportSessionDto session = chatSessionManager.getSession(message.getSessionId());
             if (session != null) {
                 if (session.getStaffName() != null && !session.getStaffName().trim().isEmpty()) {
                     if (!session.getStaffName().equalsIgnoreCase(senderName)) {
                         // Reject message from unauthorized staff member
-                        System.out.println("Blocked message from unauthorized staff: " + senderName 
-                                + " for session " + message.getSessionId() + " (claimed by " + session.getStaffName() + ")");
+                        log.warn("Blocked message from unauthorized staff: {} for session {} (claimed by {})",
+                                senderName, message.getSessionId(), session.getStaffName());
                         return;
                     }
                 } else {
@@ -132,43 +132,8 @@ public class ChatSupportController {
             }
         }
 
-        // Save to database
-        ChatMessage dbMsg = new ChatMessage();
-        dbMsg.setSessionId(message.getSessionId());
-        dbMsg.setSender(message.getSender());
-        dbMsg.setContent(message.getContent());
-        chatMessageRepository.save(dbMsg);
-
-        // Update last message in session tracker
-        if (message.getSessionId() != null) {
-            SupportSessionDto session = activeSessions.get(message.getSessionId());
-            
-            // If the message is from the customer and the session is either non-existent or inactive,
-            // we re-activate it and clear the staff assignment lock so it can be claimed again.
-            if ("USER".equalsIgnoreCase(message.getSender())) {
-                if (session == null) {
-                    session = new SupportSessionDto(message.getSessionId(), true, message.getContent(), "Khách hàng", null);
-                    activeSessions.put(message.getSessionId(), session);
-                } else {
-                    // Only clear the staff lock when re-activating a closed session
-                    if (!session.isActive()) {
-                        session.setActive(true);
-                        session.setStaffName(null);
-                    }
-                    session.setLastMessage(message.getContent());
-                }
-                // Notify employees to update their session list in real-time
-                messagingTemplate.convertAndSend("/topic/support/requests", session);
-            } else {
-                // If it is from STAFF or AI, and session is active, just update the last message
-                if (session != null && session.isActive()) {
-                    session.setLastMessage(message.getContent());
-                    messagingTemplate.convertAndSend("/topic/support/requests", session);
-                }
-            }
-        }
-
-        // Route message to both user and employee subscribed to this session's topic
-        messagingTemplate.convertAndSend("/topic/chat/" + message.getSessionId(), message);
+        // Process message via Observer Pattern (Spring local ApplicationEvents)
+        log.info("Publishing local chat event for session: {}", message.getSessionId());
+        eventPublisher.publishEvent(new LocalChatMessageReceivedEvent(message));
     }
 }

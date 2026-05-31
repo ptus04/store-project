@@ -1,5 +1,6 @@
 package io.github.ptus04.server.config;
 
+import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import io.github.ptus04.server.dto.chat.ChatOrderDto;
 import io.github.ptus04.server.dto.chat.ChatProductDto;
@@ -35,8 +36,24 @@ public class AiChatConfig {
 
         @Tool("Tìm kiếm sản phẩm theo tên hoặc từ khóa")
         @SuppressWarnings("unused")
-        public List<ChatProductDto> searchProducts(String keyword) {
-            return productService.getProductsPageWithFilters(0, 10, "createdAt", null, keyword, null, null, false)
+        public List<ChatProductDto> searchProducts(
+                @P("Từ khóa tìm kiếm (ví dụ: 'tee', 'jacket', 'jean'). Nếu khách hàng yêu cầu gợi ý chung chung hoặc từ khóa trống/chung chung như 'sản phẩm', 'quần áo', 'áo', 'quần', 'gợi ý', hãy truyền 'all'")
+                String keyword
+        ) {
+            String query = keyword;
+            // Nếu từ khóa trống hoặc mang ý nghĩa gợi ý chung chung, ta thiết lập query = null để tìm tất cả sản phẩm
+            if (keyword == null || keyword.trim().isEmpty() 
+                    || keyword.equalsIgnoreCase("all") 
+                    || keyword.equalsIgnoreCase("sản phẩm") 
+                    || keyword.equalsIgnoreCase("quần áo") 
+                    || keyword.equalsIgnoreCase("áo") 
+                    || keyword.equalsIgnoreCase("quần") 
+                    || keyword.equalsIgnoreCase("gợi ý") 
+                    || keyword.equalsIgnoreCase("recommend")) {
+                query = null;
+            }
+            
+            return productService.getProductsPageWithFilters(0, 10, "createdAt", null, query, null, null, false)
                     .getContent().stream()
                     .map(ChatProductDto::fromProductResponse)
                     .collect(Collectors.toList());
@@ -52,7 +69,10 @@ public class AiChatConfig {
 
         @Tool("Tra cứu tình trạng đơn hàng bằng mã đơn hàng (ví dụ: DH202405200001)")
         @SuppressWarnings("unused")
-        public ChatOrderDto checkOrderStatus(String orderCode) {
+        public ChatOrderDto checkOrderStatus(
+                @P("Mã đơn hàng cần kiểm tra trạng thái (ví dụ: DH202405200001)")
+                String orderCode
+        ) {
             try {
                 return ChatOrderDto.fromOrderResponse(orderService.getOrderByOrderCode(orderCode));
             } catch (EntityNotFoundException e) {
