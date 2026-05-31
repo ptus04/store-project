@@ -11,6 +11,8 @@ public interface CarouselService {
     List<CarouselResponse> getAllCarousels();
 
     CarouselResponse createCarousel(CarouselCreateRequest request);
+
     CarouselResponse updateCarousel(UUID id, CarouselUpdateRequest request);
+
     void deleteCarousel(UUID id);
 }

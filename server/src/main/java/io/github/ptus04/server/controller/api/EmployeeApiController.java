@@ -5,7 +5,7 @@ import io.github.ptus04.server.dto.request.EmployeeCreateRequest;
 import io.github.ptus04.server.dto.request.EmployeeUpdateRequest;
 import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.enums.UserRoleEnum;
-import io.github.ptus04.server.security.CustomUserDetails;
+import io.github.ptus04.server.dto.internal.CustomUserDetails;
 import io.github.ptus04.server.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +22,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/employees")
-@RequiredArgsConstructor
 @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+@RequiredArgsConstructor
 public class EmployeeApiController {
     private final UserService userService;
 

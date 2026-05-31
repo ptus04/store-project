@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "custom.rate-limit")
+@ConfigurationProperties(prefix = "rate-limit")
 public class RateLimitProperties {
     private boolean enabled = true;
     private int capacity = 120;

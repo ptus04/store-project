@@ -11,8 +11,11 @@ spring:
     azure:
       storage:
         connection-string: ${AZURE_STORAGE_CONNECTION_STRING}
-  rabbitmq:
-    host: ${RABBITMQ_HOST}
-    port: ${RABBITMQ_PORT}
-    username: ${RABBITMQ_USERNAME}
-    password: ${RABBITMQ_PASSWORD}
+
+  docker:
+    compose:
+      enabled: false
+  devtools:
+    add-properties: false
+  jpa:
+    open-in-view: true

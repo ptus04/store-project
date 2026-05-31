@@ -7,10 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 @RestController
 @RequestMapping("/api/blobs")
+@PreAuthorize("hasRole('ADMIN')")
+@RequiredArgsConstructor
 public class StorageApiController {
     private final StorageService storageService;
 

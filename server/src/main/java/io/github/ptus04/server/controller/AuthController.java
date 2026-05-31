@@ -6,7 +6,7 @@ import io.github.ptus04.server.dto.response.PhoneVerificationResponse;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.exception.PhoneExistedException;
 import io.github.ptus04.server.repository.UserRepository;
-import io.github.ptus04.server.security.CustomUserDetails;
+import io.github.ptus04.server.dto.internal.CustomUserDetails;
 import io.github.ptus04.server.service.AuthService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;

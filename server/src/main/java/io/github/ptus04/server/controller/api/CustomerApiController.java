@@ -2,7 +2,7 @@ package io.github.ptus04.server.controller.api;
 
 import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.enums.UserGenderEnum;
-import io.github.ptus04.server.security.CustomUserDetails;
+import io.github.ptus04.server.dto.internal.CustomUserDetails;
 import io.github.ptus04.server.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,8 +15,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/customers")
-@RequiredArgsConstructor
 @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+@RequiredArgsConstructor
 public class CustomerApiController {
 
     private final UserService userService;

@@ -1,0 +1,72 @@
+name: local-store
+services:
+  azurite:
+    image: 'mcr.microsoft.com/azure-storage/azurite:latest'
+    ports:
+      - '10000:10000'
+      - '10001:10001'
+      - '10002:10002'
+    command: >
+      azurite
+      --location /data
+      --blobHost 0.0.0.0
+      --queueHost 0.0.0.0
+      --tableHost 0.0.0.0
+      --skipApiVersionCheck
+    volumes:
+      - azurite_data:/data
+
+  mysql:
+    image: 'mysql:latest'
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: 'redis:latest'
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    image: 'phungtu081/store'
+    ports:
+      - '8080:8080'
+    env_file:
+      - ./server/.env
+      - ./server/.env.prod
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web-admin:
+    image: 'phungtu081/store-admin'
+    ports:
+      - '8081:8080'
+    env_file:
+      - ./web/.env
+
+volumes:
+  azurite_data:
+  mysql_data:
+  redis_data:

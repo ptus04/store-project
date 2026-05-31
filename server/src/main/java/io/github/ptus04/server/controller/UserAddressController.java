@@ -1,7 +1,7 @@
 package io.github.ptus04.server.controller;
 
 import io.github.ptus04.server.dto.request.UserAddressUpdateRequest;
-import io.github.ptus04.server.security.CustomUserDetails;
+import io.github.ptus04.server.dto.internal.CustomUserDetails;
 import io.github.ptus04.server.service.UserAddressService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

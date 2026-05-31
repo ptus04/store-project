@@ -2,6 +2,7 @@ package io.github.ptus04.server.controller;
 
 import io.github.ptus04.server.config.SePayQRProperties;
 import io.github.ptus04.server.dto.internal.Cart;
+import io.github.ptus04.server.dto.internal.CustomUserDetails;
 import io.github.ptus04.server.dto.request.*;
 import io.github.ptus04.server.dto.response.CartResponse;
 import io.github.ptus04.server.dto.response.OrderResponse;
@@ -10,7 +11,6 @@ import io.github.ptus04.server.dto.response.UserResponse;
 import io.github.ptus04.server.enums.OrderPaymentMethodEnum;
 import io.github.ptus04.server.enums.OrderStatusEnum;
 import io.github.ptus04.server.mapper.CartMapper;
-import io.github.ptus04.server.security.CustomUserDetails;
 import io.github.ptus04.server.service.OrderService;
 import io.github.ptus04.server.service.TransactionService;
 import io.github.ptus04.server.service.UserAddressService;
@@ -18,7 +18,6 @@ import io.github.ptus04.server.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,7 +33,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-@Slf4j
 @Controller
 @RequestMapping("/orders")
 @RequiredArgsConstructor
@@ -201,7 +199,7 @@ public class OrderController {
     @GetMapping("{orderId}/status")
     @ResponseBody
     public String getQrPaymentPage(@PathVariable UUID orderId,
-                                          @AuthenticationPrincipal CustomUserDetails userDetails) throws BadRequestException {
+                                   @AuthenticationPrincipal CustomUserDetails userDetails) throws BadRequestException {
         OrderResponse order = orderService.getOrderById(orderId);
 
         if (!userDetails.getId().equals(order.user().id())) {

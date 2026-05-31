@@ -4,7 +4,6 @@ import io.github.ptus04.server.dto.request.EmployeeCreateRequest;
 import io.github.ptus04.server.dto.request.EmployeeUpdateRequest;
 import io.github.ptus04.server.dto.request.UserProfileUpdateRequest;
 import io.github.ptus04.server.dto.response.UserResponse;
-import io.github.ptus04.server.email.service.EmailService;
 import io.github.ptus04.server.entity.User;
 import io.github.ptus04.server.enums.UserGenderEnum;
 import io.github.ptus04.server.enums.UserRoleEnum;
@@ -12,6 +11,7 @@ import io.github.ptus04.server.exception.BusinessConstraintViolationException;
 import io.github.ptus04.server.exception.PhoneExistedException;
 import io.github.ptus04.server.mapper.UserMapper;
 import io.github.ptus04.server.repository.UserRepository;
+import io.github.ptus04.server.service.EmailService;
 import io.github.ptus04.server.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -198,8 +198,7 @@ public class UserServiceImpl implements UserService {
     public Page<UserResponse> searchCustomers(UserGenderEnum gender, String search, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         String keyword = StringUtils.hasText(search) ? search.trim() : null;
-        UserGenderEnum genderFilter = gender;
-        return userRepository.searchByRoleAndFilters(UserRoleEnum.CUSTOMER, genderFilter, keyword, pageable)
+        return userRepository.searchByRoleAndFilters(UserRoleEnum.CUSTOMER, gender, keyword, pageable)
                 .map(userMapper::toUserResponse);
     }
 

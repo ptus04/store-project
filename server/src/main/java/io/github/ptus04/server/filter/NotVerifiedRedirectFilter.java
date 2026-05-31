@@ -1,7 +1,7 @@
 package io.github.ptus04.server.filter;
 
 import io.github.ptus04.server.dto.response.UserResponse;
-import io.github.ptus04.server.security.CustomUserDetails;
+import io.github.ptus04.server.dto.internal.CustomUserDetails;
 import io.github.ptus04.server.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
