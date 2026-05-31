@@ -20,5 +20,6 @@ terraform {
 
 provider "azurerm" {
   resource_provider_registrations = "none"
+  use_cli                         = false
   features {}
 }
