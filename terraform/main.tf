@@ -37,7 +37,7 @@ resource "azurerm_linux_web_app" "store" {
 
   site_config {
     application_stack {
-      docker_image_name = "phungtu081/store:latest"
+      docker_image_name = "phungtu081/store-server:latest"
     }
   }
 
