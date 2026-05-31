@@ -74,21 +74,3 @@ variable "gemini_api_key" {
   type      = string
   sensitive = true
 }
-
-variable "rabbitmq_host" {
-  type = string
-}
-
-variable "rabbitmq_port" {
-  type = string
-}
-
-variable "rabbitmq_username" {
-  type      = string
-  sensitive = true
-}
-
-variable "rabbitmq_password" {
-  type      = string
-  sensitive = true
-}

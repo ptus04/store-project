@@ -37,7 +37,7 @@ resource "azurerm_linux_web_app" "store" {
 
   site_config {
     application_stack {
-      docker_image_name = "phungtu081/store:latest"
+      docker_image_name = "phungtu081/store-server:latest"
     }
   }
 
@@ -73,11 +73,6 @@ resource "azurerm_linux_web_app" "store" {
 
     GEMINI_API_KEY = var.gemini_api_key
 
-    RABBITMQ_HOST     = var.rabbitmq_host
-    RABBITMQ_PORT     = var.rabbitmq_port
-    RABBITMQ_USERNAME = var.rabbitmq_username
-    RABBITMQ_PASSWORD = var.rabbitmq_password
-
     ALLOWED_ORIGINS   = "https://ptus04-store-admin-app.azurewebsites.net"
     ALLOWED_METHODS   = "GET,POST,PUT,PATCH,DELETE"
     ALLOWED_HEADERS   = "Content-Type,Authorization"
@@ -93,7 +88,7 @@ resource "azurerm_linux_web_app" "store_admin" {
 
   site_config {
     application_stack {
-      docker_image_name = "phungtu081/store-admin:latest"
+      docker_image_name = "phungtu081/store-web:latest"
     }
   }
 

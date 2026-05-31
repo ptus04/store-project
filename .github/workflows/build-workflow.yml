@@ -9,13 +9,20 @@ permissions:
   contents: read
   actions: write
 
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
 jobs:
   build-push-image:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        module: [server, web]
-        image-name: [phungtu081/store-server, phungtu081/store-web]
+        include:
+          - module: server
+            image-name: phungtu081/store-server
+          - module: web
+            image-name: phungtu081/store-web
 
     steps:
       - name: Checkout repository
@@ -27,7 +34,7 @@ jobs:
         with:
           images: ${{ matrix.image-name }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest
             type=sha,format=long
             type=ref,event=tag
 
@@ -50,3 +57,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            VITE_API_URL=https://ptus04-store-app.azurewebsites.net/
+            VITE_IMAGE_CONTAINER_URL=https://ptus04storageaccount.blob.core.windows.net/images
+            VITE_STORAGE_URL=https://ptus04storageaccount.blob.core.windows.net/carousel
