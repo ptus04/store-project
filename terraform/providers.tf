@@ -1,10 +1,10 @@
 terraform {
-  # cloud {
-  #   organization = "ptus04-test-org"
-  #   workspaces {
-  #     name = "store-deploy"
-  #   }
-  # }
+  cloud {
+    organization = "DragonSharpOrg"
+    workspaces {
+      name = "store-prod-deploy"
+    }
+  }
 
   required_providers {
     azurerm = {

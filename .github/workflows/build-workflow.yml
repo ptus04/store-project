@@ -50,3 +50,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            VITE_API_URL=https://ptus04-store-app.azurewebsites.net/
+            VITE_IMAGE_CONTAINER_URL=https://ptus04storageaccount.blob.core.windows.net/images
+            VITE_STORAGE_URL=https://ptus04storageaccount.blob.core.windows.net/carousel
