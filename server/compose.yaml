@@ -34,19 +34,7 @@ services:
     volumes:
       - redis_data:/data
 
-  rabbitmq:
-    image: rabbitmq:4.3.1-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-
 volumes:
   azurite_data:
   mysql_data:
   redis_data:
-  rabbitmq_data:

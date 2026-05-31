@@ -15,6 +15,11 @@ services:
       --skipApiVersionCheck
     volumes:
       - azurite_data:/data
+    healthcheck:
+      test: nc 127.0.0.1 10000 -z
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mysql:
     image: 'mysql:latest'
@@ -32,7 +37,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 10s
 
   redis:
     image: 'redis:latest'
@@ -58,6 +63,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   web-admin:
     image: 'phungtu081/store-admin'

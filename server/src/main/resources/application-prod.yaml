@@ -17,5 +17,3 @@ spring:
       enabled: false
   devtools:
     add-properties: false
-  jpa:
-    open-in-view: true
