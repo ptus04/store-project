@@ -10,9 +10,6 @@
 !include <azure/Storage/AzureStorage>
 !include <azure/Storage/AzureBlobStorage>
 
-!include <logos/rabbitmq-icon>
-
-!include <tupadr3/common>
 !include <office/Concepts/globe_internet>
 
 title SLY Clothing Store Project - Deployment Diagram
@@ -22,13 +19,12 @@ Node(dockerhub, "<img:https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmg0
 Node(sepay, "<img:https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHAkUmtCLwnn7w7YdFtAgI1dLbECX5dY4DmA&s{scale=0.25}>\nSePay", "Cổng thanh toán")
 Node(gmail, "<img:https://images.icon-icons.com/2642/PNG/512/google_mail_gmail_logo_icon_159346.png{scale=0.15}>\nGmail SMTP Service", "Dịch vụ email")
 Node(twilio, "<img:https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_ASF9RYHvUXKB0y4yo93NQOL0A8UBL4zQTQ&s{scale=0.25}>\nTwilio Verify", "Dịch vụ xác thực SMS")
-Node(rabbitMq, "<$rabbitmq-icon,color=#FF5500>\nRabbitMQ", "Message Broker")
 Node(googleAi, "<img:https://www.gstatic.com/images/branding/productlogos/ai_studio/v1/web-96dp/logo_ai_studio_color_1x_web_96dp.png{scale=0.70}>\nGoogle AI Studio", "Dịch vụ AI")
 
 AzureResourceGroups(azure_rg, "Azure Resource Group", "Southeast Asia") {
   AzureAppServicePlan(app_service_plan, "App Service Plan", "B2 (Linux)") {
-    AzureAppService(server, "Server", "Docker container", "phungtu081/store:latest")
-    AzureAppService(web_admin, "Web Admin", "Docker container", "phungtu081/store-admin:latest")
+    AzureAppService(server, "Server", "Docker container", "phungtu081/store-server:latest")
+    AzureAppService(web_admin, "Web Admin", "Docker container", "phungtu081/store-web:latest")
   }
 
   AzureDatabaseForMySQL(mysql_node, "Azure Database for MySQL\n(Flexible Server)", "MySQL 8.0") {
@@ -57,11 +53,9 @@ Rel(server, redis_cache_instance, "Cache", "Redis SDK")
 Rel(app_service_plan, dockerhub, "pull images", "HTTP")
 
 Rel_U(server, gmail, "Gửi email xác nhận", "SMTP")
-Rel_U(server, twilio, "Gửi OTP", "Twilio SDK / HTTPS")
+Rel_U(server, twilio, "Gửi OTP", "Twilio SDK")
 Rel(sepay, server, "Gửi Webhook thanh toán", "HTTPS POST")
-Rel_U(server, rabbitMq, "Publish messages", "AMQP")
-Rel_U(rabbitMq, server, "Deliver messages", "AMQP")
-Rel(server, googleAi, "Gửi prompts")
+Rel_L(server, googleAi, "Gửi prompts")
 
 @enduml
 

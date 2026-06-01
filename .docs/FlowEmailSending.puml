@@ -1,0 +1,42 @@
+@startuml
+!include <C4/C4_Component>
+
+title Luồng gửi hóa đơn
+
+System_Ext(smtp, "SMTP Server", "Dịch vụ email")
+System_Ext(sepay, "SePay API", "Dịch vụ hóa đơn")
+
+System_Boundary(storeSystem, "SLY Store System") {
+    Container_Boundary(server, "Server") {
+        Boundary(streamListener, "Stream Listener") {
+            Component(orderStreamListener, "Order Stream Listener", "Spring Component")
+            Component(invoiceStreamListener, "Invoice Stream Listener", "Spring Component")
+        }
+
+        Boundary(svc, "Service") {
+            Component(invoiceSvc, "Invoice Service", "Spring Service")
+            Component(emailSvc, "Email Service", "Spring Service")
+        }
+
+        Boundary(streamPublisher, "Stream Publisher") {
+            Component(invoiceStreamPublisher, "Invoice Stream Publisher", "Spring Component")
+        }
+    }
+
+    ContainerDb(redis, "Redis Streams", "Azure Managed Redis", "Lưu trữ Streams")
+}
+
+Rel_U(redis, orderStreamListener, "XREAD")
+Rel(orderStreamListener, invoiceSvc, "Tạo hóa đơn")
+Rel(invoiceSvc, sepay, "Yêu cầu tạo hóa đơn", "HTTP POST")
+Rel(invoiceSvc, invoiceStreamPublisher, "publish InvoiceCreatedEvent")
+Rel(invoiceStreamPublisher, redis, "XADD")
+
+Rel(redis, invoiceStreamListener, "XREAD")
+Rel(invoiceStreamListener, emailSvc, "Gửi hóa đơn")
+Rel(emailSvc, smtp, "Gửi email", "SMTP")
+
+@enduml
+
+
+
