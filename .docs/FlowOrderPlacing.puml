@@ -1,0 +1,36 @@
+@startuml
+!include <C4/C4_Component>
+
+title Luồng đặt hàng
+
+Person(customer, "Customer", "Khách hàng")
+
+System_Boundary(storeSystem, "SLY Store System") {
+    Container_Boundary(server, "Server") {
+        Boundary(ctrl, "Controller") {
+            Component(orderCtrl, "Order Controller", "Spring MVC Controller")
+        }
+
+        Boundary(svc, "Service") {
+            Component(orderSvc, "Order Service", "Spring Service")
+        }
+
+        Boundary(repo, "Repository") {
+            Component(orderRepo, "Order Repository", "Spring Repository")
+        }
+    }
+
+    ContainerDb(mySQL, "MySQL Database", "Azure Database for MySQL", "Cơ sở dữ liệu")
+    ContainerDb(redis, "Redis Cache/Streams", "Azure Managed Redis", "Lưu trữ Cache/Streams")
+}
+
+Rel(customer, orderCtrl, "Đặt hàng", "HTTP POST")
+Rel(orderCtrl, orderSvc, "Tạo đơn hàng")
+Rel(orderSvc, orderRepo, "Lưu đơn hàng")
+Rel(orderRepo, mySQL, "write")
+Rel(orderSvc, redis, "Lưu trạng thái đơn hàng")
+
+@enduml
+
+
+

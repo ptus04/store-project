@@ -15,7 +15,6 @@ System_Boundary(storeSystem, "SLY Store System") {
     Container(azureBlob, "Object storage", "Azure Blob Storage", "Lưu trữ hình ảnh")
     ContainerDb(azureMySQL, "MySQL Database", "Azure Database for MySQL", "Cơ sở dữ liệu")
     ContainerDb(azureRedis, "Redis Cache", "Azure Managed Redis", "Lưu trữ Session / Cache")
-    ContainerQueue(rabbitMq, "Message Broker", "RabbitMQ", "Luồng sự kiện bất đồng bộ")
 }
 
 System_Ext(sepay, "SePay", "Cổng thanh toán")
@@ -35,8 +34,6 @@ Rel(server, azureRedis, "Cache", "Redis SDK")
 Rel(server, azureMySQL, "CRUD dữ liệu", "JDBC")
 Rel(server, gmail, "Gửi email", "SMTP")
 Rel(server, twilio, "Gửi OTP", "Twilio SDK")
-Rel(server, rabbitMq, "Publish messages", "AMQP")
-Rel_R(rabbitMq, server, "Deliver messages", "AMQP")
 Rel(server, googleAi, "Gửi prompts")
 
 Rel(sepay, server, "Gửi Webhook thanh toán", "HTTP POST")

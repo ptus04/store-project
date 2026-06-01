@@ -1,0 +1,45 @@
+@startuml
+!include <C4/C4_Component>
+
+title Luồng thanh toán
+
+System_Ext(sepay, "SePay API", "Cổng thanh toán")
+
+System_Boundary(storeSystem, "SLY Store System") {
+    Container_Boundary(server, "Server") {
+        Boundary(ctrl, "Controller") {
+            Component(transactionCtrl, "Transaction Controller", "Spring MVC Controller")
+        }
+
+        Boundary(svc, "Service") {
+            Component(transactionSvc, "Transaction Service", "Spring Service")
+        }
+
+        Boundary(repo, "Repository") {
+            Component(orderRepo, "Order Repository", "Spring Repository")
+            Component(transactionRepo, "Transaction Repository", "Spring Repository")
+        }
+
+        Boundary(streamPublisher, "Stream Publisher") {
+            Component(orderStreamPublisher, "Order Stream Publisher", "Spring Component")
+        }
+    }
+
+    ContainerDb(mySQL, "MySQL Database", "Azure Database for MySQL", "Cơ sở dữ liệu")
+    ContainerDb(redis, "Redis Cache/Streams", "Azure Managed Redis", "Lưu trữ Cache/Streams")
+}
+
+Rel(sepay, transactionCtrl, "Gửi webhook thanh toán", "HTTP POST")
+Rel(transactionCtrl, transactionSvc, "Tạo giao dịch")
+Rel(transactionSvc, transactionRepo, "Lưu giao dịch")
+Rel(transactionRepo, mySQL, "write")
+Rel_R(transactionSvc, orderRepo, "Cập nhật trạng thái đơn hàng")
+Rel(orderRepo, mySQL, "write")
+Rel(transactionSvc, redis, "Cập nhật trạng thái đơn hàng")
+Rel(transactionSvc, orderStreamPublisher, "publish OrderPaidEvent")
+Rel_R(orderStreamPublisher, redis, "XADD")
+
+@enduml
+
+
+
