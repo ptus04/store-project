@@ -205,6 +205,7 @@
             let currentMode = 'AI'; // 'AI' or 'STAFF'
             let isWaitingForResponse = false;
             let stompClient = null;
+            let isInitialized = false;
 
             // Persist sessionId in localStorage to maintain history across page reloads
             let sessionId = localStorage.getItem('chat_session_id');
@@ -225,6 +226,12 @@
             function togglePopup() {
                 isPopupOpen = !isPopupOpen;
                 if (isPopupOpen) {
+                    if (!isInitialized && CONFIG.useBackendApi) {
+                        connectWebSocket();
+                        loadChatHistory();
+                        isInitialized = true;
+                    }
+
                     popup.classList.remove('scale-0', 'opacity-0');
                     popup.classList.add('scale-100', 'opacity-100');
                     fabBtn.classList.add('scale-0', 'opacity-0');
@@ -607,11 +614,7 @@
                 }
             }
 
-            // Connect socket and load history if using backend
-            if (CONFIG.useBackendApi) {
-                connectWebSocket();
-                loadChatHistory();
-            }
+            // Initialize connection and history only on first click (handled in togglePopup)
         });
     </script>
 </div>
