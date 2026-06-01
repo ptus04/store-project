@@ -56,7 +56,7 @@ services:
   server:
     build:
       context: ./server
-    image: phungtu081/store-local:latest
+    image: phungtu081/store-server-local:latest
     ports:
       - '8080:8080'
     env_file:
@@ -81,7 +81,7 @@ services:
         - VITE_API_URL=http://host.docker.internal:8080
         - VITE_IMAGE_CONTAINER_URL=http://host.docker.internal:10000/devstoreaccount1/images" --build-arg
         - VITE_STORAGE_URL=http://host.docker.internal:10000/devstoreaccount1/carousel
-    image: phungtu081/store-admin-local:latest
+    image: phungtu081/store-web-local:latest
     ports:
       - '5173:8080'
     depends_on:
