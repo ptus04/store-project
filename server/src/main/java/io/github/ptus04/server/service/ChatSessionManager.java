@@ -1,6 +1,6 @@
-package io.github.ptus04.server.chat.service;
+package io.github.ptus04.server.service;
 
-import io.github.ptus04.server.chat.dto.SupportSessionDto;
+import io.github.ptus04.server.dto.SupportSessionDto;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
