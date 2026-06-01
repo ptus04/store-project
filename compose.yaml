@@ -83,7 +83,7 @@ services:
         - VITE_STORAGE_URL=http://host.docker.internal:10000/devstoreaccount1/carousel
     image: phungtu081/store-admin-local:latest
     ports:
-      - '8081:8080'
+      - '5173:8080'
     depends_on:
       server:
         condition: service_healthy
