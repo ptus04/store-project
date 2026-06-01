@@ -1,109 +1,136 @@
-# SLY Clothing - Website Thương mại Điện tử Tích hợp AI
+# SLY Clothing - Nền tảng thương mại điện tử tích hợp AI
 
-Chào mừng bạn đến với dự án **SLY Clothing**. Đây là một hệ thống thương mại điện tử dành cho thương hiệu thời trang
-SLY, được tích hợp AI Chatbot và hỗ trợ giao tiếp chăm sóc khách hàng theo thời gian thực.
+SLY Clothing là hệ thống thương mại điện tử cho thương hiệu thời trang SLY. Repo này gồm storefront server-rendered cho
+khách hàng, admin dashboard cho nhân viên, cùng AI chatbot và live support qua WebSocket.
 
----
+## Thành phần chính
 
-## 🌟 Các tính năng chính (Key Features)
+- Storefront (Spring Boot + Thymeleaf) cho khách hàng: duyệt sản phẩm, giỏ hàng, đặt hàng, hồ sơ người dùng.
+- Admin dashboard (React + Vite) cho nhân viên: quản lý sản phẩm, đơn hàng, khách hàng, thống kê.
+- Dịch vụ nền: MySQL, Redis, Azure Blob Storage, SePay, Twilio SMS, SMTP mail, Gemini AI.
 
-### 🛒 Dành cho Khách hàng (Storefront)
+## Tính năng
 
-- **Tìm kiếm & Lọc thông minh**: Cho phép lọc sản phẩm theo danh mục, mức giá, kích cỡ (size), chất liệu, và form dáng.
-- **Giỏ hàng & Đặt hàng khép kín**: Xử lý mượt mà từ lúc thêm sản phẩm, cập nhật số lượng đến bước điền địa chỉ giao
-  hàng và thanh toán.
-- **Theo dõi đơn hàng**: Xem lịch sử mua hàng và cập nhật trạng thái đơn hàng (Chờ duyệt, Đang giao, Hoàn thành).
-- **Hồ sơ cá nhân**: Quản lý thông tin, đổi mật khẩu bảo mật và sổ địa chỉ giao hàng.
+### Storefront (khách hàng)
 
-### 💼 Dành cho Quản trị viên & Nhân viên (Admin Dashboard)
+- Duyệt sản phẩm, lọc theo danh mục, khoảng giá, từ khóa và sắp xếp.
+- Giỏ hàng theo session và quy trình đặt hàng.
+- Theo dõi đơn hàng với các trạng thái: UNPAID, PAID, PACKAGING, SHIPPING, COMPLETED, CANCELLED, REFUNDED.
+- Hồ sơ người dùng, sổ địa chỉ, đổi mật khẩu, xác thực số điện thoại và email.
+- Widget chat cho phép chuyển đổi giữa AI và nhân viên hỗ trợ.
 
-- **Quản lý Hàng hóa**: CRUD (Thêm/Sửa/Xóa) Danh mục và Sản phẩm (hỗ trợ nhiều ảnh, nhiều size).
-- **Quản lý Đơn hàng & Kho**: Duyệt đơn hàng, cập nhật trạng thái giao hàng, tự động trừ số lượng hàng tồn kho.
-- **Thống kê & Báo cáo**: Biểu đồ trực quan theo dõi doanh thu và hiệu suất bán hàng.
-- **Quản lý Người dùng**: Phân quyền tài khoản (Admin, Staff, Customer), vô hiệu hóa (ban) tài khoản.
+### Admin dashboard
 
-### 🤖 Trí tuệ nhân tạo (AI) & Tương tác Realtime
+- CRUD danh mục và sản phẩm (nhiều ảnh, nhiều size, soft delete/restore).
+- Quản lý đơn hàng và cập nhật trạng thái.
+- Quản lý khách hàng và nhân viên (role ADMIN/EMPLOYEE/CUSTOMER, vô hiệu hóa tài khoản).
+- Thống kê đơn hàng và doanh thu theo ngày/tháng.
+- Upload ảnh qua Azure Blob Storage bằng SAS URL.
+- Helpdesk chat: hàng chờ phiên hỗ trợ, phân công nhân viên, xem lịch sử chat.
 
-- **AI Chatbot (Google Gemini + LangChain4j)**: Chatbot thông minh (song ngữ Anh/Việt) có khả năng đọc và hiểu trực tiếp
-  Database để tư vấn size, tìm kiếm sản phẩm cho khách.
-- **Live Chat (WebSocket/STOMP)**: Khách hàng có thể chuyển tiếp (handoff) từ AI sang chat 1-1 với nhân viên thật mà
-  không có độ trễ.
-- **Hàng chờ Hỗ trợ (Support Queue)**: Nhân viên quản lý đồng thời nhiều phiên chat thông qua giao diện Helpdesk.
+### AI & realtime
 
----
+- AI chatbot dùng LangChain4j + Gemini (OpenAI-compatible endpoint) với tool tra cứu sản phẩm, danh mục và trạng thái
+  đơn.
+- WebSocket/STOMP tại `/ws`, subscribe/publish qua `/topic/chat/{sessionId}` và `/topic/support/requests`.
+- Lưu lịch sử chat trong bảng `chat_messages`.
 
-## 🏗️ Kiến trúc công nghệ (Tech Stack)
+### Hạ tầng & vận hành
 
-Hệ thống được phân tách rõ ràng theo mô hình **Client - Server**:
+- Docker Compose cho MySQL, Redis, Azurite, server và admin.
+- Terraform triển khai Azure (MySQL, Redis, Storage, Web Apps).
+- GitHub Actions build/push Docker image và apply Terraform.
 
-- **Frontend (Web)**: React.js, TypeScript, Vite, Tailwind CSS. Giao tiếp qua Fetch API.
-- **Backend (Server)**: Java 17, Spring Boot 3, Spring Security (JWT), Spring Data JPA.
-- **Database**: PostgreSQL / MySQL (Relational DB) để đảm bảo tính nhất quán (ACID).
-- **AI Integration**: LangChain4j kết hợp với LLM Google Gemini.
-- **Realtime**: WebSockets (STOMP protocol).
+## Kiến trúc & công nghệ
 
----
+- Backend: Java 21, Spring Boot 4.0.6, Spring MVC, Spring Security (JWT cho `/api/**` + form login cho storefront),
+  Spring Data JPA, Flyway.
+- Storefront: Thymeleaf + Tailwind (build tại `server/src/main/frontend`).
+- Admin dashboard: React 19, Vite, TypeScript, Tailwind, Recharts, STOMP.
+- Database: MySQL.
+- Cache/Session/Rate limit/Streams: Redis.
+- Storage: Azure Blob Storage (SAS).
+- Payment: SePay (QR + invoice).
+- Messaging: Twilio SMS OTP, SMTP mail.
 
-## 🗄️ Cấu trúc Cơ sở dữ liệu (Database Schema)
+## API & WebSocket chính
 
-Dữ liệu được tổ chức thành các Entity (Bảng) chính:
+- Auth (admin): `POST /api/auth/login`
+- Users: `GET /api/users/profile`, `PUT /api/users/profile`, `POST /api/users/profile/email/verify`,
+  `PUT /api/users/change-password`
+- Products (admin): `GET|POST /api/products`, `PATCH|DELETE /api/products/{id}`
+- Categories (admin): `GET|POST /api/categories`, `PATCH|DELETE /api/categories/{id}`
+- Orders (admin): `GET /api/orders`, `PATCH /api/orders/{id}/status`
+- Customers (admin): `GET /api/customers`, `PATCH /api/customers/{id}/status`
+- Employees (admin): `GET|POST /api/employees`, `PATCH /api/employees/{id}`, `PATCH /api/employees/{id}/status`
+- Dashboard (admin): `GET /api/admin/dashboard/stats`, `GET /api/admin/dashboard/order-stats`,
+  `GET /api/admin/dashboard/revenue-stats`
+- Storage (admin): `GET /api/blobs/{container}/sas`, `DELETE /api/blobs/{container}/{blob}`
+- AI chat: `POST /api/chat`
+- Support chat: `POST /api/support/request`, `POST /api/support/assign`, `GET /api/support/sessions`
+- Chat history: `GET /api/chat/history/{sessionId}`
+- Transactions: `POST /api/transactions`
+- WebSocket: endpoint `/ws`, app destination `/app/chat.send`, topics `/topic/chat/{sessionId}`,
+  `/topic/support/requests`
 
-- **Người dùng**: `User` (Khách, Nhân viên, Admin), `UserAddress`.
-- **Sản phẩm**: `Category`, `Product`, `ProductImage`, `ProductSize`.
-- **Đơn hàng & Giao dịch**: `Order`, `OrderDetail`, `OrderShippingAddress`, `Transaction`.
-- **Hỗ trợ & Tương tác**: `ChatMessage` (Lưu lịch sử hội thoại), `Carousel` (Quản lý banner quảng cáo).
+Lưu ý: `/api/**` yêu cầu JWT; một số endpoint giới hạn quyền ADMIN/EMPLOYEE theo `@PreAuthorize`.
 
----
+## Route web chính (storefront)
 
-## 🔌 Các API cốt lõi (Core Endpoints)
+- `GET /` (trang chủ), `GET /products`, `GET /products/{id}`
+- `GET /cart`, `POST /cart/items`, `POST /cart/items/{itemId}/update`, `POST /cart/items/{itemId}/remove`
+- `GET /orders`, `POST /orders`, `GET /orders/{id}`, `POST /orders/{id}/cancel`
+- `GET /auth/login`, `GET|POST /auth/register`, `GET|POST /auth/change-password`, `GET|POST /auth/verify-phone`
+- `GET /profile`, `GET /profile/update`, `POST /profile/update`, `POST /profile/email/verify`
 
-Dự án cung cấp bộ RESTful API tiêu chuẩn:
+## Cấu trúc thư mục
 
-- **Auth & Users**:
-    - `POST /api/auth/login`, `POST /api/auth/register`: Xác thực & cấp phát JWT Token.
-    - `GET /api/users/profile`, `PUT /api/users/change-password`: Quản lý hồ sơ.
-- **Products & Categories**:
-    - `GET /api/products`: Danh sách sản phẩm (có Hỗ trợ filter/search/pagination).
-    - `POST /api/products`: Thêm sản phẩm mới (Yêu cầu quyền Admin/Staff).
-- **Order Flow**:
-    - `POST /cart/add`: Thêm vào giỏ hàng (sử dụng Session hoặc Database tùy cấu hình).
-    - `POST /order/checkout`: Chốt đơn hàng và lưu địa chỉ giao nhận.
-- **AI & Chat**:
-    - `POST /api/chat`: Gửi câu hỏi cho Gemini AI.
-    - WebSocket `ws://.../ws-stomp` -> Topic `/topic/chat/{sessionId}`, `/topic/support/requests`.
+- `server/`: Spring Boot backend + storefront (Thymeleaf, static assets, migrations).
+- `web/`: admin dashboard (React + Vite).
+- `.docs/`: sơ đồ kiến trúc và tài liệu (PlantUML, HTML).
+- `terraform/`: hạ tầng Azure.
+- `.github/workflows/`: CI/CD.
+- `compose.yaml`: Docker Compose cho local.
 
----
+## Cấu hình môi trường
 
-## 📁 Cấu trúc thư mục dự án (Monorepo)
+Tham khảo `server/.env.example` và `compose.yaml`. Các nhóm biến chính:
 
-- 📁 **`server/`**: Mã nguồn Backend (Spring Boot). Chứa Controllers, Services, Repositories, Entities và Security
-  configs.
-- 📁 **`web/`**: Mã nguồn Frontend (React). Chứa Pages, Components, utils và cấu hình Tailwind.
-- 📁 **`docs/`**: Tài liệu kỹ thuật. Các file Markdown đặc tả Use Case (UML Activity, Sequence Diagrams).
-- 📁 **`terraform/`**: Infrastructure as Code. Các script để tự động triển khai hạ tầng Cloud.
-- 📁 **`.github/`**: Các luồng CI/CD (GitHub Actions) tự động kiểm thử và deploy.
+- MySQL: `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`
+- DB/App: `DATABASE_CONNECTION_STRING`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`
+- Redis: `REDIS_CONNECTION_STRING`
+- JWT: `JWT_SECRET`, `JWT_EXPIRATION_MS`
+- CORS: `ALLOWED_ORIGINS`, `ALLOWED_METHODS`, `ALLOWED_HEADERS`, `ALLOW_CREDENTIALS`
+- SePay: `SEPAY_*` (bank, account, invoice urls, username/password)
+- Twilio: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_VERIFY_SERVICE_SID`
+- Mail: `MAIL_USERNAME`, `MAIL_PASSWORD`
+- Azure Storage: `AZURE_STORAGE_CONNECTION_STRING`
+- AI: `GEMINI_API_KEY`
 
----
+Admin dashboard (build) dùng:
 
-## 🛠️ Hướng dẫn Cài đặt & Chạy dự án (Local Development)
+- `VITE_API_URL`
+- `VITE_IMAGE_CONTAINER_URL`
+- `VITE_STORAGE_URL`
 
-### Yêu cầu môi trường
+## Chạy local
 
-- **Java**: JDK 17+
-- **Node.js**: v18.x+
-- **Database**: Cài đặt sẵn MySQL hoặc PostgreSQL (Cập nhật thông tin kết nối trong `application.properties`).
+### Option A: Docker Compose toàn bộ
 
-### 1. Khởi động Backend
+```bash
+docker compose up -d
+```
+
+### Option B: Chạy dịch vụ nền + chạy ứng dụng thủ công
+
+```bash
+docker compose -f server/compose.yaml up -d
+```
 
 ```bash
 cd server
-# (Tùy chọn) Điền GEMINI_API_KEY và DB URL trong src/main/resources/application.properties
 ./mvnw spring-boot:run
 ```
-
-> Server sẽ khởi chạy tại: `http://localhost:8080`
-
-### 2. Khởi động Frontend
 
 ```bash
 cd web
@@ -111,13 +138,15 @@ npm install
 npm run dev
 ```
 
-> Giao diện web sẽ khởi chạy tại: `http://localhost:5173`
+Tùy chọn build CSS storefront (Tailwind):
 
-### 3. Các lệnh hữu ích (Frontend)
+```bash
+cd server/src/main/frontend
+npm install
+npm run watch
+```
 
-- `npm run build`: Đóng gói ứng dụng để đưa lên server (Production).
-- `npm run lint`: Chạy trình kiểm tra cú pháp ESLint.
-- `npm run fix`: Tự động sửa các lỗi format code (Prettier + ESLint).
+Mặc định:
 
----
-*Dự án được phát triển và tối ưu liên tục nhằm mang lại trải nghiệm thương mại điện tử hiện đại nhất.*
+- Server: `http://localhost:8080`
+- Admin: `http://localhost:5173`

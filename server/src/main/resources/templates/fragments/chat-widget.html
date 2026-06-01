@@ -148,6 +148,26 @@
                 .replaceAll("'", "&#039;");
         }
 
+        function formatMessageText(text) {
+            if (!text) return "";
+            let escaped = escapeHtml(text);
+            escaped = escaped.replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // ReDoS-safe regular expression to parse Markdown links
+            // Dynamically constructed to prevent Thymeleaf from interpreting square brackets as template expressions
+            const bracketOpen = '[';
+            const bracketClose = ']';
+            const regexStr = '\\' + bracketOpen + '([^' + bracketClose + ']*)\\' + bracketClose + '\\(([^)]*)\\)';
+            const mdLinkRegex = new RegExp(regexStr, 'g');
+            escaped = escaped.replaceAll(mdLinkRegex, (_, p1, p2) => {
+                return '<a href="' + p2 + '" class="text-neutral-950 font-semibold underline decoration-neutral-400 hover:decoration-neutral-950 transition-colors duration-200">' + p1 + '</a>';
+            });
+            escaped = escaped.replaceAll('\n', '<br>');
+            return escaped;
+        }
+    </script>
+
+    <!-- Custom Chat JS Main Logic -->
+    <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', function () {
             // --- Configuration ---
             const CONFIG = {
@@ -520,10 +540,7 @@
                     }
 
                     hideTypingIndicator();
-                    // Format markdown-like bold text **text** to HTML
-                    const formattedHtml = escapeHtml(responseText)
-                        .replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replaceAll('\n', '<br>');
+                    const formattedHtml = formatMessageText(responseText);
 
                     appendMessage('AI', formattedHtml, true);
 
@@ -578,9 +595,7 @@
                             }
 
                             history.forEach(msg => {
-                                const formattedContent = msg.content
-                                    .replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                                    .replaceAll('\n', '<br>');
+                                const formattedContent = formatMessageText(msg.content);
                                 appendMessage(msg.sender, formattedContent, true, false);
                             });
                             resetUnreadBadge();
