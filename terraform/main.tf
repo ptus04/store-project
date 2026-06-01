@@ -35,10 +35,16 @@ resource "azurerm_linux_web_app" "store" {
   location            = azurerm_resource_group.store.location
   service_plan_id     = azurerm_service_plan.store.id
 
+  https_only = true
+
   site_config {
     application_stack {
       docker_image_name = "phungtu081/store-server:latest"
     }
+    health_check_path                 = "/actuator/health"
+    health_check_eviction_time_in_min = 2
+    http2_enabled                     = true
+    websockets_enabled                = true
   }
 
   app_settings = {
