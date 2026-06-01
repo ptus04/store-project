@@ -3,7 +3,7 @@ package io.github.ptus04.server.chat.listener;
 import io.github.ptus04.server.dto.ChatMessageDto;
 import io.github.ptus04.server.dto.SupportSessionDto;
 import io.github.ptus04.server.chat.event.LocalChatMessageReceivedEvent;
-import io.github.ptus04.server.service.ChatSessionManager;
+import io.github.ptus04.server.service.impl.ChatSessionManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
