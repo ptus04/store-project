@@ -1,6 +1,6 @@
 package io.github.ptus04.server.chat.listener;
 
-import io.github.ptus04.server.chat.dto.ChatMessageDto;
+import io.github.ptus04.server.dto.ChatMessageDto;
 import io.github.ptus04.server.chat.event.LocalChatMessageReceivedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
