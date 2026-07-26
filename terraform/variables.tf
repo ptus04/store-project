@@ -74,3 +74,8 @@ variable "gemini_api_key" {
   type      = string
   sensitive = true
 }
+
+variable "redis_connection_string" {
+  type      = string
+  sensitive = true
+}

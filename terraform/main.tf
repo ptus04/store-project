@@ -9,11 +9,13 @@ module "database" {
   resource_group_location = azurerm_resource_group.store.location
 }
 
+/* Replaced with an instance from cloud.redis.io
 module "redis" {
   source                  = "./modules/managed_redis"
   resource_group_name     = azurerm_resource_group.store.name
   resource_group_location = azurerm_resource_group.store.location
 }
+*/
 
 module "storage" {
   source                  = "./modules/storage"
@@ -26,7 +28,7 @@ resource "azurerm_service_plan" "store" {
   resource_group_name = azurerm_resource_group.store.name
   location            = azurerm_resource_group.store.location
   os_type             = "Linux"
-  sku_name            = "B2"
+  sku_name            = "F1"
 }
 
 resource "azurerm_linux_web_app" "store" {
@@ -55,7 +57,7 @@ resource "azurerm_linux_web_app" "store" {
     DATABASE_USERNAME          = module.database.administrator_login
     DATABASE_PASSWORD          = module.database.administrator_password
 
-    REDIS_CONNECTION_STRING         = module.redis.connection_string
+    REDIS_CONNECTION_STRING         = var.redis_connection_string
     AZURE_STORAGE_CONNECTION_STRING = module.storage.connection_string
 
     TWILIO_ACCOUNT_SID        = var.twilio_account_sid
