@@ -47,6 +47,7 @@ resource "azurerm_linux_web_app" "store" {
     health_check_eviction_time_in_min = 2
     http2_enabled                     = true
     websockets_enabled                = true
+    always_on                         = false
   }
 
   app_settings = {
@@ -98,6 +99,7 @@ resource "azurerm_linux_web_app" "store_admin" {
     application_stack {
       docker_image_name = "phungtu081/store-web:latest"
     }
+    always_on = false
   }
 
   app_settings = {
